@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ShoppingBag, Menu, X, ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
@@ -19,6 +19,8 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const isHome = location.pathname === '/';
+  const useTransparent = isHome && !isScrolled;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -37,7 +39,7 @@ export const Navbar = () => {
   return (
     <nav className={cn(
       "fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 py-4",
-      isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-3" : "bg-transparent"
+      useTransparent ? "bg-transparent" : "bg-white/90 backdrop-blur-md shadow-sm py-3"
     )}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 group">
@@ -46,7 +48,7 @@ export const Navbar = () => {
           </div>
           <span className={cn(
             "text-xl font-display font-bold tracking-tighter transition-colors duration-300",
-            isScrolled ? "text-charcoal" : "text-white"
+            useTransparent ? "text-white" : "text-charcoal"
           )}>
             RESIP <span className="text-brand-gold">INDIA</span>
           </span>
@@ -60,7 +62,7 @@ export const Navbar = () => {
               to={link.path}
               className={cn(
                 "text-sm font-medium tracking-wide hover:text-brand-gold transition-colors duration-300",
-                isScrolled ? "text-charcoal" : "text-white"
+                useTransparent ? "text-white" : "text-charcoal"
               )}
             >
               {link.name}
@@ -68,7 +70,7 @@ export const Navbar = () => {
           ))}
           <Link to="/shop" className={cn(
             "p-2 rounded-full transition-all duration-300",
-            isScrolled ? "bg-brand-blue text-white hover:bg-brand-gold" : "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+            useTransparent ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm" : "bg-brand-blue text-white hover:bg-brand-gold"
           )}>
             <ShoppingBag size={20} />
           </Link>
@@ -76,7 +78,7 @@ export const Navbar = () => {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className={cn("md:hidden p-2", isScrolled ? "text-charcoal" : "text-white")}
+          className={cn("md:hidden p-2", useTransparent ? "text-white" : "text-charcoal")}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -247,12 +249,14 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <motion.div 
-      whileHover={{ y: -10 }}
+      whileHover={shouldReduceMotion ? undefined : { y: -10 }}
       className="group bg-white rounded-2xl overflow-hidden border border-black/5 hover:shadow-2xl transition-all duration-500"
     >
-      <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden">
+      <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden">
         <img 
           src={product.image} 
           alt={product.name} 
@@ -264,17 +268,39 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           Quick View
         </div>
       </Link>
-      <div className="p-6 space-y-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-brand-gold font-bold mb-1">{product.category}</p>
-            <h3 className="text-lg font-display font-bold group-hover:text-brand-blue transition-colors">{product.name}</h3>
-          </div>
-          <p className="font-bold text-brand-blue">₹{product.price}</p>
+      <div className="p-6">
+        <h3 className="text-xl md:text-2xl font-display font-bold leading-tight tracking-tight group-hover:text-brand-blue transition-colors">
+          {product.name}
+        </h3>
+        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-charcoal/50 font-bold">
+          {product.category}
+        </p>
+
+        <div className="mt-4">
+          <p className="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold">
+            Expertise
+          </p>
+          <p className="mt-2 text-sm text-charcoal/60 font-light leading-relaxed line-clamp-2">
+            {product.description}
+          </p>
         </div>
-        <button className="w-full mt-4 py-3 bg-brand-bg border border-brand-blue/10 rounded-xl text-sm font-bold text-brand-blue hover:bg-brand-blue hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
-          Add to Cart <ChevronRight size={16} />
-        </button>
+
+        <div className="mt-5 flex items-baseline justify-between">
+          <p className="text-sm text-charcoal/40 font-medium">Price</p>
+          <p className="text-lg font-bold text-brand-blue">₹{product.price}</p>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <Link
+            to={`/product/${product.id}`}
+            className="py-3 rounded-xl text-sm font-bold text-brand-blue border border-brand-blue/20 hover:border-brand-blue/40 hover:bg-brand-blue/5 transition-colors flex items-center justify-center gap-2"
+          >
+            Details <ChevronRight size={16} />
+          </Link>
+          <button className="py-3 rounded-xl text-sm font-bold bg-brand-blue text-white hover:bg-brand-gold transition-colors flex items-center justify-center gap-2">
+            Add to Cart <ChevronRight size={16} />
+          </button>
+        </div>
       </div>
     </motion.div>
   );

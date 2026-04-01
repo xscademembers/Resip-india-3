@@ -1,23 +1,83 @@
-import React from 'react';
-import { motion } from 'motion/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, Recycle, Award, Sparkles, Droplets, Instagram, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BeforeAfterSlider, ProductCard } from './components';
 import { PRODUCTS, CATEGORIES } from './constants';
 
 const Home = () => {
+  const heroSlides = useMemo(
+    () => [
+      {
+        src: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1920',
+        alt: 'Handcrafted glassware hero slide',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=1920',
+        alt: 'Upcycled glasses hero slide',
+      },
+      {
+        src: 'https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=80&w=1920',
+        alt: 'Premium glassware hero slide',
+      },
+    ],
+    []
+  );
+
+  const socialImages = useMemo(
+    () => [
+      'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=600',
+      'https://images.unsplash.com/photo-1527281405159-35d5b5aa7c1d?auto=format&fit=crop&q=80&w=600',
+    ],
+    []
+  );
+
+  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  const goToHeroSlide = (index: number) => {
+    const clamped = ((index % heroSlides.length) + heroSlides.length) % heroSlides.length;
+    setActiveHeroSlide(clamped);
+  };
+
+  const goToNextHeroSlide = () => goToHeroSlide(activeHeroSlide + 1);
+  const goToPrevHeroSlide = () => goToHeroSlide(activeHeroSlide - 1);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const id = window.setInterval(() => {
+      setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+
+    return () => window.clearInterval(id);
+  }, [heroSlides.length, prefersReducedMotion]);
+
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Parallax Effect */}
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1920" 
-            alt="Hero Background" 
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
+          <AnimatePresence initial={false}>
+            <motion.img
+              key={heroSlides[activeHeroSlide]?.src}
+              src={heroSlides[activeHeroSlide]?.src}
+              alt={heroSlides[activeHeroSlide]?.alt}
+              className="absolute inset-0 w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          </AnimatePresence>
           <div className="absolute inset-0 bg-black/40" />
         </div>
 
@@ -51,13 +111,55 @@ const Home = () => {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+        <motion.div
+          animate={{
+            y: prefersReducedMotion ? 0 : [0, 10, 0],
+          }}
+          transition={{
+            duration: 2,
+            repeat: prefersReducedMotion ? 0 : Infinity,
+          }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50"
         >
           <div className="w-[1px] h-16 bg-gradient-to-b from-white/50 to-transparent mx-auto" />
         </motion.div>
+
+        {/* Hero Slider Controls (Bottom Right) */}
+        <div className="absolute bottom-8 right-8 z-30 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={goToPrevHeroSlide}
+            aria-label="Previous slide"
+            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
+          >
+            <ChevronRight className="mx-auto rotate-180" size={20} />
+          </button>
+
+          <div className="flex items-center gap-2">
+            {heroSlides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goToHeroSlide(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                aria-current={i === activeHeroSlide ? 'true' : undefined}
+                className={[
+                  'h-2.5 rounded-full transition-all',
+                  i === activeHeroSlide ? 'w-8 bg-brand-gold' : 'w-2.5 bg-white/50 hover:bg-white/70',
+                ].join(' ')}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={goToNextHeroSlide}
+            aria-label="Next slide"
+            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
+          >
+            <ChevronRight className="mx-auto" size={20} />
+          </button>
+        </div>
       </section>
 
       {/* Transformation Section */}
@@ -174,7 +276,7 @@ const Home = () => {
               <motion.div
                 key={cat.id}
                 whileHover={{ y: -10 }}
-                className="group relative aspect-[3/4] rounded-2xl overflow-hidden shadow-lg"
+                className="group relative aspect-square rounded-2xl overflow-hidden shadow-lg"
               >
                 <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
@@ -245,10 +347,10 @@ const Home = () => {
             </a>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="aspect-square rounded-xl overflow-hidden group relative">
+            {socialImages.map((src, i) => (
+              <div key={src} className="aspect-square rounded-xl overflow-hidden group relative">
                 <img 
-                  src={`https://picsum.photos/seed/glass${i}/600/600`} 
+                  src={src}
                   alt="Social" 
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   referrerPolicy="no-referrer"

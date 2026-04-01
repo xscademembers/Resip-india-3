@@ -51,10 +51,33 @@
   100% { transform: translateX(100%) translateY(100%) rotate(-45deg); }
 }
 
+.prefers-reduced-motion *,
+.prefers-reduced-motion *::before,
+.prefers-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-reflection::after {
+    animation: none;
+  }
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Safe fallback if Tailwind line-clamp isn't enabled */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

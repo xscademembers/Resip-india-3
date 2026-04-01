@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Filter, ChevronDown, Search } from 'lucide-react';
 import { ProductCard } from './components';
 import { PRODUCTS } from './constants';
 
 const Shop = () => {
   const [activeCategory, setActiveCategory] = useState('All');
+  const shouldReduceMotion = useReducedMotion();
   const categories = [
     'All', 
     'OG Collections (Glasses)', 
@@ -62,9 +63,9 @@ const Shop = () => {
           {filteredProducts.map((product, i) => (
             <motion.div
               key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { delay: i * 0.1 }}
             >
               <ProductCard product={product} />
             </motion.div>
