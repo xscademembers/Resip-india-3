@@ -11,6 +11,10 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
 
   if (!product) return <div className="pt-40 text-center">Product not found.</div>;
+  const storyParagraphs = product.story
+    .split(/\n\s*\n/g)
+    .map((p) => p.trim())
+    .filter(Boolean);
 
   return (
     <div className="pt-32 pb-32 px-6 bg-white">
@@ -45,9 +49,6 @@ const ProductDetail = () => {
                 before={product.beforeImage || "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800"}
                 after={product.image}
               />
-              <p className="text-charcoal/60 font-light italic text-sm">
-                “{product.story}”
-              </p>
             </div>
           </div>
 
@@ -66,7 +67,9 @@ const ProductDetail = () => {
             </p>
 
             <div className="space-y-4">
-              <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">Key Features</h4>
+              <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
+                Glass Features – {product.name}
+              </h4>
               <ul className="grid grid-cols-2 gap-4">
                 {product.features.map((f, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-charcoal/80">
@@ -74,6 +77,17 @@ const ProductDetail = () => {
                   </li>
                 ))}
               </ul>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
+                Why Choose Our Upcycled Glasses?
+              </h4>
+              <div className="space-y-4 text-charcoal/70 font-light leading-relaxed">
+                {storyParagraphs.map((p, idx) => (
+                  <p key={idx}>{p}</p>
+                ))}
+              </div>
             </div>
 
             {/* Add to Cart Section */}

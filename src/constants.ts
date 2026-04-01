@@ -48,13 +48,15 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800",
     description: "Upcycled tumbler crafted from an authentic Bombay Sapphire gin bottle.",
     story:
-      "At ReSip India, we collect Bombay Sapphire bottles from bars, cafés, and restaurants and transform them into reusable drinkware. Sapphire Charm carries the signature blue character of the original bottle—each piece is handcrafted, unique, and consciously made.",
+      "Every year, millions of glass bottles end up in landfills despite being highly recyclable. At ReSip India, we collect Bombay Sapphire bottles from bars, cafes, and restaurants and transform them into beautiful, reusable drinkware.\n\nBy choosing Sapphire Charm, you’re not just buying a glass you’re choosing sustainability. Each piece carries a story of transformation, turning a discarded bottle into a stylish, functional tumbler that adds character to your everyday drinking experience.",
     features: [
-      "Upcycled from an original Bombay Sapphire bottle",
-      "Iconic sapphire-blue glass character",
-      "Holds ~350 ml",
-      "Hand-cut, smoothened, and polished",
-      "Eco-friendly choice with unique bottle markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic Bombay Sapphire gin bottle.",
+      "Sapphire blue Glass – Retains the elegant green tint of the original wine bottle, giving it a minimal and aesthetic look.",
+      "Iconic Sapphire Blue Design – Retains the signature deep blue glass that makes the bottle instantly recognizable.",
+      "Capacity – Holds approximately 350 ml, perfect for cocktails, mocktails, juices, or everyday beverages.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand for a premium and safe drinking experience.",
+      "Eco-Friendly Choice – Helps reduce waste, carbon emissions, and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making every glass unique."
     ]
   },
   {
@@ -66,13 +68,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800",
     description: "Bold, nostalgic tumbler upcycled from an authentic Old Monk rum bottle.",
     story:
-      "We collect bottles from bars, cafés, and restaurants and transform them into stylish, reusable drinkware. Old Soul preserves the character of a legendary rum bottle—reborn into a functional tumbler that celebrates sustainability and story.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect bottles from bars, cafes, and restaurants and transform them into stylish, reusable drinkware.\n\nBy choosing Old Soul, you’re not just buying a glass—you’re preserving a story. A once-used Old Monk bottle is reborn into a bold, functional tumbler that celebrates sustainability while adding character to your everyday drinking moments.",
     features: [
-      "Upcycled from an original Old Monk bottle",
-      "Iconic dark-glass character",
-      "Holds ~600 ml",
-      "Handcrafted cut + polished rim",
-      "Eco-friendly with unique bottle textures"
+      "Upcycled from an Original Bottle – Crafted from an authentic Old Monk rum bottle, giving the glass a bold and nostalgic character.",
+      "Iconic Old Monk Design – Retains the classic dark glass look inspired by the legendary rum bottle loved for generations.",
+      "Capacity – Holds approximately 600 ml, making it perfect for cocktails, beer, cold coffee, mocktails, or sharing drinks.",
+      "Handcrafted Finish – Each glass is carefully cut, smoothened, and polished by hand for a premium and safe drinking experience.",
+      "Eco-Friendly Choice – Upcycling reduces landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making every piece unique and full of personality."
     ]
   },
   {
@@ -84,13 +87,15 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=800",
     description: "Crystal-clear tumbler crafted from an authentic Bacardi White Rum bottle.",
     story:
-      "Caribbean Echo is made from once-used Bacardi bottles collected from bars, cafés, and restaurants. Each glass is cut, smoothened, and polished by hand—designed to bring iconic character to everyday sipping while reducing waste.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect Bacardi bottles from bars, cafes, and restaurants and transform them into stylish, reusable drinkware.\n\nBy choosing Caribbean Echo, you’re not just buying a glass—you’re choosing sustainability. Each piece carries a story of transformation, turning a once-used bottle into a functional and iconic tumbler that brings character to your everyday drinking experience.",
     features: [
-      "Upcycled from an original Bacardi bottle",
-      "Crystal-clear look for vibrant drinks",
-      "Holds ~350 ml",
-      "Handcrafted finish with safe rim",
-      "Eco-friendly with authentic bottle markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic Bacardi White Rum bottle, giving the glass a distinctive and stylish look.",
+      "Crystal Clear Glass – Features a clean, crystal-clear finish, perfect for showcasing layered dessert shots or vibrant beverages.",
+      "Iconic Bacardi Design – Retains the recognisable bottle character inspired by the classic white rum bottle.",
+      "Capacity – Holds approximately 350 ml, perfect for cocktails, mocktails, juices, or everyday beverages.",
+      "Handcrafted Finish – Each glass is carefully cut, smoothened, and polished by hand for a premium and safe drinking experience.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making every glass unique."
     ]
   },
   {
@@ -102,13 +107,15 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800",
     description: "Timeless tumbler upcycled from an authentic Antiquity whisky bottle.",
     story:
-      "Antique Luxe begins as an Antiquity whisky bottle collected from bars, cafés, and restaurants—then reborn through careful hand-finishing. The result is a bold, premium tumbler that reflects conscious living and craftsmanship.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect Antiquity whisky bottles from bars, cafes, and restaurants and transform them into elegant, reusable drinkware.\n\nBy choosing Antique Luxe, you’re not just buying a glassyou’re choosing sustainability. Each piece carries a story of transformation, turning a once-used bottle into a stylish, functional tumbler that brings character and conscious living into your everyday moments.",
     features: [
-      "Upcycled from an original Antiquity bottle",
-      "Distinctive tinted-glass character",
-      "Holds ~400 ml",
-      "Hand-cut, smoothened, and polished",
-      "Eco-friendly with one-of-a-kind markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic Antiquity whisky bottle, giving the glass a rich and timeless character.",
+      "Emerald Blue Glass – Features a striking emerald blue tint, making it stand out in any bar setup or party setting.",
+      "Classic Whisky Bottle Design – Retains the bold and premium look inspired by the original whisky bottle.",
+      "Capacity – Holds approximately 400 ml, perfect for cocktails, mocktails, juices, or everyday beverages.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium feel and safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, adding uniqueness to every glass."
     ]
   },
   {
@@ -120,13 +127,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1538944748257-423e72757591?auto=format&fit=crop&q=80&w=800",
     description: "Minimal green-tint tumbler upcycled from an authentic wine bottle.",
     story:
-      "We collect wine bottles from bars, cafés, and restaurants and transform them into beautiful, reusable drinkware. Grape Glass keeps the natural green tint of the original bottle—simple, aesthetic, and made to be used every day.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect wine bottles from bars, cafes, and restaurants and transform them into beautiful, reusable drinkware.\n\nBy choosing Grape Glass, you’re not just buying a glass—you’re supporting a sustainable lifestyle. Each piece carries a story of transformation, turning a once-used bottle into a unique everyday tumbler that adds character to your cold brew moments and conscious living.",
     features: [
-      "Upcycled from an original wine bottle",
-      "Natural green glass tint",
-      "Holds ~350 ml",
-      "Handcrafted smooth rim",
-      "Eco-friendly with unique bottle character"
+      "Upcycled from an Original Bottle – Crafted from an authentic wine bottle, thoughtfully transformed into a stylish reusable glass.",
+      "Natural Green Glass – Retains the elegant green tint of the original wine bottle, giving it a minimal and aesthetic look.",
+      "Capacity – Holds approximately 350 ml, ideal for cold brew, iced coffee, juices, mocktails, or refreshing beverages.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium feel and safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling reduces landfill waste while saving energy, water, and carbon emissions compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making every glass unique."
     ]
   },
   {
@@ -138,13 +146,15 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=800",
     description: "Sophisticated tumbler upcycled from a Johnnie Walker Black Label bottle.",
     story:
-      "The Gentleman is crafted from Johnnie Walker Black Label bottles collected from bars, cafés, and restaurants. Cut and polished by hand, it brings timeless style to cold brew, mocktails, and everyday refreshers—without the waste.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect bottles from bars, cafes, and restaurants and transform them into stylish, reusable drinkware.\n\nBy choosing The Gentleman, you’re not just buying a glass you’re choosing sustainability and character. A once-used Johnnie Walker Black Label bottle is reborn into a sophisticated tumbler, perfect for enjoying your cold brew moments with a touch of timeless style.",
     features: [
-      "Upcycled from an original Johnnie Walker Black Label bottle",
-      "Crystal-clear look for layered drinks",
-      "Holds ~350 ml",
-      "Handcrafted finish and safe rim",
-      "Eco-friendly with authentic bottle textures"
+      "Upcycled from an Original Bottle – Crafted from an authentic Johnnie Walker Black Label whisky bottle, giving the glass a refined and classic character.",
+      "Crystal Clear Glass – Features a clean, crystal-clear finish, perfect for showcasing layered dessert shots or vibrant beverages.",
+      "Iconic Whisky Bottle Design – Retains the sleek and recognisable style inspired by the original Black Label bottle.",
+      "Capacity – Holds approximately 350 ml, making it ideal for cold brew coffee, iced coffee, mocktails, juices, or refreshing beverages.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium feel and a safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making each glass unique."
     ]
   },
   {
@@ -156,13 +166,15 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1527281405159-35d5b5aa7c1d?auto=format&fit=crop&q=80&w=800",
     description: "Refreshing tumbler upcycled from an authentic Kingfisher beer bottle.",
     story:
-      "King Crest is made from once-used Kingfisher bottles collected from bars, cafés, and restaurants. Each glass is hand-finished to keep the classic bottle character—perfect for chilled beverages with an eco-conscious twist.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect Kingfisher beer bottles from bars, cafes, and restaurants and transform them into stylish, reusable drinkware.\n\nBy choosing King Crest, you’re not just buying a glass you’re choosing sustainability. Each piece carries a story of transformation, turning a once-used beer bottle into a unique tumbler perfect for enjoying craft beer moments with an eco-conscious twist.",
     features: [
-      "Upcycled from an original Kingfisher beer bottle",
-      "Classic green-glass character",
-      "Holds ~350 ml",
-      "Handcrafted smooth, safe rim",
-      "Eco-friendly with unique bottle markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic Kingfisher beer bottle, giving it a bold and refreshing character.",
+      "Crystal Clear Glass – Features a clean, crystal-clear finish, perfect for showcasing layered dessert shots or vibrant beverages.",
+      "Iconic Beer Bottle Design – Retains the classic green glass style inspired by the original Kingfisher beer bottle.",
+      "Capacity – Holds approximately 350 ml, making it perfect for beer, craft beer, chilled beverages, or mocktails.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium look and a safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, giving each glass a unique identity."
     ]
   },
   {
@@ -174,13 +186,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1538944748257-423e72757591?auto=format&fit=crop&q=80&w=800",
     description: "A light, minimal everyday tumbler upcycled from an authentic wine bottle.",
     story:
-      "Vino Vibe turns collected wine bottles into elegant, reusable drinkware. Hand-cut and polished, it keeps the refreshing green tint and brings a mindful, sustainable touch to water, tonic, and sparkling pours.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect wine bottles from bars, cafes, and restaurants and transform them into elegant, reusable drinkware.\n\nBy choosing Vino Vibe, you’re not just buying a glass—you’re choosing sustainability. Each piece carries a story of transformation, turning a once-used wine bottle into a refreshing everyday tumbler perfect for water, tonic, and mindful living.",
     features: [
-      "Upcycled from an original wine bottle",
-      "Natural green tint",
-      "Holds ~250 ml",
-      "Handcrafted finish with safe rim",
-      "Eco-friendly with one-of-a-kind markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic wine bottle, thoughtfully transformed into a stylish reusable glass.",
+      "Natural Green Glass – Retains the elegant green tint of the original wine bottle, giving it a minimal and refreshing aesthetic.",
+      "Capacity – Holds approximately 250 ml, perfect for water, tonic water, sparkling beverages, or light refreshments.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium feel and a safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while saving energy, water, and carbon emissions compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making every glass unique."
     ]
   },
   {
@@ -192,13 +205,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800",
     description: "Bold shot glass upcycled from an authentic Antiquity whisky bottle.",
     story:
-      "Royal Shotlet is crafted from collected Antiquity whisky bottles and finished by hand for a premium rim and feel. A small glass with big character—made for celebrations and conscious choices.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect Antiquity whisky bottles from bars, cafes, and restaurants and transform them into stylish, reusable drinkware.\n\nBy choosing Royal Shotlet, you’re not just buying a shot glass—you’re choosing sustainability with style. Each piece carries a story of transformation, turning a once-used bottle into a bold little glass perfect for celebrations, tequila shots, and memorable gatherings.",
     features: [
-      "Upcycled from an original Antiquity bottle",
-      "Distinctive tinted-glass character",
-      "Holds ~60 ml",
-      "Handcrafted cut + polished finish",
-      "Eco-friendly with unique bottle textures"
+      "Upcycled from an Original Bottle – Crafted from an authentic Antiquity whisky bottle, giving the shot glass a bold and premium character.",
+      "Emerald Blue Glass – Features a striking emerald blue tint, making it stand out in any bar setup or party setting.",
+      "Capacity – Holds approximately 60 ml, ideal for shots, tequila shots, or party servings.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium finish and a safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or markings may remain, making each shot glass unique."
     ]
   },
   {
@@ -210,13 +224,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=800",
     description: "Refined mini glass upcycled from a Royal Ranthambore whisky bottle.",
     story:
-      "We collect bottles from bars, cafés, and restaurants and turn them into elegant drinkware. Dessert Shotlet is cut and polished by hand—ideal for dessert shots, tastings, and espresso moments, with a lighter footprint.",
+      "Every year, millions of glass bottles end up in landfills despite being recyclable. At ReSip India, we collect bottles from bars, cafes, and restaurants and transform them into elegant, reusable drinkware.\n\nBy choosing Dessert Shotlet, you’re not just buying a shot glass you’re supporting sustainability. Each piece carries a story of transformation, turning a once-used Royal Ranthambore whisky bottle into a stylish mini glass perfect for dessert shots, tastings, and special moments.",
     features: [
-      "Upcycled from an original Royal Ranthambore bottle",
-      "Crystal-clear look for layered shots",
-      "Holds ~60 ml",
-      "Handcrafted safe rim",
-      "Eco-friendly with subtle authentic markings"
+      "Upcycled from an Original Bottle – Crafted from an authentic Royal Ranthambore whisky bottle, giving the shot glass a refined and distinctive character.",
+      "Crystal Clear Glass – Features a clean, crystal-clear finish, perfect for showcasing layered dessert shots or vibrant beverages.",
+      "Capacity – Holds approximately 60 ml, ideal for dessert shots, tasting shots, espresso shots, or party servings.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium finish and a safe drinking rim.",
+      "Eco-Friendly Choice – Upcycling helps reduce landfill waste while lowering carbon emissions and water consumption compared to producing new glass.",
+      "Authentic Bottle Character – Original bottle textures or subtle markings may remain, making each shot glass unique."
     ]
   },
   {
@@ -228,13 +243,14 @@ export const PRODUCTS: Product[] = [
     beforeImage: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800",
     description: "Contemporary 350 ml glass upcycled from an authentic Greater Than Gin bottle.",
     story:
-      "Greater Pour starts as discarded Greater Than Gin bottles collected from bars, cafés, and restaurants. Hand-finished into an elegant 350 ml glass, it’s designed for daily sipping and special pours—without producing new glass.",
+      "Every year, millions of glass bottles end up in landfills despite being fully recyclable. At ReSip India, we collect discarded bottles from bars, cafés, and restaurants and transform them into elegant, reusable drinkware.\n\nBy choosing Greater Pour, you’re not just buying a glass—you’re making a conscious lifestyle choice. Each piece carries a story of transformation, turning a once-used Greater Than Gin bottle into a stylish, functional glass perfect for everyday sipping and special moments alike.",
     features: [
-      "Upcycled from an original Greater Than Gin bottle",
-      "Crystal-clear look",
-      "Holds ~350 ml",
-      "Handcrafted smooth, comfortable rim",
-      "Eco-friendly with one-of-a-kind textures"
+      "Upcycled from an Original Bottle – Crafted from an authentic Greater Than Gin bottle, giving the glass a bold, contemporary, and premium character.",
+      "Crystal Clear Glass – Features a clean, crystal-clear finish, perfect for showcasing cocktails, mocktails, infused drinks, or even water with style.",
+      "Capacity – Holds approximately 350 ml, making it ideal for long drinks, cocktails, iced beverages, or everyday use.",
+      "Handcrafted Finish – Carefully cut, smoothened, and polished by hand to ensure a premium feel and a safe, comfortable drinking rim.",
+      "Eco-Friendly Choice – Upcycling reduces landfill waste while saving energy, water, and resources compared to manufacturing new glass.",
+      "Authentic Bottle Character – Retains subtle textures or markings from the original bottle, making each glass uniquely one-of-a-kind."
     ]
   },
   {
