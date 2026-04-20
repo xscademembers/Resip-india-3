@@ -62,9 +62,11 @@ const ProductDetail = () => {
               <p className="text-3xl font-display font-bold text-brand-blue">₹{product.price}</p>
             </div>
 
-            <p className="text-lg text-charcoal/70 leading-relaxed font-light">
-              {product.description}
-            </p>
+            {product.description.trim() ? (
+              <p className="text-lg text-charcoal/70 leading-relaxed font-light">
+                {product.description}
+              </p>
+            ) : null}
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
@@ -81,7 +83,7 @@ const ProductDetail = () => {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
-                Why Choose Our Upcycled Glasses?
+                {product.whyChooseHeading ?? 'Why Choose Our Upcycled Glasses?'}
               </h4>
               <div className="space-y-4 text-charcoal/70 font-light leading-relaxed">
                 {storyParagraphs.map((p, idx) => (

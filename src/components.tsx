@@ -280,9 +280,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <p className="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold">
             Expertise
           </p>
-          <p className="mt-2 text-sm text-charcoal/60 font-light leading-relaxed line-clamp-2">
-            {product.description}
-          </p>
+          {product.description?.trim() ? (
+            <p className="mt-2 text-sm text-charcoal/60 font-light leading-relaxed line-clamp-2">
+              {product.description}
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-5 flex items-baseline justify-between">
