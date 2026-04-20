@@ -1,6 +1,15 @@
+/** Glasses are sold only in fixed packs (4 or 6). */
+export interface GlassPackPricing {
+  packOf4: number;
+  packOf6: number;
+}
+
+export type GlassPackSize = 4 | 6;
+
 export interface Product {
   id: string;
   name: string;
+  /** Lowest purchasable total (for glasses: 4-pack price). Single-SKU items use this as the unit price. */
   price: number;
   category: string;
   image: string;
@@ -10,6 +19,25 @@ export interface Product {
   features: string[];
   /** When set, replaces the default “Why Choose Our Upcycled Glasses?” heading on the product page */
   whyChooseHeading?: string;
+  /** OG glasses: sold only in packs of 4 or 6; `price` should match `packOf4`. */
+  glassPackPricing?: GlassPackPricing;
+}
+
+export function sellsGlassPacks(product: Product): boolean {
+  return product.glassPackPricing != null;
+}
+
+export function formatInr(amount: number): string {
+  return amount.toLocaleString('en-IN');
+}
+
+/** One-line price for cards and related products */
+export function getProductPriceCaption(product: Product): string {
+  if (product.glassPackPricing) {
+    const { packOf4, packOf6 } = product.glassPackPricing;
+    return `4-pack ₹${formatInr(packOf4)} · 6-pack ₹${formatInr(packOf6)}`;
+  }
+  return `₹${formatInr(product.price)}`;
 }
 
 export interface Category {
@@ -22,7 +50,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-sapphire-charm",
     name: "Sapphire Charm",
-    price: 990,
+    price: 3960,
+    glassPackPricing: { packOf4: 3960, packOf6: 5940 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_c398c890cb1545cabc699166de03d4c4~mv2.png",
     description: "",
@@ -40,7 +69,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-old-soul",
     name: "Old Soul",
-    price: 1090,
+    price: 4360,
+    glassPackPricing: { packOf4: 4360, packOf6: 6540 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_b9b800074661487491d9bf58cca9331f~mv2.png",
     description: "",
@@ -58,7 +88,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-carribean-echo",
     name: "Carribean Echo",
-    price: 990,
+    price: 3960,
+    glassPackPricing: { packOf4: 3960, packOf6: 5940 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_69716d5a49334f1eb8888f05d398dd6c~mv2.png",
     description: "",
@@ -76,7 +107,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-antique-luxe",
     name: "Antique Luxe",
-    price: 1040,
+    price: 4160,
+    glassPackPricing: { packOf4: 4160, packOf6: 6240 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_9709a90aaa144bbe9e969b795213586d~mv2.png",
     description: "",
@@ -94,7 +126,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-grape-glass",
     name: "Grape Glass",
-    price: 890,
+    price: 3560,
+    glassPackPricing: { packOf4: 3560, packOf6: 5340 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_c50d951e9b9042d191b6d330f220c749~mv2.png",
     description: "",
@@ -112,7 +145,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-the-gentlemen",
     name: "The Gentlemen",
-    price: 990,
+    price: 3960,
+    glassPackPricing: { packOf4: 3960, packOf6: 5940 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_efbcd122607e4820953bc97bc234bf0f~mv2.png",
     description: "",
@@ -130,7 +164,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-king-mid",
     name: "King Mid",
-    price: 890,
+    price: 3560,
+    glassPackPricing: { packOf4: 3560, packOf6: 5340 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_787d4596d7494da1aa389b6d35f76443~mv2.png",
     description: "",
@@ -148,7 +183,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-vino-vibe",
     name: "Vino Vibe",
-    price: 790,
+    price: 3160,
+    glassPackPricing: { packOf4: 3160, packOf6: 4740 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_585a68965247433990972e7e7b07f574~mv2.png",
     description: "",
@@ -166,7 +202,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-royal-shotlet",
     name: "Royal Shotlet",
-    price: 390,
+    price: 1560,
+    glassPackPricing: { packOf4: 1560, packOf6: 2340 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_ace1f7f522e144c8acecc08e23a5c10b~mv2.png",
     description: "",
@@ -184,7 +221,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-dessert-shotlet",
     name: "Dessert Shotlet",
-    price: 390,
+    price: 1560,
+    glassPackPricing: { packOf4: 1560, packOf6: 2340 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_a31fcceb34a042fcaba75efd51d84c49~mv2.png",
     description: "",
@@ -202,7 +240,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-greater-pour",
     name: "Greater Pour",
-    price: 990,
+    price: 3960,
+    glassPackPricing: { packOf4: 3960, packOf6: 5940 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_a4d99249b8e0444689b28e359c0e60f4~mv2.png",
     description: "",
@@ -220,7 +259,8 @@ export const PRODUCTS: Product[] = [
   {
     id: "og-corocut",
     name: "CoroCut",
-    price: 890,
+    price: 3560,
+    glassPackPricing: { packOf4: 3560, packOf6: 5340 },
     category: "OG Collections (Glasses)",
     image: "https://static.wixstatic.com/media/7dc839_37314c31f305478a885bc328ec45cf32~mv2.png",
     description: "",

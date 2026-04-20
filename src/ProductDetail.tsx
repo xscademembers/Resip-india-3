@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ChevronLeft, ShoppingCart, ShieldCheck, Truck, Recycle, Award, ChevronRight } from 'lucide-react';
-import { PRODUCTS } from './constants';
-import { BeforeAfterSlider } from './components';
+import { ChevronLeft, ShoppingCart, ShieldCheck, Truck, Recycle, ChevronRight } from 'lucide-react';
+import { PRODUCTS, formatInr, getProductPriceCaption, sellsGlassPacks } from './constants';
+import type { GlassPackSize } from './constants';
+import { BeforeAfterSlider, GlassPackPicker } from './components';
 
 const ProductDetail = () => {
   const { id } = useParams();
   const product = PRODUCTS.find(p => p.id === id);
   const [quantity, setQuantity] = useState(1);
+  const [packSize, setPackSize] = useState<GlassPackSize>(4);
+
+  const isGlassPacks = product ? sellsGlassPacks(product) : false;
+  const unitPrice = useMemo(() => {
+    if (!product?.glassPackPricing) return product?.price ?? 0;
+    return packSize === 4 ? product.glassPackPricing.packOf4 : product.glassPackPricing.packOf6;
+  }, [product, packSize]);
+
+  useEffect(() => {
+    setPackSize(4);
+    setQuantity(1);
+  }, [id]);
 
   if (!product) return <div className="pt-40 text-center">Product not found.</div>;
   const storyParagraphs = product.story
@@ -59,7 +72,23 @@ const ProductDetail = () => {
                 {product.category}
               </span>
               <h1 className="text-5xl md:text-6xl mb-6">{product.name}</h1>
-              <p className="text-3xl font-display font-bold text-brand-blue">₹{product.price}</p>
+              {isGlassPacks && product.glassPackPricing ? (
+                <div className="space-y-2">
+                  <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
+                    ₹{formatInr(unitPrice)}
+                    <span className="ml-3 text-base font-sans font-semibold tracking-normal text-charcoal/50">
+                      per {packSize}-glass pack
+                    </span>
+                  </p>
+                  <p className="text-sm text-charcoal/55">
+                    {getProductPriceCaption(product)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
+                  ₹{formatInr(product.price)}
+                </p>
+              )}
             </div>
 
             {product.description.trim() ? (
@@ -70,7 +99,7 @@ const ProductDetail = () => {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
-                Glass Features – {product.name}
+                {isGlassPacks ? `Glass Features – ${product.name}` : `Features – ${product.name}`}
               </h4>
               <ul className="grid grid-cols-2 gap-4">
                 {product.features.map((f, i) => (
@@ -94,16 +123,55 @@ const ProductDetail = () => {
 
             {/* Add to Cart Section */}
             <div className="pt-10 border-t border-black/5 space-y-6">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center border border-black/10 rounded-full px-4 py-2">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-2 hover:text-brand-blue">-</button>
-                  <span className="w-12 text-center font-bold">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="p-2 hover:text-brand-blue">+</button>
+              {isGlassPacks && product.glassPackPricing ? (
+                <GlassPackPicker
+                  packOf4={product.glassPackPricing.packOf4}
+                  packOf6={product.glassPackPricing.packOf6}
+                  selected={packSize}
+                  onChange={setPackSize}
+                />
+              ) : null}
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold uppercase tracking-widest text-charcoal/40">
+                    {isGlassPacks ? 'Number of packs' : 'Quantity'}
+                  </span>
+                  <div className="flex items-center rounded-full border border-black/10 px-4 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="p-2 hover:text-brand-blue"
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="w-12 text-center font-bold">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="p-2 hover:text-brand-blue"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
-                <button className="flex-1 bg-brand-blue text-white py-5 rounded-full font-bold text-lg hover:bg-brand-gold transition-all duration-500 flex items-center justify-center gap-3 shadow-xl shadow-brand-blue/20">
+                <button
+                  type="button"
+                  className="flex flex-1 items-center justify-center gap-3 rounded-full bg-brand-blue py-5 text-lg font-bold text-white shadow-xl shadow-brand-blue/20 transition-all duration-500 hover:bg-brand-gold"
+                >
                   <ShoppingCart size={20} /> Add to Cart
                 </button>
               </div>
+
+              {isGlassPacks ? (
+                <p className="text-sm text-charcoal/60" aria-live="polite">
+                  <span className="font-semibold text-charcoal">Line total: </span>
+                  ₹{formatInr(unitPrice * quantity)} ({quantity} × {packSize}-glass pack
+                  {quantity > 1 ? 's' : ''} @ ₹{formatInr(unitPrice)} each)
+                </p>
+              ) : null}
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col items-center text-center gap-2 p-4 bg-brand-bg rounded-2xl">
@@ -135,7 +203,7 @@ const ProductDetail = () => {
                   </div>
                   <div>
                     <h4 className="font-bold group-hover:text-brand-blue transition-colors">{p.name}</h4>
-                    <p className="text-sm text-charcoal/60">₹{p.price}</p>
+                    <p className="text-sm text-charcoal/60">{getProductPriceCaption(p)}</p>
                   </div>
                 </div>
               </Link>

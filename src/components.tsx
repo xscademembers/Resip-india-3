@@ -4,6 +4,8 @@ import { ShoppingBag, Menu, X, ChevronRight, ArrowRight, Instagram, Facebook, Tw
 import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { GlassPackSize } from './constants';
+import { formatInr, getProductPriceCaption, sellsGlassPacks } from './constants';
 
 /**
  * Utility for Tailwind class merging
@@ -242,6 +244,93 @@ export const BeforeAfterSlider = ({ before, after }: { before: string; after: st
 };
 
 /**
+ * Pack size selector for OG glass products (sold only in sets of 4 or 6).
+ */
+interface GlassPackPickerProps {
+  packOf4: number;
+  packOf6: number;
+  selected: GlassPackSize;
+  onChange: (size: GlassPackSize) => void;
+}
+
+export const GlassPackPicker: React.FC<GlassPackPickerProps> = ({
+  packOf4,
+  packOf6,
+  selected,
+  onChange,
+}) => {
+  const baseLabel =
+    'flex cursor-pointer flex-col gap-2 rounded-2xl border p-4 motion-safe:transition-colors';
+
+  return (
+    <fieldset className="space-y-4">
+      <legend className="mb-2 block text-sm font-bold uppercase tracking-widest text-charcoal/40">
+        Pack size
+      </legend>
+      <p id="glass-pack-hint" className="mb-4 text-sm text-charcoal/60">
+        These glasses ship in sets of four or six only (not sold as single units).
+      </p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
+        <label
+          className={cn(
+            baseLabel,
+            selected === 4
+              ? 'border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/5 ring-2 ring-[var(--color-brand-blue)]/25'
+              : 'border-black/10 hover:border-[var(--color-brand-blue)]/40'
+          )}
+        >
+          <span className="flex items-start gap-3">
+            <input
+              type="radio"
+              name="glass-pack-size"
+              value="4"
+              checked={selected === 4}
+              onChange={() => onChange(4)}
+              className="mt-1 size-4 shrink-0 accent-[var(--color-brand-blue)]"
+              aria-describedby="glass-pack-hint"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="font-bold text-charcoal">Pack of 4</span>
+              <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
+                ₹{formatInr(packOf4)}
+              </span>
+              <span className="text-xs text-charcoal/55">4 glasses per pack</span>
+            </span>
+          </span>
+        </label>
+        <label
+          className={cn(
+            baseLabel,
+            selected === 6
+              ? 'border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/5 ring-2 ring-[var(--color-brand-blue)]/25'
+              : 'border-black/10 hover:border-[var(--color-brand-blue)]/40'
+          )}
+        >
+          <span className="flex items-start gap-3">
+            <input
+              type="radio"
+              name="glass-pack-size"
+              value="6"
+              checked={selected === 6}
+              onChange={() => onChange(6)}
+              className="mt-1 size-4 shrink-0 accent-[var(--color-brand-blue)]"
+              aria-describedby="glass-pack-hint"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="font-bold text-charcoal">Pack of 6</span>
+              <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
+                ₹{formatInr(packOf6)}
+              </span>
+              <span className="text-xs text-charcoal/55">6 glasses per pack</span>
+            </span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+  );
+};
+
+/**
  * Product Card Component
  */
 interface ProductCardProps {
@@ -264,6 +353,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-500" />
+        {sellsGlassPacks(product) ? (
+          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-brand-blue)] shadow-sm backdrop-blur-sm">
+            Packs of 4 & 6
+          </div>
+        ) : null}
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           Quick View
         </div>
@@ -287,9 +381,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           ) : null}
         </div>
 
-        <div className="mt-5 flex items-baseline justify-between">
+        <div className="mt-5 flex flex-col gap-2">
           <p className="text-sm text-charcoal/40 font-medium">Price</p>
-          <p className="text-lg font-bold text-brand-blue">₹{product.price}</p>
+          <p className="text-sm font-bold leading-snug text-[var(--color-brand-blue)] sm:text-base">
+            {getProductPriceCaption(product)}
+          </p>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
