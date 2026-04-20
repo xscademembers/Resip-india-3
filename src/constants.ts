@@ -31,11 +31,10 @@ export function formatInr(amount: number): string {
   return amount.toLocaleString('en-IN');
 }
 
-/** One-line price for cards and related products */
+/** One-line price for cards and related products (glasses: entry price only). */
 export function getProductPriceCaption(product: Product): string {
   if (product.glassPackPricing) {
-    const { packOf4, packOf6 } = product.glassPackPricing;
-    return `4-pack ₹${formatInr(packOf4)} · 6-pack ₹${formatInr(packOf6)}`;
+    return `Starting from ₹${formatInr(product.price)}`;
   }
   return `₹${formatInr(product.price)}`;
 }

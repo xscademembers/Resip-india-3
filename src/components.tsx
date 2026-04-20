@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type { GlassPackSize } from './constants';
-import { formatInr, getProductPriceCaption, sellsGlassPacks } from './constants';
+import { formatInr, getProductPriceCaption } from './constants';
 
 /**
  * Utility for Tailwind class merging
@@ -265,10 +265,10 @@ export const GlassPackPicker: React.FC<GlassPackPickerProps> = ({
   return (
     <fieldset className="space-y-4">
       <legend className="mb-2 block text-sm font-bold uppercase tracking-widest text-charcoal/40">
-        Pack size
+        Choose your set
       </legend>
       <p id="glass-pack-hint" className="mb-4 text-sm text-charcoal/60">
-        These glasses ship in sets of four or six only (not sold as single units).
+        Sold in sets only — not as single glasses.
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
         <label
@@ -290,11 +290,10 @@ export const GlassPackPicker: React.FC<GlassPackPickerProps> = ({
               aria-describedby="glass-pack-hint"
             />
             <span className="flex flex-col gap-1">
-              <span className="font-bold text-charcoal">Pack of 4</span>
+              <span className="font-bold text-charcoal">4 glasses</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
                 ₹{formatInr(packOf4)}
               </span>
-              <span className="text-xs text-charcoal/55">4 glasses per pack</span>
             </span>
           </span>
         </label>
@@ -317,11 +316,10 @@ export const GlassPackPicker: React.FC<GlassPackPickerProps> = ({
               aria-describedby="glass-pack-hint"
             />
             <span className="flex flex-col gap-1">
-              <span className="font-bold text-charcoal">Pack of 6</span>
+              <span className="font-bold text-charcoal">6 glasses</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
                 ₹{formatInr(packOf6)}
               </span>
-              <span className="text-xs text-charcoal/55">6 glasses per pack</span>
             </span>
           </span>
         </label>
@@ -353,11 +351,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-500" />
-        {sellsGlassPacks(product) ? (
-          <div className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-[var(--color-brand-blue)] shadow-sm backdrop-blur-sm">
-            Packs of 4 & 6
-          </div>
-        ) : null}
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           Quick View
         </div>

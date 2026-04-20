@@ -73,17 +73,9 @@ const ProductDetail = () => {
               </span>
               <h1 className="text-5xl md:text-6xl mb-6">{product.name}</h1>
               {isGlassPacks && product.glassPackPricing ? (
-                <div className="space-y-2">
-                  <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
-                    ₹{formatInr(unitPrice)}
-                    <span className="ml-3 text-base font-sans font-semibold tracking-normal text-charcoal/50">
-                      per {packSize}-glass pack
-                    </span>
-                  </p>
-                  <p className="text-sm text-charcoal/55">
-                    {getProductPriceCaption(product)}
-                  </p>
-                </div>
+                <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
+                  Starting from ₹{formatInr(product.price)}
+                </p>
               ) : (
                 <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
                   ₹{formatInr(product.price)}
@@ -135,7 +127,7 @@ const ProductDetail = () => {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-charcoal/40">
-                    {isGlassPacks ? 'Number of packs' : 'Quantity'}
+                    {isGlassPacks ? 'Number of sets' : 'Quantity'}
                   </span>
                   <div className="flex items-center rounded-full border border-black/10 px-4 py-2">
                     <button
@@ -168,8 +160,8 @@ const ProductDetail = () => {
               {isGlassPacks ? (
                 <p className="text-sm text-charcoal/60" aria-live="polite">
                   <span className="font-semibold text-charcoal">Line total: </span>
-                  ₹{formatInr(unitPrice * quantity)} ({quantity} × {packSize}-glass pack
-                  {quantity > 1 ? 's' : ''} @ ₹{formatInr(unitPrice)} each)
+                  ₹{formatInr(unitPrice * quantity)} ({quantity} set{quantity > 1 ? 's' : ''} at ₹
+                  {formatInr(unitPrice)} each)
                 </p>
               ) : null}
               
