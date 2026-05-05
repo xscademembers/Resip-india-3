@@ -1,11 +1,127 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, Recycle, Award, Sparkles, Droplets, Instagram, ChevronRight } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import {
+  ArrowRight,
+  Recycle,
+  Award,
+  Droplets,
+  Instagram,
+  ChevronRight,
+  Wine,
+  UserRound,
+  Truck,
+  BadgeCheck,
+  Scissors,
+  FlaskConical,
+  Package,
+  Users,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BeforeAfterSlider, ProductCard } from './components';
-import { PRODUCTS, CATEGORIES } from './constants';
+import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
+
+const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: LucideIcon }[] = [
+  {
+    step: 1,
+    title: 'Origin: The Dump Bottle',
+    description:
+      'Every piece starts as a bottle left behind—we intercept it before it becomes landfill.',
+    Icon: Wine,
+  },
+  {
+    step: 2,
+    title: 'The Ragman',
+    description: 'Local collectors recover glass from bars, cafés, and streets with care.',
+    Icon: UserRound,
+  },
+  {
+    step: 3,
+    title: 'Resip Collection',
+    description: 'Our trucks bring each batch safely to the workshop for the next chapter.',
+    Icon: Truck,
+  },
+  {
+    step: 4,
+    title: 'Washing & Sanitizing',
+    description: 'Deep wash and sanitization so every surface is spotless and food-safe.',
+    Icon: Droplets,
+  },
+  {
+    step: 5,
+    title: 'Quality Check',
+    description: 'Trained eyes inspect thickness, integrity, and feel before any cut.',
+    Icon: BadgeCheck,
+  },
+  {
+    step: 6,
+    title: 'Cutting & Smoothing',
+    description: 'Precision cutting edges and careful smoothing for a refined rim and silhouette.',
+    Icon: Scissors,
+  },
+  {
+    step: 7,
+    title: 'Biochemical Treatment',
+    description: 'A controlled finish that protects clarity and strength for everyday use.',
+    Icon: FlaskConical,
+  },
+  {
+    step: 8,
+    title: 'Packaging with Care',
+    description: 'Thoughtful, protective packing—ready to travel without a scratch.',
+    Icon: Package,
+  },
+  {
+    step: 9,
+    title: 'Delivered to Happy Families',
+    description: 'From our bench to your table—made to be loved for years.',
+    Icon: Users,
+  },
+];
+
+function UpcycleStepCard({
+  step,
+  reduceMotion,
+}: {
+  step: (typeof UPCYCLE_STEPS)[number];
+  reduceMotion: boolean;
+}) {
+  const Icon = step.Icon;
+  return (
+    <motion.article
+      initial={reduceMotion ? undefined : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-32px' }}
+      transition={{ duration: 0.45, ease: 'easeOut' }}
+      className="group flex h-full flex-col rounded-2xl border border-brand-blue/10 bg-white p-5 shadow-sm transition-all duration-300 hover:border-brand-gold/50 hover:shadow-md md:p-6"
+    >
+      <div className="flex gap-4 md:gap-5">
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-gold font-display text-base font-bold text-brand-blue shadow-sm">
+            {step.step}
+          </span>
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-brand-blue/10 text-brand-blue transition-colors duration-300 group-hover:bg-brand-blue group-hover:text-white">
+            <Icon className="h-6 w-6" strokeWidth={1.75} aria-hidden />
+            {step.step === 3 ? (
+              <Recycle
+                className="absolute -bottom-0.5 -right-0.5 h-4 w-4 text-brand-gold drop-shadow"
+                strokeWidth={2}
+                aria-hidden
+              />
+            ) : null}
+          </div>
+        </div>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h3 className="font-display text-lg font-bold leading-snug text-charcoal md:text-xl">{step.title}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-charcoal/65">{step.description}</p>
+        </div>
+      </div>
+    </motion.article>
+  );
+}
 
 const Home = () => {
+  const reduceMotion = useReducedMotion();
   const heroSlides = useMemo(
     () => [
       {
@@ -24,15 +140,15 @@ const Home = () => {
     []
   );
 
-  const socialImages = useMemo(
-    () => [
-      'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=600',
-      'https://images.unsplash.com/photo-1527281405159-35d5b5aa7c1d?auto=format&fit=crop&q=80&w=600',
-    ],
+  /* First six catalog products — visuals align with site; tiles link to @resip_india on Instagram. */
+  const instagramSpotlight = useMemo(
+    () =>
+      PRODUCTS.slice(0, 6).map((p) => ({
+        id: p.id,
+        src: p.image,
+        name: p.name,
+        alt: `${p.name} — ReSip India handcrafted glassware`,
+      })),
     []
   );
 
@@ -78,7 +194,7 @@ const Home = () => {
               transition={{ duration: 0.8, ease: 'easeOut' }}
             />
           </AnimatePresence>
-          <div className="absolute inset-0 bg-black/40" />
+          <div className="absolute inset-0 bg-brand-blue/45" />
         </div>
 
         {/* Glass Reflection Overlay */}
@@ -216,43 +332,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section id="process" className="py-32 px-6 bg-brand-blue text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl mb-6">The Art of <span className="text-brand-gold">Upcycling</span></h2>
-            <p className="text-white/60 max-w-2xl mx-auto font-light">A meticulous 5-step process that ensures every glass meets our high-end standards.</p>
-          </div>
+      {/* Process Section — nine steps, simple 1→9 flow */}
+      <section
+        id="process"
+        className="border-t border-brand-blue/10 bg-gradient-to-b from-brand-bg via-white to-brand-bg py-32 px-6"
+        aria-labelledby="process-heading"
+      >
+        <div className="mx-auto max-w-7xl">
+          <header className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
+            <p className="mb-3 font-display text-xs font-bold uppercase tracking-[0.28em] text-brand-gold">
+              Bottle to table
+            </p>
+            <h2 id="process-heading" className="mb-6 font-display text-4xl font-bold tracking-tight text-charcoal md:text-5xl lg:text-6xl">
+              The art of <span className="text-brand-blue">upcycling</span>
+            </h2>
+            <p className="text-base font-light leading-relaxed text-charcoal/65 md:text-lg">
+              Nine deliberate stages—from the dump bottle to delivery—so every glass earns its place in your home.
+            </p>
+          </header>
 
-          <div className="relative">
-            {/* Connecting Line */}
-            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 hidden lg:block" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-12 relative z-10">
-              {[
-                { icon: <Recycle />, title: "Collect", desc: "Sourcing premium bottles from across India." },
-                { icon: <Droplets />, title: "Clean", desc: "Sanitization and label removal process." },
-                { icon: <Sparkles />, title: "Cut", desc: "Precision diamond-blade cutting." },
-                { icon: <Award />, title: "Polish", desc: "Multi-stage fire and hand polishing." },
-                { icon: <ChevronRight />, title: "Finish", desc: "Quality check and premium packaging." }
-              ].map((step, i) => (
-                <motion.div 
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="text-center group"
-                >
-                  <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-brand-gold mx-auto mb-6 group-hover:bg-brand-gold group-hover:text-brand-blue transition-all duration-500">
-                    {step.icon}
-                  </div>
-                  <h4 className="text-xl font-bold mb-3">{step.title}</h4>
-                  <p className="text-white/50 text-sm font-light leading-relaxed">{step.desc}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+          <ol className="mx-auto grid max-w-6xl list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {UPCYCLE_STEPS.map((s) => (
+              <li key={s.step} className="min-w-0">
+                <UpcycleStepCard step={s} reduceMotion={!!reduceMotion} />
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -272,21 +377,26 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {CATEGORIES.map((cat, i) => (
-              <motion.div
+            {CATEGORIES.map((cat) => (
+              <Link
                 key={cat.id}
-                whileHover={{ y: -10 }}
-                className="group relative aspect-square rounded-2xl overflow-hidden shadow-lg"
+                to={`/shop?category=${encodeURIComponent(cat.name)}`}
+                className="group relative block aspect-square overflow-hidden rounded-2xl shadow-lg outline-none transition-transform duration-300 ease-out hover:-translate-y-2 motion-reduce:transform-none motion-reduce:hover:translate-y-0 focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
               >
-                <img src={cat.image} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-8 left-8">
-                  <h3 className="text-2xl text-white font-bold mb-2">{cat.name}</h3>
-                  <Link to="/shop" className="text-brand-gold font-bold text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    Explore <ChevronRight size={16} />
-                  </Link>
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-blue/85 via-transparent to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <h3 className="mb-2 text-2xl font-bold text-white">{cat.name}</h3>
+                  <span className="flex items-center gap-2 text-sm font-bold text-brand-gold opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:opacity-100">
+                    Explore <ChevronRight size={16} aria-hidden />
+                  </span>
                 </div>
-              </motion.div>
+              </Link>
             ))}
           </div>
         </div>
@@ -322,12 +432,12 @@ const Home = () => {
               </p>
             </div>
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="bg-white p-10 rounded-3xl border border-black/5 shadow-sm">
+              <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Recycle size={40} /></div>
                 <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">50,000+</h3>
                 <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Bottles Recycled</p>
               </div>
-              <div className="bg-white p-10 rounded-3xl border border-black/5 shadow-sm">
+              <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Droplets size={40} /></div>
                 <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">12 Tons</h3>
                 <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Waste Diverted</p>
@@ -337,28 +447,61 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-32 px-6 bg-white">
+      {/* Instagram */}
+      <section className="py-32 px-6 bg-white" aria-labelledby="instagram-heading">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-16">
-            <h2 className="text-3xl font-bold">Resip in the Wild</h2>
-            <a href="#" className="flex items-center gap-2 text-brand-blue font-bold hover:text-brand-gold transition-colors">
-              <Instagram size={20} /> @resipindia
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between mb-10 md:mb-16">
+            <div>
+              <p className="text-brand-gold font-display font-bold tracking-[0.25em] uppercase text-xs mb-3">
+                Follow us
+              </p>
+              <h2 id="instagram-heading" className="text-3xl md:text-4xl font-bold">
+                On Instagram
+              </h2>
+              <p className="mt-3 max-w-xl text-charcoal/60 font-light leading-relaxed">
+                Real pours, studio shots, and new drops — see everything on{' '}
+                <a
+                  href={INSTAGRAM_PROFILE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-brand-blue underline decoration-brand-gold/60 underline-offset-4 hover:text-brand-gold"
+                >
+                  @resip_india
+                </a>
+                .
+              </p>
+            </div>
+            <a
+              href={INSTAGRAM_PROFILE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-brand-blue bg-white px-6 py-3 text-sm font-bold text-brand-blue transition-colors hover:bg-brand-blue hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+            >
+              <Instagram size={20} aria-hidden /> Open Instagram profile
             </a>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {socialImages.map((src, i) => (
-              <div key={src} className="aspect-square rounded-xl overflow-hidden group relative">
-                <img 
-                  src={src}
-                  alt="Social" 
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {instagramSpotlight.map((item) => (
+              <a
+                key={item.id}
+                href={INSTAGRAM_PROFILE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="aspect-square rounded-xl overflow-hidden group relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+                aria-label={`See ${item.name} and more on @resip_india on Instagram`}
+              >
+                <img
+                  src={item.src}
+                  alt={item.alt}
+                  className="h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-110 motion-reduce:group-hover:scale-100"
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
-                <div className="absolute inset-0 bg-brand-blue/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Instagram className="text-white" />
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-brand-blue/90 via-brand-blue/35 to-transparent px-3 pb-4 pt-14 opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:group-hover:opacity-0">
+                  <Instagram className="mb-2 shrink-0 text-white" size={22} aria-hidden />
+                  <p className="w-full truncate text-center text-xs font-bold text-white drop-shadow-sm">{item.name}</p>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>

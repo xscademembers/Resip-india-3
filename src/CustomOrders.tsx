@@ -17,25 +17,25 @@ const CustomOrders = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-blue/10">
                 <h3 className="text-xl font-bold mb-4 text-brand-blue">Bars & Cafes</h3>
                 <p className="text-sm text-charcoal/60 font-light">Customized glassware that matches your establishment's aesthetic.</p>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-blue/10">
                 <h3 className="text-xl font-bold mb-4 text-brand-blue">Corporate Gifting</h3>
                 <p className="text-sm text-charcoal/60 font-light">Sustainable and unique gifts for your clients and employees.</p>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-blue/10">
                 <h3 className="text-xl font-bold mb-4 text-brand-blue">Events</h3>
                 <p className="text-sm text-charcoal/60 font-light">Memorable wedding favors or event giveaways.</p>
               </div>
-              <div className="bg-white p-8 rounded-3xl shadow-sm border border-black/5">
+              <div className="bg-white p-8 rounded-3xl shadow-sm border border-brand-blue/10">
                 <h3 className="text-xl font-bold mb-4 text-brand-blue">Branding</h3>
                 <p className="text-sm text-charcoal/60 font-light">Engrave your logo or custom designs on our glassware.</p>
               </div>
             </div>
 
-            <div className="space-y-6 pt-10 border-t border-black/5">
+            <div className="space-y-6 pt-10 border-t border-brand-blue/10">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-brand-blue text-white flex items-center justify-center"><Mail size={20} /></div>
                 <div>
@@ -57,27 +57,27 @@ const CustomOrders = () => {
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-black/5"
+            className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-brand-blue/10"
           >
             <h2 className="text-3xl font-bold mb-10">Inquiry Form</h2>
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-charcoal/60">Full Name</label>
-                  <input type="text" className="w-full bg-brand-bg border border-black/5 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="John Doe" />
+                  <input type="text" className="w-full bg-brand-bg border border-brand-blue/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="John Doe" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-charcoal/60">Email Address</label>
-                  <input type="email" className="w-full bg-brand-bg border border-black/5 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="john@example.com" />
+                  <input type="email" className="w-full bg-brand-bg border border-brand-blue/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="john@example.com" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-charcoal/60">Company / Organization</label>
-                <input type="text" className="w-full bg-brand-bg border border-black/5 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="Company Name" />
+                <input type="text" className="w-full bg-brand-bg border border-brand-blue/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="Company Name" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-charcoal/60">Order Type</label>
-                <select className="w-full bg-brand-bg border border-black/5 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors appearance-none">
+                <select className="w-full bg-brand-bg border border-brand-blue/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors appearance-none">
                   <option>Corporate Gifting</option>
                   <option>Bar / Cafe Supply</option>
                   <option>Event Favors</option>
@@ -86,7 +86,7 @@ const CustomOrders = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-charcoal/60">Message</label>
-                <textarea rows={4} className="w-full bg-brand-bg border border-black/5 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="Tell us about your requirements..."></textarea>
+                <textarea rows={4} className="w-full bg-brand-bg border border-brand-blue/10 rounded-xl px-6 py-4 focus:outline-none focus:border-brand-blue transition-colors" placeholder="Tell us about your requirements..."></textarea>
               </div>
               <button className="w-full bg-brand-blue text-white py-5 rounded-full font-bold text-lg hover:bg-brand-gold transition-all duration-500 flex items-center justify-center gap-3 shadow-xl shadow-brand-blue/20">
                 Send Inquiry <Send size={20} />

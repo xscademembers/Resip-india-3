@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-blue: #0246AB;
-  --color-brand-gold: #D2AC08;
-  --color-brand-bg: #FAFAFA;
-  --color-charcoal: #333333;
-  
+  --color-brand-blue: #0047ab;
+  --color-brand-gold: #d1aa05;
+  /* Neutrals derived from brand blue for a cohesive palette */
+  --color-brand-bg: color-mix(in srgb, white 97%, var(--color-brand-blue) 3%);
+  --color-charcoal: color-mix(in srgb, var(--color-brand-blue) 22%, #141820 78%);
+
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
 }
@@ -34,11 +35,11 @@
   height: 300%;
   background: linear-gradient(
     45deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.05) 45%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.05) 55%,
-    rgba(255, 255, 255, 0) 100%
+    color-mix(in srgb, var(--color-brand-gold) 0%, transparent) 0%,
+    color-mix(in srgb, white 85%, var(--color-brand-gold) 15%) 45%,
+    color-mix(in srgb, white 70%, var(--color-brand-gold) 30%) 50%,
+    color-mix(in srgb, white 85%, var(--color-brand-gold) 15%) 55%,
+    color-mix(in srgb, var(--color-brand-gold) 0%, transparent) 100%
   );
   transform: rotate(-45deg);
   animation: glass-shine 8s infinite linear;

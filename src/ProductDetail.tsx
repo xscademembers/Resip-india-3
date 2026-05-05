@@ -1,27 +1,44 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'motion/react';
-import { ChevronLeft, ShoppingCart, ShieldCheck, Truck, Recycle, ChevronRight } from 'lucide-react';
-import { PRODUCTS, formatInr, getProductPriceCaption, sellsGlassPacks } from './constants';
-import type { GlassPackSize } from './constants';
-import { BeforeAfterSlider, GlassPackPicker } from './components';
+import { ChevronLeft, ShoppingCart, ShieldCheck, Truck, Recycle } from 'lucide-react';
+import {
+  PRODUCTS,
+  formatInr,
+  getGlassSetEntryPrice,
+  getProductGalleryImages,
+  getProductPriceCaption,
+  sellsGlassSets,
+} from './constants';
+import type { GlassSetSize } from './constants';
+import { BeforeAfterSlider, GlassPackPicker, ProductImageCarousel } from './components';
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const product = PRODUCTS.find(p => p.id === id);
+  const [setSize, setSetSize] = useState<GlassSetSize>(() => {
+    const p = PRODUCTS.find((x) => x.id === id);
+    return p?.glassSetPricing?.format === '612' ? 6 : 2;
+  });
   const [quantity, setQuantity] = useState(1);
-  const [packSize, setPackSize] = useState<GlassPackSize>(4);
+  const product = PRODUCTS.find((p) => p.id === id);
 
-  const isGlassPacks = product ? sellsGlassPacks(product) : false;
+  const isSetSku = product ? sellsGlassSets(product) : false;
   const unitPrice = useMemo(() => {
-    if (!product?.glassPackPricing) return product?.price ?? 0;
-    return packSize === 4 ? product.glassPackPricing.packOf4 : product.glassPackPricing.packOf6;
-  }, [product, packSize]);
+    if (!product?.glassSetPricing) return product?.price ?? 0;
+    const p = product.glassSetPricing;
+    if (p.format === '24') {
+      return setSize === 4 ? p.setOf4 : p.setOf2;
+    }
+    return setSize === 12 ? p.setOf12 : p.setOf6;
+  }, [product, setSize]);
 
   useEffect(() => {
-    setPackSize(4);
     setQuantity(1);
   }, [id]);
+
+  useEffect(() => {
+    if (!product?.glassSetPricing) return;
+    setSetSize(product.glassSetPricing.format === '24' ? 2 : 6);
+  }, [id, product?.glassSetPricing]);
 
   if (!product) return <div className="pt-40 text-center">Product not found.</div>;
   const storyParagraphs = product.story
@@ -42,25 +59,14 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           {/* Image Gallery */}
           <div className="space-y-8">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="aspect-[4/5] rounded-3xl overflow-hidden bg-brand-bg shadow-xl"
-            >
-              <img 
-                src={product.image} 
-                alt={product.name} 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-            
+            <ProductImageCarousel product={product} />
+
             {/* Transformation Visual */}
             <div className="space-y-6">
               <h3 className="text-2xl font-bold">The Transformation</h3>
               <BeforeAfterSlider 
                 before={product.beforeImage || "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800"}
-                after={product.image}
+                after={getProductGalleryImages(product)[0]}
               />
             </div>
           </div>
@@ -72,9 +78,9 @@ const ProductDetail = () => {
                 {product.category}
               </span>
               <h1 className="text-5xl md:text-6xl mb-6">{product.name}</h1>
-              {isGlassPacks && product.glassPackPricing ? (
+              {isSetSku && product.glassSetPricing ? (
                 <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
-                  Starting from ₹{formatInr(product.price)}
+                  Starting from ₹{formatInr(getGlassSetEntryPrice(product.glassSetPricing))}
                 </p>
               ) : (
                 <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
@@ -91,7 +97,7 @@ const ProductDetail = () => {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
-                {isGlassPacks ? `Glass Features – ${product.name}` : `Features – ${product.name}`}
+                {isSetSku ? `Glass Features – ${product.name}` : `Features – ${product.name}`}
               </h4>
               <ul className="grid grid-cols-2 gap-4">
                 {product.features.map((f, i) => (
@@ -114,22 +120,21 @@ const ProductDetail = () => {
             </div>
 
             {/* Add to Cart Section */}
-            <div className="pt-10 border-t border-black/5 space-y-6">
-              {isGlassPacks && product.glassPackPricing ? (
+            <div className="pt-10 border-t border-brand-blue/10 space-y-6">
+              {isSetSku && product.glassSetPricing ? (
                 <GlassPackPicker
-                  packOf4={product.glassPackPricing.packOf4}
-                  packOf6={product.glassPackPricing.packOf6}
-                  selected={packSize}
-                  onChange={setPackSize}
+                  pricing={product.glassSetPricing}
+                  selected={setSize}
+                  onChange={setSetSize}
                 />
               ) : null}
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
                 <div className="flex flex-col gap-2">
                   <span className="text-xs font-bold uppercase tracking-widest text-charcoal/40">
-                    {isGlassPacks ? 'Number of sets' : 'Quantity'}
+                    {isSetSku ? 'Number of sets' : 'Quantity'}
                   </span>
-                  <div className="flex items-center rounded-full border border-black/10 px-4 py-2">
+                  <div className="flex items-center rounded-full border border-brand-blue/15 px-4 py-2">
                     <button
                       type="button"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -157,13 +162,18 @@ const ProductDetail = () => {
                 </button>
               </div>
 
-              {isGlassPacks ? (
+              {isSetSku ? (
                 <p className="text-sm text-charcoal/60" aria-live="polite">
                   <span className="font-semibold text-charcoal">Line total: </span>
-                  ₹{formatInr(unitPrice * quantity)} ({quantity} set{quantity > 1 ? 's' : ''} at ₹
+                  ₹{formatInr(unitPrice * quantity)} ({quantity} set{quantity > 1 ? 's' : ''} · set of {setSize} at ₹
                   {formatInr(unitPrice)} each)
                 </p>
-              ) : null}
+              ) : (
+                <p className="text-sm text-charcoal/60" aria-live="polite">
+                  <span className="font-semibold text-charcoal">Line total: </span>₹
+                  {formatInr(unitPrice * quantity)} ({quantity} at ₹{formatInr(unitPrice)} each)
+                </p>
+              )}
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col items-center text-center gap-2 p-4 bg-brand-bg rounded-2xl">

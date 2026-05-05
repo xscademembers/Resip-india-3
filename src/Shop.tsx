@@ -1,21 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
-import { Filter, ChevronDown, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ProductCard } from './components';
 import { PRODUCTS } from './constants';
 
+const SHOP_CATEGORY_FILTERS = [
+  'All',
+  'Upcycled Glass',
+  'Shots',
+  'Scented Candles',
+  'Party Gift Box',
+  'Corporate Gift Box',
+  'Gift Box (Matchbox, Coasters, Bowls)',
+  'Jars',
+] as const;
+
 const Shop = () => {
+  const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('All');
   const shouldReduceMotion = useReducedMotion();
-  const categories = [
-    'All', 
-    'OG Collections (Glasses)', 
-    'Flame Collection (Candle Box)', 
-    'Party Box', 
-    'Corporate Box', 
-    'Extras (Matchbox, Coasters, Bowls)', 
-    'Vault Category (Jars)'
-  ];
+
+  useEffect(() => {
+    const param = searchParams.get('category');
+    if (!param) {
+      setActiveCategory('All');
+      return;
+    }
+    if ((SHOP_CATEGORY_FILTERS as readonly string[]).includes(param)) {
+      setActiveCategory(param);
+    } else {
+      setActiveCategory('All');
+    }
+  }, [searchParams]);
 
   const filteredProducts = activeCategory === 'All' 
     ? PRODUCTS 
@@ -31,9 +48,9 @@ const Shop = () => {
         </div>
 
         {/* Filters & Search */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 pb-8 border-b border-black/5">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 pb-8 border-b border-brand-blue/10">
           <div className="flex flex-wrap gap-4">
-            {categories.map((cat) => (
+            {SHOP_CATEGORY_FILTERS.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -53,7 +70,7 @@ const Shop = () => {
             <input 
               type="text" 
               placeholder="Search products..." 
-              className="w-full bg-white border border-black/5 rounded-full py-3 pl-12 pr-6 focus:outline-none focus:border-brand-blue transition-colors text-sm"
+              className="w-full bg-white border border-brand-blue/10 rounded-full py-3 pl-12 pr-6 focus:outline-none focus:border-brand-blue transition-colors text-sm"
             />
           </div>
         </div>
