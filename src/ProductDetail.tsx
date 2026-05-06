@@ -11,6 +11,8 @@ import {
 } from './constants';
 import type { GlassSetSize } from './constants';
 import { BeforeAfterSlider, GlassPackPicker, ProductImageCarousel } from './components';
+import OptimizedImage from './OptimizedImage';
+import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -65,8 +67,8 @@ const ProductDetail = () => {
             <div className="space-y-6">
               <h3 className="text-2xl font-bold">The Transformation</h3>
               <BeforeAfterSlider 
-                before={product.beforeImage || "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800"}
-                after={getProductGalleryImages(product)[0]}
+                before={optimizedSrc(product.beforeImage || 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
+                after={optimizedSrc(getProductGalleryImages(product)[0], IMG_WIDTHS.CARD)}
               />
             </div>
           </div>
@@ -201,7 +203,7 @@ const ProductDetail = () => {
               <Link key={p.id} to={`/product/${p.id}`} onClick={() => window.scrollTo(0, 0)}>
                 <div className="group space-y-4">
                   <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-brand-bg">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                    <OptimizedImage src={p.image} displayWidth={IMG_WIDTHS.RELATED} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   </div>
                   <div>
                     <h4 className="font-bold group-hover:text-brand-blue transition-colors">{p.name}</h4>

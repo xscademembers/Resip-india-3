@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Recycle, Award, Sparkles, Heart } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
+import { IMG_WIDTHS } from './image-utils';
 
 const About = () => {
   return (
@@ -19,11 +21,11 @@ const About = () => {
               A Modern <span className="text-brand-blue italic">Sustainability</span> Movement
             </h1>
             <div className="w-full aspect-video rounded-[3rem] overflow-hidden shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1920" 
-                alt="Workshop" 
+              <OptimizedImage
+                src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1920"
+                displayWidth={IMG_WIDTHS.HERO}
+                alt="Workshop"
                 className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
               />
             </div>
           </motion.div>

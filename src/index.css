@@ -14,10 +14,28 @@
 @layer base {
   body {
     @apply bg-brand-bg text-charcoal font-sans antialiased;
+    /* Prevent layout shift while custom fonts load */
+    font-display: swap;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
+  }
+
+  /* Allow browser to skip rendering off-screen sections entirely */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
+
+  /* Override for hero / first visible section */
+  section:first-of-type {
+    content-visibility: visible;
+  }
+
+  /* Smooth image load transitions site-wide */
+  img {
+    will-change: auto;
   }
 }
 

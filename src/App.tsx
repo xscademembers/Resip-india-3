@@ -1,12 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
 import { Navbar, Footer } from './components';
+
+// Lazy-load route-level pages for code-splitting.
+// Only the Home page is eagerly loaded (it's the landing page).
 import Home from './Home';
-import Shop from './Shop';
-import ProductDetail from './ProductDetail';
-import About from './About';
-import CustomOrders from './CustomOrders';
+const Shop = lazy(() => import('./Shop'));
+const ProductDetail = lazy(() => import('./ProductDetail'));
+const About = lazy(() => import('./About'));
+const CustomOrders = lazy(() => import('./CustomOrders'));
+
+/** Lightweight spinner shown while a route chunk loads. */
+const RouteFallback = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-blue/20 border-t-brand-blue" />
+  </div>
+);
 
 /**
  * ScrollToTop component ensures page starts at top on route change
@@ -36,13 +46,15 @@ export default function App() {
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/corporate" element={<CustomOrders />} />
-          </Routes>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/corporate" element={<CustomOrders />} />
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
         

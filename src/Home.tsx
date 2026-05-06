@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
@@ -20,6 +20,8 @@ import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BeforeAfterSlider, ProductCard } from './components';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
+import OptimizedImage from './OptimizedImage';
+import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
 const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: LucideIcon }[] = [
   {
@@ -122,18 +124,20 @@ function UpcycleStepCard({
 
 const Home = () => {
   const reduceMotion = useReducedMotion();
+
+  // Hero slides — optimized URLs computed once
   const heroSlides = useMemo(
     () => [
       {
-        src: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=1920',
+        src: optimizedSrc('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
         alt: 'Handcrafted glassware hero slide',
       },
       {
-        src: 'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=1920',
+        src: optimizedSrc('https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
         alt: 'Upcycled glasses hero slide',
       },
       {
-        src: 'https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=80&w=1920',
+        src: optimizedSrc('https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
         alt: 'Premium glassware hero slide',
       },
     ],
@@ -157,13 +161,29 @@ const Home = () => {
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-  const goToHeroSlide = (index: number) => {
-    const clamped = ((index % heroSlides.length) + heroSlides.length) % heroSlides.length;
-    setActiveHeroSlide(clamped);
-  };
+  const goToHeroSlide = useCallback((index: number) => {
+    setActiveHeroSlide((prev) => {
+      const len = heroSlides.length;
+      return ((index % len) + len) % len;
+    });
+  }, [heroSlides.length]);
 
-  const goToNextHeroSlide = () => goToHeroSlide(activeHeroSlide + 1);
-  const goToPrevHeroSlide = () => goToHeroSlide(activeHeroSlide - 1);
+  const goToNextHeroSlide = useCallback(() => {
+    setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
+  }, [heroSlides.length]);
+
+  const goToPrevHeroSlide = useCallback(() => {
+    setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  }, [heroSlides.length]);
+
+  // Prefetch upcoming hero slides for instant transitions
+  useEffect(() => {
+    heroSlides.forEach((slide, i) => {
+      if (i === 0) return; // first one is already preloaded via <link>
+      const img = new Image();
+      img.src = slide.src;
+    });
+  }, [heroSlides]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -178,7 +198,7 @@ const Home = () => {
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden" style={{ contentVisibility: 'visible' }}>
         {/* Background Image with Parallax Effect */}
         <div className="absolute inset-0 z-0">
           <AnimatePresence initial={false}>
@@ -188,10 +208,14 @@ const Home = () => {
               alt={heroSlides[activeHeroSlide]?.alt}
               className="absolute inset-0 w-full h-full object-cover"
               referrerPolicy="no-referrer"
+              // First slide is LCP-critical
+              loading={activeHeroSlide === 0 ? 'eager' : 'lazy'}
+              decoding={activeHeroSlide === 0 ? 'sync' : 'async'}
+              fetchpriority={activeHeroSlide === 0 ? 'high' : undefined}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             />
           </AnimatePresence>
           <div className="absolute inset-0 bg-brand-blue/45" />
@@ -204,7 +228,7 @@ const Home = () => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <span className="inline-block text-brand-gold font-display font-bold tracking-[0.4em] uppercase text-sm mb-6">
               Sustainable Luxury
@@ -285,7 +309,7 @@ const Home = () => {
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
             <span className="text-brand-blue font-display font-bold tracking-[0.3em] uppercase text-xs mb-4 block">
               The Signature Experience
@@ -322,11 +346,11 @@ const Home = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6 }}
           >
             <BeforeAfterSlider 
-              before="https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800"
-              after="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800"
+              before={optimizedSrc('https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
+              after={optimizedSrc('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
             />
           </motion.div>
         </div>
@@ -383,11 +407,11 @@ const Home = () => {
                 to={`/shop?category=${encodeURIComponent(cat.name)}`}
                 className="group relative block aspect-square overflow-hidden rounded-2xl shadow-lg outline-none transition-transform duration-300 ease-out hover:-translate-y-2 motion-reduce:transform-none motion-reduce:hover:translate-y-0 focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
               >
-                <img
+                <OptimizedImage
                   src={cat.image}
+                  displayWidth={IMG_WIDTHS.CARD}
                   alt={cat.name}
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-blue/85 via-transparent to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8">
@@ -490,12 +514,11 @@ const Home = () => {
                 className="aspect-square rounded-xl overflow-hidden group relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
                 aria-label={`See ${item.name} and more on @resip_india on Instagram`}
               >
-                <img
+                <OptimizedImage
                   src={item.src}
+                  displayWidth={IMG_WIDTHS.THUMB}
                   alt={item.alt}
                   className="h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none group-hover:scale-110 motion-reduce:group-hover:scale-100"
-                  referrerPolicy="no-referrer"
-                  loading="lazy"
                 />
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-end bg-gradient-to-t from-brand-blue/90 via-brand-blue/35 to-transparent px-3 pb-4 pt-14 opacity-0 transition-opacity duration-300 group-hover:opacity-100 motion-reduce:group-hover:opacity-0">
                   <Instagram className="mb-2 shrink-0 text-white" size={22} aria-hidden />

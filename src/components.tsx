@@ -15,6 +15,8 @@ import {
   type GlassSetPricing,
   type Product,
 } from './constants';
+import OptimizedImage from './OptimizedImage';
+import { optimizedSrc, optimizedSrcSet, IMG_WIDTHS } from './image-utils';
 
 /**
  * Utility for Tailwind class merging
@@ -60,14 +62,14 @@ export const Navbar = () => {
             useTransparent && 'drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]'
           )}
         >
-          <img
+          <OptimizedImage
             src={BRAND_LOGO_HEADER_SRC}
+            displayWidth={IMG_WIDTHS.LOGO}
+            priority
             alt="ReSip India — Upcycling With A Cause"
             className="h-10 w-auto max-h-[52px] object-contain object-left md:h-11 md:max-h-14"
             width={200}
             height={56}
-            decoding="async"
-            referrerPolicy="no-referrer"
           />
         </Link>
 
@@ -140,14 +142,13 @@ export const Footer = () => {
             to="/"
             className="inline-flex rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)] motion-safe:transition-opacity hover:opacity-95"
           >
-            <img
+            <OptimizedImage
               src={BRAND_LOGO_FOOTER_SRC}
+              displayWidth={IMG_WIDTHS.LOGO_FOOTER}
               alt="ReSip India — Upcycling With A Cause"
               className="h-[72px] w-auto max-w-[min(100%,280px)] object-contain object-left md:h-20"
               width={240}
               height={80}
-              decoding="async"
-              referrerPolicy="no-referrer"
             />
           </Link>
           <p className="text-white/70 leading-relaxed font-light">
@@ -239,14 +240,14 @@ export const BeforeAfterSlider = ({ before, after }: { before: string; after: st
       onTouchMove={handleMove}
     >
       {/* After Image (Base) */}
-      <img src={after} alt="After" className="absolute inset-0 w-full h-full object-cover" referrerPolicy="no-referrer" />
+      <OptimizedImage src={after} displayWidth={IMG_WIDTHS.CARD} alt="After" className="absolute inset-0 w-full h-full object-cover" />
       
       {/* Before Image (Overlay) */}
       <div 
         className="absolute inset-0 w-full h-full overflow-hidden"
         style={{ width: `${sliderPos}%` }}
       >
-        <img src={before} alt="Before" className="absolute inset-0 w-full h-full object-cover max-w-none" style={{ width: '100vw' }} referrerPolicy="no-referrer" />
+        <OptimizedImage src={before} displayWidth={IMG_WIDTHS.CARD} alt="Before" className="absolute inset-0 w-full h-full object-cover max-w-none" style={{ width: '100vw' }} />
         <div className="absolute inset-0 bg-brand-blue/25 flex items-center justify-center">
           <span className="text-white font-display font-bold text-4xl opacity-50 tracking-widest uppercase">Waste</span>
         </div>
@@ -314,21 +315,25 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
         }}
       >
         {shouldReduceMotion ? (
-          <img
+          <OptimizedImage
             key={currentSrc}
             src={currentSrc}
+            displayWidth={IMG_WIDTHS.DETAIL}
             alt={`${product.name} — image ${index + 1} of ${len}`}
             className="h-full w-full object-cover"
-            referrerPolicy="no-referrer"
           />
         ) : (
           <AnimatePresence mode="wait" initial={false}>
             <motion.img
               key={currentSrc}
-              src={currentSrc}
+              src={optimizedSrc(currentSrc, IMG_WIDTHS.DETAIL)}
+              srcSet={optimizedSrcSet(currentSrc, IMG_WIDTHS.DETAIL)}
+              sizes={`(max-width: ${IMG_WIDTHS.DETAIL}px) 100vw, ${IMG_WIDTHS.DETAIL}px`}
               alt={`${product.name} — image ${index + 1} of ${len}`}
               className="absolute inset-0 h-full w-full object-cover"
               referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -529,11 +534,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       className="group bg-white rounded-2xl overflow-hidden border border-brand-blue/10 hover:shadow-2xl transition-all duration-500"
     >
       <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden">
-        <img 
+        <OptimizedImage 
           src={product.image} 
+          displayWidth={IMG_WIDTHS.THUMB}
           alt={product.name} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-500" />
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
