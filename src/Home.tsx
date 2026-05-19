@@ -356,35 +356,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Process Section — nine steps, simple 1→9 flow */}
-      <section
-        id="process"
-        className="border-t border-brand-blue/10 bg-gradient-to-b from-brand-bg via-white to-brand-bg py-32 px-6"
-        aria-labelledby="process-heading"
-      >
-        <div className="mx-auto max-w-7xl">
-          <header className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
-            <p className="mb-3 font-display text-xs font-bold uppercase tracking-[0.28em] text-brand-gold">
-              Bottle to table
-            </p>
-            <h2 id="process-heading" className="mb-6 font-display text-4xl font-bold tracking-tight text-charcoal md:text-5xl lg:text-6xl">
-              The art of <span className="text-brand-blue">upcycling</span>
-            </h2>
-            <p className="text-base font-light leading-relaxed text-charcoal/65 md:text-lg">
-              Nine deliberate stages—from the dump bottle to delivery—so every glass earns its place in your home.
-            </p>
-          </header>
-
-          <ol className="mx-auto grid max-w-6xl list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-            {UPCYCLE_STEPS.map((s) => (
-              <li key={s.step} className="min-w-0">
-                <UpcycleStepCard step={s} reduceMotion={!!reduceMotion} />
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
       {/* Categories Section */}
       <section className="py-32 px-6 bg-brand-bg">
         <div className="max-w-7xl mx-auto">
@@ -442,6 +413,35 @@ const Home = () => {
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Process Section — nine steps, simple 1→9 flow */}
+      <section
+        id="process"
+        className="border-t border-brand-blue/10 bg-gradient-to-b from-brand-bg via-white to-brand-bg py-32 px-6"
+        aria-labelledby="process-heading"
+      >
+        <div className="mx-auto max-w-7xl">
+          <header className="mx-auto mb-14 max-w-3xl text-center md:mb-16">
+            <p className="mb-3 font-display text-xs font-bold uppercase tracking-[0.28em] text-brand-gold">
+              Bottle to table
+            </p>
+            <h2 id="process-heading" className="mb-6 font-display text-4xl font-bold tracking-tight text-charcoal md:text-5xl lg:text-6xl">
+              The art of <span className="text-brand-blue">upcycling</span>
+            </h2>
+            <p className="text-base font-light leading-relaxed text-charcoal/65 md:text-lg">
+              Nine deliberate stages—from the dump bottle to delivery—so every glass earns its place in your home.
+            </p>
+          </header>
+
+          <ol className="mx-auto grid max-w-6xl list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            {UPCYCLE_STEPS.map((s) => (
+              <li key={s.step} className="min-w-0">
+                <UpcycleStepCard step={s} reduceMotion={!!reduceMotion} />
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 

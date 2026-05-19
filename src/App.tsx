@@ -1,7 +1,7 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
-import { Navbar, Footer } from './components';
+import { SiteHeader, Footer } from './components';
 
 // Lazy-load route-level pages for code-splitting.
 // Only the Home page is eagerly loaded (it's the landing page).
@@ -44,7 +44,7 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <div className="flex flex-col min-h-screen">
-        <Navbar />
+        <SiteHeader />
         <main className="flex-grow">
           <Suspense fallback={<RouteFallback />}>
             <Routes>

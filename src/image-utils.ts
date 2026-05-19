@@ -26,6 +26,16 @@ export const IMG_WIDTHS = {
 
 type ImgWidth = (typeof IMG_WIDTHS)[keyof typeof IMG_WIDTHS];
 
+/** Wix `fill` / `fit` transforms require both width and height or the CDN returns 400. */
+function wixTransformHeight(width: ImgWidth | number): number {
+  if (width === IMG_WIDTHS.HERO) return Math.round((width * 9) / 16);
+  if (width === IMG_WIDTHS.LOGO || width === IMG_WIDTHS.LOGO_FOOTER) {
+    return Math.round((width * 80) / 280);
+  }
+  if (width === IMG_WIDTHS.DETAIL) return Math.round((width * 5) / 4);
+  return width;
+}
+
 /**
  * Return a resized/optimised URL for the given source.
  *
@@ -42,9 +52,9 @@ export function optimizedSrc(src: string, width: ImgWidth | number, quality = 75
   if (src.includes('static.wixstatic.com/media/')) {
     // Strip any existing /v1/ transform suffix and rebuild.
     const base = src.replace(/\/v1\/.*$/, '');
-    // Use w_ only (no forced square h_) so Wix auto-calculates height.
-    // Add unsharp-mask for sharpness after down-scale, and output WebP.
-    return `${base}/v1/fill/w_${width},al_c,q_${quality},usm_0.66_1.00_0.01/image.webp`;
+    const height = wixTransformHeight(width);
+    // `fit` preserves aspect ratio inside the box; both w_ and h_ are required.
+    return `${base}/v1/fit/w_${width},h_${height},al_c,q_${quality},usm_0.66_1.00_0.01/image.webp`;
   }
 
   // ── Unsplash ──────────────────────────────────────────

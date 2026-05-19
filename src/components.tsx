@@ -8,6 +8,7 @@ import {
   formatInr,
   getProductGalleryImages,
   getProductPriceCaption,
+  ANNOUNCEMENT_MESSAGES,
   INSTAGRAM_PROFILE_URL,
   BRAND_LOGO_HEADER_SRC,
   BRAND_LOGO_FOOTER_SRC,
@@ -24,6 +25,67 @@ import { optimizedSrc, optimizedSrcSet, IMG_WIDTHS } from './image-utils';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+const ANNOUNCEMENT_INTERVAL_MS = 4500;
+
+/**
+ * Rotating promo strip above the navbar (marquee-style, all pages).
+ */
+export const AnnouncementBanner = () => {
+  const shouldReduceMotion = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const len = ANNOUNCEMENT_MESSAGES.length;
+
+  useEffect(() => {
+    if (len <= 1) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % len);
+    }, ANNOUNCEMENT_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [len]);
+
+  const message = ANNOUNCEMENT_MESSAGES[index] ?? ANNOUNCEMENT_MESSAGES[0];
+
+  return (
+    <div
+      className="announcement-bar relative h-10 w-full shrink-0 overflow-hidden border-b border-[color-mix(in_srgb,var(--color-brand-gold)_35%,transparent)] bg-[var(--color-brand-blue)] text-white"
+      role="region"
+      aria-label="Store announcements"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div className="relative flex h-full items-center justify-center px-4">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={message}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -10 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.35, ease: 'easeOut' }}
+            className="max-w-full truncate text-center text-[11px] font-semibold uppercase tracking-[0.28em] md:text-xs md:tracking-[0.32em]"
+          >
+            <span className="text-[var(--color-brand-gold)]" aria-hidden>
+              ◆{' '}
+            </span>
+            {message}
+            <span className="text-[var(--color-brand-gold)]" aria-hidden>
+              {' '}
+              ◆
+            </span>
+          </motion.p>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+/** Fixed header stack: announcement bar + navbar (every page). */
+export const SiteHeader = () => (
+  <header className="fixed top-0 left-0 z-50 flex w-full flex-col">
+    <AnnouncementBanner />
+    <Navbar />
+  </header>
+);
 
 /**
  * Navbar Component
@@ -51,7 +113,7 @@ export const Navbar = () => {
 
   return (
     <nav className={cn(
-      "fixed top-0 left-0 w-full z-50 transition-all duration-500 px-6 py-4",
+      "relative w-full transition-all duration-500 px-6 py-4",
       useTransparent ? "bg-transparent" : "bg-white/90 backdrop-blur-md shadow-sm py-3"
     )}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">

@@ -39,7 +39,7 @@ const Shop = () => {
     : PRODUCTS.filter(p => p.category === activeCategory);
 
   return (
-    <div className="pt-32 pb-32 px-6 bg-brand-bg min-h-screen">
+    <motion.div className="pt-40 pb-32 px-6 bg-brand-bg min-h-screen">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-16">
@@ -95,7 +95,7 @@ const Shop = () => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

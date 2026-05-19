@@ -6,7 +6,7 @@ import { IMG_WIDTHS } from './image-utils';
 
 const About = () => {
   return (
-    <div className="pt-32 pb-32">
+    <motion.div className="pt-40 pb-32">
       {/* Hero */}
       <section className="px-6 mb-32">
         <div className="max-w-7xl mx-auto text-center">
@@ -90,7 +90,7 @@ const About = () => {
           </div>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 };
 

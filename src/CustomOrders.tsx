@@ -4,7 +4,7 @@ import { Mail, Phone, MapPin, Send } from 'lucide-react';
 
 const CustomOrders = () => {
   return (
-    <div className="pt-32 pb-32 px-6 bg-brand-bg min-h-screen">
+    <div className="pt-40 pb-32 px-6 bg-brand-bg min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           {/* Info */}

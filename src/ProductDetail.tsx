@@ -49,7 +49,7 @@ const ProductDetail = () => {
     .filter(Boolean);
 
   return (
-    <div className="pt-32 pb-32 px-6 bg-white">
+    <div className="pt-40 pb-32 px-6 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <div className="mb-12">

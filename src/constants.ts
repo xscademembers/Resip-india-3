@@ -58,6 +58,13 @@ export interface Category {
 /** Profile URL for footer and home Instagram section. */
 export const INSTAGRAM_PROFILE_URL = 'https://www.instagram.com/resip_india/';
 
+/** Rotating promo line above the site header (all pages). */
+export const ANNOUNCEMENT_MESSAGES = [
+  'Free delivery on orders above ₹999',
+  'Handcrafted upcycled glassware — made in India',
+  'Eco-friendly packaging on every order',
+] as const;
+
 /** Header lockup — full-colour logo for nav (light backgrounds / hero overlay). */
 export const BRAND_LOGO_HEADER_SRC =
   'https://static.wixstatic.com/media/7dc839_2e48de9b008d43d58067c17afc5dc6fb~mv2.jpg';
