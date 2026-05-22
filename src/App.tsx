@@ -1,5 +1,5 @@
 import React, { useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
 import { SiteHeader, Footer } from './components';
 
@@ -9,7 +9,8 @@ import Home from './Home';
 const Shop = lazy(() => import('./Shop'));
 const ProductDetail = lazy(() => import('./ProductDetail'));
 const About = lazy(() => import('./About'));
-const CustomOrders = lazy(() => import('./CustomOrders'));
+const Gallery = lazy(() => import('./Gallery'));
+const Contact = lazy(() => import('./CustomOrders'));
 
 /** Lightweight spinner shown while a route chunk loads. */
 const RouteFallback = () => (
@@ -52,7 +53,9 @@ export default function App() {
               <Route path="/shop" element={<Shop />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/about" element={<About />} />
-              <Route path="/corporate" element={<CustomOrders />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/corporate" element={<Navigate to="/contact" replace />} />
             </Routes>
           </Suspense>
         </main>

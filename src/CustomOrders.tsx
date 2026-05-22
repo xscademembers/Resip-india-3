@@ -10,7 +10,7 @@ const CustomOrders = () => {
           {/* Info */}
           <div className="space-y-12">
             <div>
-              <h1 className="text-5xl md:text-7xl mb-8 leading-tight">Custom & <br /><span className="text-brand-blue">Corporate</span> Orders</h1>
+              <h1 className="text-5xl md:text-7xl mb-8 leading-tight"><span className="text-brand-blue">Contact</span> Us</h1>
               <p className="text-xl text-charcoal/60 font-light leading-relaxed">
                 Elevate your brand or event with bespoke upcycled glassware. From custom branding to bulk orders for cafes and bars, we offer tailored solutions.
               </p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ShoppingBag, Menu, X, ChevronRight, ChevronLeft, ArrowRight, Instagram, Facebook, Twitter, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,8 +10,7 @@ import {
   getProductPriceCaption,
   ANNOUNCEMENT_MESSAGES,
   INSTAGRAM_PROFILE_URL,
-  BRAND_LOGO_HEADER_SRC,
-  BRAND_LOGO_FOOTER_SRC,
+  BRAND_LOGO_SRC,
   type GlassSetSize,
   type GlassSetPricing,
   type Product,
@@ -25,6 +24,50 @@ import { optimizedSrc, optimizedSrcSet, IMG_WIDTHS } from './image-utils';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+const BRAND_LOGO_LABEL = 'ReSip India — Upcycling With A Cause';
+
+type BrandLogoProps = {
+  /** Full-colour lockup, or white for dark backgrounds. */
+  variant?: 'color' | 'white';
+  displayWidth?: number;
+  className?: string;
+  priority?: boolean;
+};
+
+/** Site logo — colour on light backgrounds, white mask on dark (footer / hero nav). */
+export function BrandLogo({
+  variant = 'color',
+  displayWidth = IMG_WIDTHS.LOGO,
+  className,
+  priority = false,
+}: BrandLogoProps) {
+  if (variant === 'white') {
+    return (
+      <span
+        role="img"
+        aria-label={BRAND_LOGO_LABEL}
+        className={cn('brand-logo--white inline-block shrink-0', className)}
+        style={
+          { '--brand-logo-mask-url': `url("${BRAND_LOGO_SRC}")` } as React.CSSProperties
+        }
+      />
+    );
+  }
+
+  return (
+    <OptimizedImage
+      src={BRAND_LOGO_SRC}
+      displayWidth={displayWidth}
+      priority={priority}
+      alt={BRAND_LOGO_LABEL}
+      className={cn('object-contain object-left', className)}
+    />
+  );
+}
+
+const BRAND_LOGO_BOX = 'h-12 w-[140px] md:h-14 md:w-[160px]';
+const BRAND_LOGO_BOX_FOOTER = 'h-24 w-[200px] md:h-28 md:w-[220px]';
 
 const ANNOUNCEMENT_INTERVAL_MS = 4500;
 
@@ -105,10 +148,10 @@ export const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', path: '/' },
+    { name: 'About Us', path: '/about' },
     { name: 'Shop', path: '/shop' },
-    { name: 'Our Process', path: '/#process' },
-    { name: 'About', path: '/about' },
-    { name: 'Corporate', path: '/corporate' },
+    { name: 'Gallery', path: '/gallery' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   return (
@@ -120,18 +163,25 @@ export const Navbar = () => {
         <Link
           to="/"
           className={cn(
-            'flex shrink-0 items-center rounded-sm motion-safe:transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)]',
-            useTransparent && 'drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]'
+            'relative flex shrink-0 items-center rounded-sm motion-safe:transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)]',
+            BRAND_LOGO_BOX
           )}
         >
-          <OptimizedImage
-            src={BRAND_LOGO_HEADER_SRC}
+          <BrandLogo
+            variant="color"
             displayWidth={IMG_WIDTHS.LOGO}
             priority
-            alt="ReSip India — Upcycling With A Cause"
-            className="h-10 w-auto max-h-[52px] object-contain object-left md:h-11 md:max-h-14"
-            width={200}
-            height={56}
+            className={cn(
+              'absolute inset-0 h-full w-full motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
+              useTransparent ? 'pointer-events-none opacity-0' : 'opacity-100'
+            )}
+          />
+          <BrandLogo
+            variant="white"
+            className={cn(
+              'absolute inset-0 h-full w-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
+              useTransparent ? 'opacity-100' : 'pointer-events-none opacity-0'
+            )}
           />
         </Link>
 
@@ -204,13 +254,10 @@ export const Footer = () => {
             to="/"
             className="inline-flex rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)] motion-safe:transition-opacity hover:opacity-95"
           >
-            <OptimizedImage
-              src={BRAND_LOGO_FOOTER_SRC}
+            <BrandLogo
+              variant="white"
               displayWidth={IMG_WIDTHS.LOGO_FOOTER}
-              alt="ReSip India — Upcycling With A Cause"
-              className="h-[72px] w-auto max-w-[min(100%,280px)] object-contain object-left md:h-20"
-              width={240}
-              height={80}
+              className={BRAND_LOGO_BOX_FOOTER}
             />
           </Link>
           <p className="text-white/70 leading-relaxed font-light">
@@ -238,10 +285,11 @@ export const Footer = () => {
         <div>
           <h4 className="text-lg font-bold mb-6 text-brand-gold">Quick Links</h4>
           <ul className="space-y-4 text-white/70 font-light">
-            <li><Link to="/shop" className="hover:text-white transition-colors">Shop All</Link></li>
-            <li><Link to="/about" className="hover:text-white transition-colors">Our Story</Link></li>
-            <li><Link to="/corporate" className="hover:text-white transition-colors">Corporate Gifting</Link></li>
-            <li><Link to="/#process" className="hover:text-white transition-colors">The Process</Link></li>
+            <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+            <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
+            <li><Link to="/shop" className="hover:text-white transition-colors">Shop</Link></li>
+            <li><Link to="/gallery" className="hover:text-white transition-colors">Gallery</Link></li>
+            <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
           </ul>
         </div>
 
@@ -285,50 +333,197 @@ export const Footer = () => {
 /**
  * Before/After Slider Component
  */
-export const BeforeAfterSlider = ({ before, after }: { before: string; after: string }) => {
+export const BeforeAfterSlider = ({
+  before,
+  after,
+  beforeLabel = 'Before',
+  afterLabel = 'After',
+  className,
+}: {
+  before: string;
+  after: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  className?: string;
+}) => {
   const [sliderPos, setSliderPos] = useState(50);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const clipRef = useRef<HTMLDivElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  const draggingRef = useRef(false);
+  const posRef = useRef(50);
 
-  const handleMove = (e: React.MouseEvent | React.TouchEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    const position = ((x - rect.left) / rect.width) * 100;
-    setSliderPos(Math.min(Math.max(position, 0), 100));
-  };
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const measure = () => setContainerWidth(el.getBoundingClientRect().width);
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const applyPosition = useCallback((pos: number, syncState = false) => {
+    const clamped = Math.min(Math.max(pos, 0), 100);
+    posRef.current = clamped;
+
+    if (clipRef.current) clipRef.current.style.width = `${clamped}%`;
+    if (dividerRef.current) dividerRef.current.style.left = `${clamped}%`;
+
+    if (syncState) setSliderPos(clamped);
+  }, []);
+
+  const updatePosition = useCallback(
+    (clientX: number, syncState = false) => {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect || rect.width <= 0) return;
+      const position = ((clientX - rect.left) / rect.width) * 100;
+      applyPosition(position, syncState);
+    },
+    [applyPosition],
+  );
+
+  const stopDragging = useCallback(() => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    setSliderPos(posRef.current);
+  }, []);
+
+  useEffect(() => {
+    const onPointerMove = (e: PointerEvent) => {
+      if (!draggingRef.current) return;
+      e.preventDefault();
+      updatePosition(e.clientX, false);
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', stopDragging);
+    window.addEventListener('pointercancel', stopDragging);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', stopDragging);
+      window.removeEventListener('pointercancel', stopDragging);
+    };
+  }, [updatePosition, stopDragging]);
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.currentTarget.setPointerCapture(e.pointerId);
+      draggingRef.current = true;
+      updatePosition(e.clientX, false);
+    },
+    [updatePosition],
+  );
+
+  const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    stopDragging();
+  }, [stopDragging]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        applyPosition(posRef.current - 2, true);
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        applyPosition(posRef.current + 2, true);
+      }
+    },
+    [applyPosition],
+  );
+
+  const showBeforeLabel = sliderPos > 12;
+  const showAfterLabel = sliderPos < 88;
+  const frameWidth = containerWidth > 0 ? `${containerWidth}px` : '100%';
 
   return (
-    <div 
-      className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden cursor-col-resize select-none shadow-2xl"
-      onMouseMove={handleMove}
-      onTouchMove={handleMove}
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative aspect-[4/3] w-full cursor-col-resize select-none overflow-hidden rounded-2xl bg-white shadow-2xl touch-none',
+        className,
+      )}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="slider"
+      aria-label="Compare before and after images"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(sliderPos)}
     >
-      {/* After Image (Base) */}
-      <OptimizedImage src={after} displayWidth={IMG_WIDTHS.CARD} alt="After" className="absolute inset-0 w-full h-full object-cover" />
-      
-      {/* Before Image (Overlay) */}
-      <div 
-        className="absolute inset-0 w-full h-full overflow-hidden"
+      {/* After image — full base layer */}
+      <div className="absolute inset-0 bg-white">
+        <OptimizedImage
+          src={after}
+          displayWidth={IMG_WIDTHS.HERO}
+          alt={afterLabel}
+          className="h-full w-full object-contain"
+        />
+      </div>
+
+      {/* Before image — clipped; inner frame matches full container size */}
+      <div
+        ref={clipRef}
+        className="absolute inset-y-0 left-0 overflow-hidden bg-white"
         style={{ width: `${sliderPos}%` }}
+        aria-hidden={sliderPos === 0}
       >
-        <OptimizedImage src={before} displayWidth={IMG_WIDTHS.CARD} alt="Before" className="absolute inset-0 w-full h-full object-cover max-w-none" style={{ width: '100vw' }} />
-        <div className="absolute inset-0 bg-brand-blue/25 flex items-center justify-center">
-          <span className="text-white font-display font-bold text-4xl opacity-50 tracking-widest uppercase">Waste</span>
+        <div
+          className="absolute left-0 top-0 h-full bg-white"
+          style={{ width: frameWidth }}
+        >
+          <OptimizedImage
+            src={before}
+            displayWidth={IMG_WIDTHS.HERO}
+            alt={beforeLabel}
+            className="h-full w-full object-contain"
+          />
         </div>
       </div>
 
-      {/* Slider Line */}
-      <div 
-        className="absolute top-0 bottom-0 w-1 bg-brand-gold z-10"
-        style={{ left: `${sliderPos}%` }}
+      {/* Divider + handle */}
+      <div
+        ref={dividerRef}
+        className="pointer-events-none absolute inset-y-0 z-10 w-0.5 bg-brand-gold shadow-[0_0_12px_color-mix(in_srgb,var(--color-brand-gold)_45%,transparent)]"
+        style={{ left: `${sliderPos}%`, transform: 'translateX(-50%)' }}
+        aria-hidden
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-brand-gold rounded-full shadow-lg flex items-center justify-center text-brand-blue">
-          <ChevronRight size={24} className="rotate-180" />
-          <ChevronRight size={24} />
+        <div className="absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white/90 bg-brand-gold text-brand-blue shadow-xl">
+          <ChevronRight size={22} className="rotate-180" strokeWidth={2.5} aria-hidden />
+          <ChevronRight size={22} strokeWidth={2.5} aria-hidden />
         </div>
       </div>
 
-      <div className="absolute bottom-6 right-6 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-        <span className="text-white font-display font-bold text-xl tracking-widest uppercase">Reimagined</span>
-      </div>
+      {/* Before label */}
+      {showBeforeLabel ? (
+        <div
+          className="pointer-events-none absolute bottom-6 left-6 z-20 rounded-full border border-white/20 bg-black/45 px-4 py-2 backdrop-blur-md"
+          style={{ maxWidth: `calc(${sliderPos}% - 24px)` }}
+        >
+          <span className="truncate font-display text-sm font-bold uppercase tracking-widest text-white">
+            {beforeLabel}
+          </span>
+        </div>
+      ) : null}
+
+      {/* After label */}
+      {showAfterLabel ? (
+        <div className="pointer-events-none absolute bottom-6 right-6 z-20 rounded-full border border-white/20 bg-black/45 px-4 py-2 backdrop-blur-md">
+          <span className="font-display text-sm font-bold uppercase tracking-widest text-white">
+            {afterLabel}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -359,7 +554,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
       className="w-full"
     >
       <section
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl bg-brand-bg shadow-xl outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-[var(--color-brand-blue)]"
+        className="relative aspect-square w-full overflow-hidden rounded-2xl bg-brand-bg shadow-lg outline-none ring-offset-2 ring-offset-white focus-visible:ring-2 focus-visible:ring-[var(--color-brand-blue)]"
         aria-roledescription="carousel"
         aria-label={`${product.name} photos`}
         aria-live={len > 1 ? 'polite' : undefined}
@@ -382,7 +577,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
             src={currentSrc}
             displayWidth={IMG_WIDTHS.DETAIL}
             alt={`${product.name} — image ${index + 1} of ${len}`}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
           />
         ) : (
           <AnimatePresence mode="wait" initial={false}>
@@ -392,7 +587,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
               srcSet={optimizedSrcSet(currentSrc, IMG_WIDTHS.DETAIL)}
               sizes={`(max-width: ${IMG_WIDTHS.DETAIL}px) 100vw, ${IMG_WIDTHS.DETAIL}px`}
               alt={`${product.name} — image ${index + 1} of ${len}`}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-contain"
               referrerPolicy="no-referrer"
               loading="lazy"
               decoding="async"
@@ -414,18 +609,18 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
             <button
               type="button"
               onClick={goPrev}
-              className="absolute left-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-brand-blue)_18%,transparent)] bg-[color-mix(in_srgb,white_94%,var(--color-brand-blue)_6%)] text-[var(--color-brand-blue)] shadow-lg motion-safe:transition-colors motion-safe:duration-200 hover:bg-[var(--color-brand-blue)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]"
+              className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-brand-blue)_18%,transparent)] bg-[color-mix(in_srgb,white_94%,var(--color-brand-blue)_6%)] text-[var(--color-brand-blue)] shadow-md motion-safe:transition-colors motion-safe:duration-200 hover:bg-[var(--color-brand-blue)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]"
               aria-label="Previous image"
             >
-              <ChevronLeft size={24} strokeWidth={2.25} aria-hidden />
+              <ChevronLeft size={20} strokeWidth={2.25} aria-hidden />
             </button>
             <button
               type="button"
               onClick={goNext}
-              className="absolute right-4 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-brand-blue)_18%,transparent)] bg-[color-mix(in_srgb,white_94%,var(--color-brand-blue)_6%)] text-[var(--color-brand-blue)] shadow-lg motion-safe:transition-colors motion-safe:duration-200 hover:bg-[var(--color-brand-blue)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]"
+              className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-brand-blue)_18%,transparent)] bg-[color-mix(in_srgb,white_94%,var(--color-brand-blue)_6%)] text-[var(--color-brand-blue)] shadow-md motion-safe:transition-colors motion-safe:duration-200 hover:bg-[var(--color-brand-blue)] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]"
               aria-label="Next image"
             >
-              <ChevronRight size={24} strokeWidth={2.25} aria-hidden />
+              <ChevronRight size={20} strokeWidth={2.25} aria-hidden />
             </button>
           </>
         ) : null}

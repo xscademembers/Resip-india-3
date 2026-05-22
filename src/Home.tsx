@@ -3,8 +3,9 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
   Recycle,
-  Award,
   Droplets,
+  Leaf,
+  Trash2,
   Instagram,
   ChevronRight,
   Wine,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { BeforeAfterSlider, ProductCard } from './components';
+import { ProductCard } from './components';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
@@ -243,9 +244,9 @@ const Home = () => {
               <Link to="/shop" className="group bg-brand-blue text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-brand-gold transition-all duration-500 flex items-center gap-3">
                 Shop Now <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
               </Link>
-              <a href="#process" className="text-white font-bold text-lg hover:text-brand-gold transition-colors flex items-center gap-3 border-b border-white/20 pb-1">
-                Our Process
-              </a>
+              <Link to="/gallery" className="text-white font-bold text-lg hover:text-brand-gold transition-colors flex items-center gap-3 border-b border-white/20 pb-1">
+                Gallery
+              </Link>
             </div>
           </motion.div>
         </div>
@@ -299,60 +300,6 @@ const Home = () => {
           >
             <ChevronRight className="mx-auto" size={20} />
           </button>
-        </div>
-      </section>
-
-      {/* Transformation Section */}
-      <section className="py-32 px-6 bg-white">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="text-brand-blue font-display font-bold tracking-[0.3em] uppercase text-xs mb-4 block">
-              The Signature Experience
-            </span>
-            <h2 className="text-4xl md:text-6xl mb-8 leading-tight">
-              Waste. <br /><span className="text-brand-blue">Reimagined.</span>
-            </h2>
-            <p className="text-lg text-charcoal/70 mb-10 leading-relaxed font-light">
-              Every piece at Resip India tells a story of transformation. We take what the world discards and apply artisanal craftsmanship to create something truly exceptional.
-            </p>
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-brand-bg flex items-center justify-center text-brand-blue shrink-0">
-                  <Recycle size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Eco-Conscious</h4>
-                  <p className="text-charcoal/60 text-sm">Reducing landfill waste one bottle at a time.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-brand-bg flex items-center justify-center text-brand-blue shrink-0">
-                  <Award size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg mb-1">Premium Quality</h4>
-                  <p className="text-charcoal/60 text-sm">Fire-polished edges and weighted bases for a luxury feel.</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <BeforeAfterSlider 
-              before={optimizedSrc('https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
-              after={optimizedSrc('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
-            />
-          </motion.div>
         </div>
       </section>
 
@@ -457,14 +404,24 @@ const Home = () => {
             </div>
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
-                <div className="text-brand-gold mb-4"><Recycle size={40} /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">50,000+</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Bottles Recycled</p>
+                <div className="text-brand-gold mb-4"><Recycle size={40} aria-hidden /></div>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">6,000+</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Bottle Upcycled</p>
               </div>
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
-                <div className="text-brand-gold mb-4"><Droplets size={40} /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">12 Tons</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Waste Diverted</p>
+                <div className="text-brand-gold mb-4"><Leaf size={40} aria-hidden /></div>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">204kg</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">CO2 Reduce</p>
+              </div>
+              <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
+                <div className="text-brand-gold mb-4"><Droplets size={40} aria-hidden /></div>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">31,800 L</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Saved Water</p>
+              </div>
+              <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
+                <div className="text-brand-gold mb-4"><Trash2 size={40} aria-hidden /></div>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">2.5+ Tonnes</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Landfilled Diverted</p>
               </div>
             </div>
           </div>

@@ -58,23 +58,26 @@ const ProductDetail = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[35fr_65fr] lg:gap-16">
           {/* Image Gallery */}
-          <div className="space-y-8">
+          <div className="w-full min-w-0 space-y-8">
             <ProductImageCarousel product={product} />
 
             {/* Transformation Visual */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold">The Transformation</h3>
-              <BeforeAfterSlider 
-                before={optimizedSrc(product.beforeImage || 'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800', IMG_WIDTHS.CARD)}
-                after={optimizedSrc(getProductGalleryImages(product)[0], IMG_WIDTHS.CARD)}
-              />
-            </div>
+            {product.beforeImage ? (
+              <div className="w-full space-y-6">
+                <h3 className="text-2xl font-bold">The Transformation</h3>
+                <BeforeAfterSlider
+                  before={optimizedSrc(product.beforeImage, IMG_WIDTHS.CARD)}
+                  after={optimizedSrc(getProductGalleryImages(product)[0], IMG_WIDTHS.CARD)}
+                  className="aspect-square bg-white shadow-lg"
+                />
+              </div>
+            ) : null}
           </div>
 
           {/* Product Info */}
-          <div className="space-y-10">
+          <div className="w-full min-w-0 space-y-10">
             <div>
               <span className="text-brand-gold font-display font-bold tracking-[0.3em] uppercase text-xs mb-4 block">
                 {product.category}

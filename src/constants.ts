@@ -65,13 +65,12 @@ export const ANNOUNCEMENT_MESSAGES = [
   'Eco-friendly packaging on every order',
 ] as const;
 
-/** Header lockup — full-colour logo for nav (light backgrounds / hero overlay). */
-export const BRAND_LOGO_HEADER_SRC =
-  'https://static.wixstatic.com/media/7dc839_2e48de9b008d43d58067c17afc5dc6fb~mv2.jpg';
+/** Primary brand logo — header, footer, and favicon. */
+export const BRAND_LOGO_SRC =
+  'https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png';
 
-/** Footer lockup — artwork tuned for the blue footer band. */
-export const BRAND_LOGO_FOOTER_SRC =
-  'https://static.wixstatic.com/media/7dc839_223e2ac28f09419db687b68a9f604b90~mv2.jpg';
+export const BRAND_LOGO_HEADER_SRC = BRAND_LOGO_SRC;
+export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 
 /** Placeholder imagery until final assets are provided. */
 const PLACEHOLDER_GLASS = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800';
@@ -83,6 +82,8 @@ export const PRODUCTS: Product[] = [
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_d7855bd374c74a3dbb4c3c0e95caf397~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_e43ac9fd179346bcae193b087049b0c7~mv2.jpg',
     images: [
@@ -110,6 +111,8 @@ export const PRODUCTS: Product[] = [
     price: 599,
     glassSetPricing: { format: '24', setOf2: 599, setOf4: 1099 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_6607b4de853b42e08cd5add136121056~mv2.jpg',
     images: [
@@ -137,6 +140,8 @@ export const PRODUCTS: Product[] = [
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_9f9d6945bb6b4af5a4c8218e062c2f31~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_b5fbaef749c44f19966ea4832980a0b7~mv2.jpg',
     images: [
@@ -164,6 +169,8 @@ export const PRODUCTS: Product[] = [
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_cdd5721644174158945b2ac7afbc3863~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_90dc0b96ddc945b39cb4326a02506720~mv2.jpg',
     images: [
@@ -191,6 +198,8 @@ export const PRODUCTS: Product[] = [
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_363a262f9724416fb27e058bb7e61180~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_54601abef09b48dd91069221fca6ad11~mv2.jpg',
     images: [
@@ -218,6 +227,8 @@ export const PRODUCTS: Product[] = [
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_c460c2389a874c66bd79cb5473838970~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_ef3f533e1adc4e7e8f8245cf407a91b9~mv2.jpg',
     images: [
@@ -245,6 +256,8 @@ export const PRODUCTS: Product[] = [
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_6c977076c59b4a46a23c0f50d2328353~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_ae062dea37e14e528f2db811d8064311~mv2.jpg',
     images: [
@@ -347,6 +360,8 @@ export const PRODUCTS: Product[] = [
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_6552424fe99f44768b8e7f4b2860ad6a~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_5647ea02097547338357d8570d67ec53~mv2.jpg',
     images: [
@@ -374,6 +389,8 @@ export const PRODUCTS: Product[] = [
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_090da3102faf47cf8bf107544f9dd049~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_37314c31f305478a885bc328ec45cf32~mv2.png',
     description:
@@ -396,6 +413,8 @@ export const PRODUCTS: Product[] = [
     price: 925,
     glassSetPricing: { format: '24', setOf2: 925, setOf4: 1650 },
     category: 'Jars',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_7ba73eec14ae4e9c90fdfb6d72bb2185~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_bea9d46a2e644e40a89470800d1b198c~mv2.png',
     images: [
@@ -448,6 +467,8 @@ export const PRODUCTS: Product[] = [
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_b53e11c91f274160b4d65120a8f26572~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_64eb0cfdb22f4cdeb21261ca67c96076~mv2.jpg',
     images: [
@@ -474,6 +495,8 @@ export const PRODUCTS: Product[] = [
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_1d2ee35ba1ce484491b1bee1a68cfdbd~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_561e9ee958ab4329abe449b0e0e25460~mv2.png',
     images: [
@@ -519,6 +542,8 @@ export const PRODUCTS: Product[] = [
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_09eeee3e17394a0a8485fcb2f9ca4136~mv2.jpg',
     image: PLACEHOLDER_GLASS,
     description:
       'Full-size tumbler upcycled from Royal Ranthambore whisky bottles—pair with our Ranthambore shot line.',
@@ -538,6 +563,8 @@ export const PRODUCTS: Product[] = [
     price: 425,
     glassSetPricing: { format: '24', setOf2: 425, setOf4: 850 },
     category: 'Gift Box (Matchbox, Coasters, Bowls)',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_b13da223244d474c8bea808e2f80ec19~mv2.png',
     images: [
@@ -564,6 +591,8 @@ export const PRODUCTS: Product[] = [
     price: 299,
     glassSetPricing: { format: '24', setOf2: 299, setOf4: 599 },
     category: 'Upcycled Glass',
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_44cb613dd8ee4e958e31c21c19bb1a1a~mv2.jpg',
     image:
       'https://static.wixstatic.com/media/7dc839_b39fe26b48f84764b328cc0703e60986~mv2.png',
     images: [
@@ -622,4 +651,42 @@ export const CATEGORIES: Category[] = [
   { id: 'corporate', name: 'Corporate Gift Box', image: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=800' },
   { id: 'extras', name: 'Gift Box (Matchbox, Coasters, Bowls)', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=800' },
   { id: 'vault', name: 'Jars', image: 'https://images.unsplash.com/photo-1527281405159-35d5b5aa7c1d?auto=format&fit=crop&q=80&w=800' },
+];
+
+/** Gallery page — still photos from the ReSip workshop and events. */
+export const GALLERY_IMAGES: string[] = [
+  'https://static.wixstatic.com/media/9356bd_c496d55fa03540c19d26b468b067f3ba~mv2.jpeg',
+  'https://static.wixstatic.com/media/9356bd_62a4ffc45b8242e495b34ac3c44bb774~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_c20c4af3d3d84d8c89f2b5592644f6bc~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_425c3342b08f442ba4cd201ddec40070~mv2.jpeg',
+  'https://static.wixstatic.com/media/9356bd_e30f9bad456049d28277b5806c843429~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_347b8ffa322e47a5b143ec09f73af2f5~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_ae5987478bbe48dda292be427f2ed48f~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_a73e2f2f7c3b4e70b03863d5b41ba505~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_3cdbc17a22364abaa98c6d7a8e51e962~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_18fa4125d2ec4f42b332cd14962bb04e~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_405d1034fac6429e9cb8f461ab100a55~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_bc1de3abc0314692bf309f82673c46ba~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_913a42218ea44d25bdc5684ccdfa0fe0~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_8c3379d63d834beb8f1389530a1547b7~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_6d3d11e11d2d4b989e9907e67c3bc24b~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_4618cd9e756943ddb9aa2c2dbf968041~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_f322c680da9a489cbe48cc07afeaea9a~mv2.jpg',
+  'https://static.wixstatic.com/media/9356bd_17aa6aa7e48a43ac955e66091b1929f8~mv2.jpeg',
+  'https://static.wixstatic.com/media/9356bd_f761273dadd7444da8afd8f910d71096~mv2.png',
+  'https://static.wixstatic.com/media/9356bd_b64db589f83941e2b140637c2b7ab28f~mv2.png',
+];
+
+/** Gallery page — workshop and event videos. */
+export const GALLERY_VIDEOS: string[] = [
+  'https://video.wixstatic.com/video/9356bd_a9830f9ea50340f49a2d83d820777b48/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_22610953964344878dc2f98bed2dc074/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_a1323fa171b645e3bc47a32392896c1b/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_5fb0cac327f94437a984b61d8d1f56bb/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_9a589266240c429780e11cfeda332c41/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_ce0c1a381b114b2c8e4d1831e95cd0e3/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_dc4febdbe4314d8dafbddde3cdc2c7e9/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_f36ff6403dae40c9a9ff1bf7d52596b3/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_a8b61ecacb884ef58989f3551fbd9db5/1080p/mp4/file.mp4',
+  'https://video.wixstatic.com/video/9356bd_eeeeb4d478eb41239da974954a40b08e/1080p/mp4/file.mp4',
 ];
