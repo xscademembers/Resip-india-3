@@ -3,18 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Search } from 'lucide-react';
 import { ProductCard } from './components';
-import { PRODUCTS } from './constants';
-
-const SHOP_CATEGORY_FILTERS = [
-  'All',
-  'Upcycled Glass',
-  'Shots',
-  'Scented Candles',
-  'Party Gift Box',
-  'Corporate Gift Box',
-  'Gift Box (Matchbox, Coasters, Bowls)',
-  'Jars',
-] as const;
+import { PRODUCTS, SHOP_CATEGORY_FILTERS } from './constants';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
