@@ -784,62 +784,68 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const shouldReduceMotion = useReducedMotion();
+  const productPath = `/product/${product.id}`;
 
   return (
-    <motion.div 
+    <motion.article
       whileHover={shouldReduceMotion ? undefined : { y: -10 }}
-      className="group bg-white rounded-2xl overflow-hidden border border-brand-blue/10 hover:shadow-2xl transition-all duration-500"
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-blue/10 bg-white transition-all duration-500 hover:shadow-2xl"
     >
-      <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden">
-        <OptimizedImage 
-          src={product.image} 
-          displayWidth={IMG_WIDTHS.THUMB}
-          alt={product.name} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-brand-blue/0 group-hover:bg-brand-blue/10 transition-colors duration-500" />
-        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-brand-blue opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          Quick View
+      <Link to={productPath} className="block flex-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)]">
+        <div className="relative aspect-square overflow-hidden">
+          <OptimizedImage
+            src={product.image}
+            displayWidth={IMG_WIDTHS.THUMB}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+          />
+          <div className="absolute inset-0 bg-brand-blue/0 transition-colors duration-500 group-hover:bg-brand-blue/10" />
+          <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-brand-blue opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:opacity-100">
+            Quick View
+          </div>
+        </div>
+        <div className="p-6 pb-4">
+          <h3 className="font-display text-xl font-bold leading-tight tracking-tight transition-colors group-hover:text-brand-blue md:text-2xl">
+            {product.name}
+          </h3>
+          <p className="mt-2 text-xs font-bold uppercase tracking-[0.2em] text-charcoal/50">
+            {product.category}
+          </p>
+
+          <div className="mt-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-gold">
+              Expertise
+            </p>
+            {product.description?.trim() ? (
+              <p className="mt-2 line-clamp-2 text-sm font-light leading-relaxed text-charcoal/60">
+                {product.description}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="mt-5 flex flex-col gap-2">
+            <p className="text-sm font-medium text-charcoal/40">Price</p>
+            <p className="text-sm font-bold leading-snug text-[var(--color-brand-blue)] sm:text-base">
+              {getProductPriceCaption(product)}
+            </p>
+          </div>
         </div>
       </Link>
-      <div className="p-6">
-        <h3 className="text-xl md:text-2xl font-display font-bold leading-tight tracking-tight group-hover:text-brand-blue transition-colors">
-          {product.name}
-        </h3>
-        <p className="mt-2 text-xs uppercase tracking-[0.2em] text-charcoal/50 font-bold">
-          {product.category}
-        </p>
 
-        <div className="mt-4">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-brand-gold font-bold">
-            Expertise
-          </p>
-          {product.description?.trim() ? (
-            <p className="mt-2 text-sm text-charcoal/60 font-light leading-relaxed line-clamp-2">
-              {product.description}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="mt-5 flex flex-col gap-2">
-          <p className="text-sm text-charcoal/40 font-medium">Price</p>
-          <p className="text-sm font-bold leading-snug text-[var(--color-brand-blue)] sm:text-base">
-            {getProductPriceCaption(product)}
-          </p>
-        </div>
-
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <Link
-            to={`/product/${product.id}`}
-            className="py-3 rounded-xl text-sm font-bold text-brand-blue border border-brand-blue/20 hover:border-brand-blue/40 hover:bg-brand-blue/5 transition-colors flex items-center justify-center gap-2"
-          >
-            Details <ChevronRight size={16} />
-          </Link>
-          <button className="py-3 rounded-xl text-sm font-bold bg-brand-blue text-white hover:bg-brand-gold transition-colors flex items-center justify-center gap-2">
-            Add to Cart <ChevronRight size={16} />
-          </button>
-        </div>
+      <div className="mt-auto grid grid-cols-2 gap-3 px-6 pb-6">
+        <Link
+          to={productPath}
+          className="flex items-center justify-center gap-2 rounded-xl border border-brand-blue/20 py-3 text-sm font-bold text-brand-blue transition-colors hover:border-brand-blue/40 hover:bg-brand-blue/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)]"
+        >
+          Details <ChevronRight size={16} aria-hidden />
+        </Link>
+        <button
+          type="button"
+          className="flex items-center justify-center gap-2 rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)]"
+        >
+          Add to Cart <ChevronRight size={16} aria-hidden />
+        </button>
       </div>
-    </motion.div>
+    </motion.article>
   );
 };

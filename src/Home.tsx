@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import React, { useMemo } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
   Recycle,
@@ -23,6 +23,9 @@ import { ProductCard } from './components';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
+
+const HERO_IMAGE =
+  'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&q=80';
 
 const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: LucideIcon }[] = [
   {
@@ -126,22 +129,8 @@ function UpcycleStepCard({
 const Home = () => {
   const reduceMotion = useReducedMotion();
 
-  // Hero slides — optimized URLs computed once
-  const heroSlides = useMemo(
-    () => [
-      {
-        src: optimizedSrc('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
-        alt: 'Handcrafted glassware hero slide',
-      },
-      {
-        src: optimizedSrc('https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
-        alt: 'Upcycled glasses hero slide',
-      },
-      {
-        src: optimizedSrc('https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=70&w=1280', IMG_WIDTHS.HERO, 70),
-        alt: 'Premium glassware hero slide',
-      },
-    ],
+  const heroImageSrc = useMemo(
+    () => optimizedSrc(HERO_IMAGE, IMG_WIDTHS.HERO, 75),
     []
   );
 
@@ -157,94 +146,45 @@ const Home = () => {
     []
   );
 
-  const [activeHeroSlide, setActiveHeroSlide] = useState(0);
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  const goToHeroSlide = useCallback((index: number) => {
-    setActiveHeroSlide((prev) => {
-      const len = heroSlides.length;
-      return ((index % len) + len) % len;
-    });
-  }, [heroSlides.length]);
-
-  const goToNextHeroSlide = useCallback(() => {
-    setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
-  }, [heroSlides.length]);
-
-  const goToPrevHeroSlide = useCallback(() => {
-    setActiveHeroSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  }, [heroSlides.length]);
-
-  // Prefetch upcoming hero slides for instant transitions
-  useEffect(() => {
-    heroSlides.forEach((slide, i) => {
-      if (i === 0) return; // first one is already preloaded via <link>
-      const img = new Image();
-      img.src = slide.src;
-    });
-  }, [heroSlides]);
-
-  useEffect(() => {
-    if (prefersReducedMotion) return;
-
-    const id = window.setInterval(() => {
-      setActiveHeroSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-
-    return () => window.clearInterval(id);
-  }, [heroSlides.length, prefersReducedMotion]);
-
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden" style={{ contentVisibility: 'visible' }}>
-        {/* Background Image with Parallax Effect */}
+      <section className="relative flex h-screen items-center justify-center overflow-hidden" style={{ contentVisibility: 'visible' }}>
         <div className="absolute inset-0 z-0">
-          <AnimatePresence initial={false}>
-            <motion.img
-              key={heroSlides[activeHeroSlide]?.src}
-              src={heroSlides[activeHeroSlide]?.src}
-              alt={heroSlides[activeHeroSlide]?.alt}
-              className="absolute inset-0 w-full h-full object-cover"
-              referrerPolicy="no-referrer"
-              // First slide is LCP-critical
-              loading={activeHeroSlide === 0 ? 'eager' : 'lazy'}
-              decoding={activeHeroSlide === 0 ? 'sync' : 'async'}
-              fetchpriority={activeHeroSlide === 0 ? 'high' : undefined}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-            />
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-brand-blue/45" />
+          <img
+            src={heroImageSrc}
+            alt="Elegant cocktail glass on a dark bar background"
+            className="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
+          />
+          <div className="absolute inset-0 bg-black/40" />
         </div>
 
         {/* Glass Reflection Overlay */}
-        <div className="absolute inset-0 glass-reflection opacity-30 z-10 pointer-events-none" />
+        <div className="glass-reflection pointer-events-none absolute inset-0 z-10 opacity-30" />
 
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+        <div className="relative z-20 mx-auto max-w-4xl px-6 text-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
           >
-            <span className="inline-block text-brand-gold font-display font-bold tracking-[0.4em] uppercase text-sm mb-6">
+            <span className="mb-6 inline-block font-display text-sm font-bold uppercase tracking-[0.4em] text-brand-gold">
               Sustainable Luxury
             </span>
-            <h1 className="text-5xl md:text-8xl text-white mb-8 leading-[0.9] tracking-tighter">
+            <h1 className="mb-8 text-5xl leading-[0.9] tracking-tighter text-white md:text-8xl">
               From Discarded Bottles to <span className="text-brand-gold italic">Designer</span> Glassware
             </h1>
-            <p className="text-lg md:text-xl text-white/80 mb-12 font-light max-w-2xl mx-auto">
+            <p className="mx-auto mb-12 max-w-2xl text-lg font-light text-white/80 md:text-xl">
               Handcrafted. Sustainable. Timeless. We reimagine waste into premium lifestyle pieces for the modern home.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link to="/shop" className="group bg-brand-blue text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-brand-gold transition-all duration-500 flex items-center gap-3">
-                Shop Now <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+              <Link to="/shop" className="group flex items-center gap-3 rounded-full bg-brand-blue px-10 py-5 text-lg font-bold text-white transition-all duration-500 hover:bg-brand-gold">
+                Shop Now <ArrowRight size={20} className="transition-transform group-hover:translate-x-2 motion-reduce:transform-none" />
               </Link>
-              <Link to="/gallery" className="text-white font-bold text-lg hover:text-brand-gold transition-colors flex items-center gap-3 border-b border-white/20 pb-1">
+              <Link to="/gallery" className="flex items-center gap-3 border-b border-white/20 pb-1 text-lg font-bold text-white transition-colors hover:text-brand-gold">
                 Gallery
               </Link>
             </div>
@@ -254,53 +194,17 @@ const Home = () => {
         {/* Scroll Indicator */}
         <motion.div
           animate={{
-            y: prefersReducedMotion ? 0 : [0, 10, 0],
+            y: reduceMotion ? 0 : [0, 10, 0],
           }}
           transition={{
             duration: 2,
-            repeat: prefersReducedMotion ? 0 : Infinity,
+            repeat: reduceMotion ? 0 : Infinity,
           }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50"
+          className="absolute bottom-10 left-1/2 z-20 -translate-x-1/2 text-white/50"
+          aria-hidden
         >
-          <div className="w-[1px] h-16 bg-gradient-to-b from-white/50 to-transparent mx-auto" />
+          <div className="mx-auto h-16 w-[1px] bg-gradient-to-b from-white/50 to-transparent" />
         </motion.div>
-
-        {/* Hero Slider Controls (Bottom Right) */}
-        <div className="absolute bottom-8 right-8 z-30 flex items-center gap-4">
-          <button
-            type="button"
-            onClick={goToPrevHeroSlide}
-            aria-label="Previous slide"
-            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
-          >
-            <ChevronRight className="mx-auto rotate-180" size={20} />
-          </button>
-
-          <div className="flex items-center gap-2">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => goToHeroSlide(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                aria-current={i === activeHeroSlide ? 'true' : undefined}
-                className={[
-                  'h-2.5 rounded-full transition-all',
-                  i === activeHeroSlide ? 'w-8 bg-brand-gold' : 'w-2.5 bg-white/50 hover:bg-white/70',
-                ].join(' ')}
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={goToNextHeroSlide}
-            aria-label="Next slide"
-            className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 transition-colors"
-          >
-            <ChevronRight className="mx-auto" size={20} />
-          </button>
-        </div>
       </section>
 
       {/* Categories Section */}

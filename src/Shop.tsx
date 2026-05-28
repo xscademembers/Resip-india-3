@@ -3,11 +3,12 @@ import { useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Search } from 'lucide-react';
 import { ProductCard } from './components';
-import { PRODUCTS, SHOP_CATEGORY_FILTERS } from './constants';
+import { PRODUCTS, SHOP_CATEGORY_FILTERS, sortProductsForShop } from './constants';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
   const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -23,9 +24,29 @@ const Shop = () => {
     }
   }, [searchParams]);
 
-  const filteredProducts = activeCategory === 'All' 
-    ? PRODUCTS 
-    : PRODUCTS.filter(p => p.category === activeCategory);
+  const categoryProducts =
+    activeCategory === 'All'
+      ? PRODUCTS
+      : PRODUCTS.filter((p) => p.category === activeCategory);
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const searchedProducts = normalizedQuery
+    ? categoryProducts.filter((product) => {
+        const haystack = [
+          product.name,
+          product.description,
+          product.category,
+          product.story,
+          ...(product.features ?? []),
+        ]
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(normalizedQuery);
+      })
+    : categoryProducts;
+
+  const filteredProducts = sortProductsForShop(searchedProducts, activeCategory);
 
   return (
     <motion.div className="pt-40 pb-32 px-6 bg-brand-bg min-h-screen">
@@ -55,11 +76,17 @@ const Shop = () => {
           </div>
           
           <div className="relative w-full md:w-72">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/30" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              className="w-full bg-white border border-brand-blue/10 rounded-full py-3 pl-12 pr-6 focus:outline-none focus:border-brand-blue transition-colors text-sm"
+            <label htmlFor="shop-search" className="sr-only">
+              Search products
+            </label>
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal/30" size={18} aria-hidden />
+            <input
+              id="shop-search"
+              type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..."
+              className="w-full rounded-full border border-brand-blue/10 bg-white py-3 pl-12 pr-6 text-sm transition-colors focus:border-brand-blue focus:outline-none"
             />
           </div>
         </div>
@@ -79,8 +106,12 @@ const Shop = () => {
         </div>
 
         {filteredProducts.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-charcoal/40 text-lg">No products found in this category.</p>
+          <div className="py-20 text-center">
+            <p className="text-lg text-charcoal/40">
+              {normalizedQuery
+                ? `No products found for “${searchQuery.trim()}”.`
+                : 'No products found in this category.'}
+            </p>
           </div>
         )}
       </div>

@@ -15,6 +15,7 @@ const WORKSHOP_AFTER =
 const ARTISANS = [
   {
     id: '01',
+    name: 'Mrs. Manda Lanjewar',
     role: 'Segregation & Cleaning',
     image:
       'https://static.wixstatic.com/media/9356bd_bab8755b17374bce8689a7a356fc0dba~mv2.jpeg',
@@ -23,6 +24,7 @@ const ARTISANS = [
   },
   {
     id: '02',
+    name: 'Mr. Ankush Borkar',
     role: 'Cutting & Shaping',
     image:
       'https://static.wixstatic.com/media/9356bd_14371afc05204fd58a7578165332d9b9~mv2.jpeg',
@@ -31,6 +33,7 @@ const ARTISANS = [
   },
   {
     id: '03',
+    name: 'Mrs. Varsha Kamble',
     role: 'Edge Finishing',
     image:
       'https://static.wixstatic.com/media/9356bd_82ccf3a77cd249edb25ca282b19db15b~mv2.jpeg',
@@ -143,7 +146,10 @@ const About = () => {
                 accent="Founders"
                 headingId="founders-heading"
               />
-              <div className="mt-10 space-y-6 text-base font-light leading-relaxed text-charcoal/70 md:text-lg">
+              <p className="mt-8 font-display text-2xl font-bold text-brand-blue md:text-3xl">
+                Vaibhav Pakhmode
+              </p>
+              <div className="mt-8 space-y-6 text-base font-light leading-relaxed text-charcoal/70 md:text-lg">
                 {FOUNDER_STORY.slice(0, 2).map((paragraph) => (
                   <p key={paragraph.slice(0, 32)}>{paragraph}</p>
                 ))}
@@ -167,7 +173,7 @@ const About = () => {
                 <OptimizedImage
                   src={FOUNDER_IMAGE}
                   displayWidth={IMG_WIDTHS.DETAIL}
-                  alt="ReSip India founder"
+                  alt="Vaibhav Pakhmode, founder of ReSip India"
                   className="mx-auto aspect-[3/4] w-full max-w-sm object-contain object-bottom lg:max-w-none"
                 />
               </div>
@@ -253,7 +259,7 @@ const About = () => {
                   <OptimizedImage
                     src={artisan.image}
                     displayWidth={IMG_WIDTHS.CARD}
-                    alt={`Artisan ${artisan.id} — ${artisan.role}`}
+                    alt={`${artisan.name} — ${artisan.role}`}
                     className="aspect-[4/5] w-full object-cover transition-transform duration-500 motion-reduce:transition-none motion-reduce:hover:scale-100 hover:scale-[1.02]"
                   />
                 </div>
@@ -261,7 +267,7 @@ const About = () => {
                   {artisan.role}
                 </p>
                 <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
-                  Artisan {artisan.id}
+                  {artisan.name}
                 </h3>
                 <p className="text-sm font-light leading-relaxed text-white/75 md:text-base">
                   {artisan.description}

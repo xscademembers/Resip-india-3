@@ -49,6 +49,49 @@ export function getProductPriceCaption(product: Product): string {
   return `₹${formatInr(product.price)}`;
 }
 
+export type UpcycleProductGroup = 'glass' | 'shot' | 'bowl';
+
+/** Upcycle sub-group: glasses, then shots, then bowls. */
+export function getUpcycleProductGroup(product: Product): UpcycleProductGroup {
+  const label = product.name.toLowerCase();
+  if (label.includes('shot')) return 'shot';
+  if (label.includes('bowl')) return 'bowl';
+  return 'glass';
+}
+
+const UPCYCLE_GROUP_ORDER: Record<UpcycleProductGroup, number> = {
+  glass: 0,
+  shot: 1,
+  bowl: 2,
+};
+
+const JAR_PRODUCT_ORDER = [
+  'og-resip-absolut-500ml-jar',
+  'og-resip-absolut-mini-180ml',
+] as const;
+
+/** Upcycle catalog order: glasses → shots → bowls. */
+const UPCYCLE_PRODUCT_ORDER = [
+  'og-sapphire-charm',
+  'og-old-soul',
+  'og-carribean-echo',
+  'og-antique-luxe',
+  'og-grape-glass',
+  'og-the-gentlemen',
+  'og-king-mid',
+  'og-vino-vibe',
+  'og-greater-pour',
+  'og-corocut',
+  'og-resip-absolut-mid-350ml',
+  'og-resip-budweiser-glass',
+  'og-resip-old-monk-coffee-glass',
+  'og-resip-ranthambore-tumbler',
+  'og-resip-old-monk-face-glass',
+  'og-royal-shotlet',
+  'og-dessert-shotlet',
+  'og-resip-old-monk-bowl',
+] as const;
+
 export interface Category {
   id: string;
   name: string;
@@ -72,6 +115,9 @@ export const BRAND_LOGO_SRC =
 
 export const BRAND_LOGO_HEADER_SRC = BRAND_LOGO_SRC;
 export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
+
+/** Placeholder for collection cards not yet photographed. */
+export const CATEGORY_COMING_SOON_IMAGE = '/images/category-coming-soon.svg';
 
 /** Placeholder imagery until final assets are provided. */
 const PLACEHOLDER_GLASS = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800';
@@ -467,7 +513,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Absolut mini jar',
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
-    category: 'Upcycle',
+    category: 'Jar',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_b53e11c91f274160b4d65120a8f26572~mv2.jpg',
     image:
@@ -524,17 +570,26 @@ export const PRODUCTS: Product[] = [
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
     category: 'Upcycle',
-    image: PLACEHOLDER_GLASS,
+    beforeImage:
+      'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
+    image:
+      'https://static.wixstatic.com/media/9356bd_2a1e3905802d425a99d10c70ada4dd59~mv2.jpg',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_2a1e3905802d425a99d10c70ada4dd59~mv2.jpg',
+      'https://static.wixstatic.com/media/9356bd_7f8ca3a5059141bc8804d96178504f07~mv2.jpg',
+      'https://static.wixstatic.com/media/9356bd_72b7de2386ec491a9f3c01d436f6bb71~mv2.jpg',
+      'https://static.wixstatic.com/media/9356bd_a5f49a1b9905464bb32d3d202d892678~mv2.jpg',
+    ],
     description:
       'Drinking glass upcycled from Old Monk coffee liqueur bottles—deep tone and coffee-house charm.',
     story:
-      'The ReSip Old Monk Coffee Bottle Glass pairs the Old Monk story with coffee culture.\n\nReplace placeholder when final assets arrive.',
+      'The ReSip Old Monk Coffee Bottle Glass pairs the Old Monk story with coffee culture—rescued bottles transformed into textured tumblers with unmistakable heritage character.',
     features: [
       'Hand cut',
       'Food-safe finish',
       'Eco-friendly',
-      'Placeholder imagery',
-      'Story TBC',
+      'Polished rim',
+      'Unique design',
     ],
   },
   {
@@ -545,7 +600,14 @@ export const PRODUCTS: Product[] = [
     category: 'Upcycle',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_09eeee3e17394a0a8485fcb2f9ca4136~mv2.jpg',
-    image: PLACEHOLDER_GLASS,
+    image:
+      'https://static.wixstatic.com/media/9356bd_e7efab05bfc14a29b5845d95e8369d77~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_e7efab05bfc14a29b5845d95e8369d77~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_f8b89d977147414c99c511e97ecdf50a~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_6779764a01134884b3bb63e94ee87eee~mv2.jpg',
+      'https://static.wixstatic.com/media/9356bd_dbbaf60d8d9e4a04acbbef1e1fe4226e~mv2.png',
+    ],
     description:
       'Full-size tumbler upcycled from Royal Ranthambore whisky bottles—pair with our Ranthambore shot line.',
     story:
@@ -554,8 +616,8 @@ export const PRODUCTS: Product[] = [
       'Hand cut',
       'Food-safe finish',
       'Eco-friendly',
-      'Placeholder imagery',
-      'Story TBC',
+      'Polished rim',
+      'Unique design',
     ],
   },
   {
@@ -614,43 +676,51 @@ export const PRODUCTS: Product[] = [
       'Monk heritage detailing',
     ],
   },
-  {
-    id: '3',
-    name: 'Scented Soy Candle',
-    price: 1450,
-    category: 'Scented Candles',
-    image:
-      'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80&w=800',
-    beforeImage:
-      'https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&q=80&w=800',
-    description: 'Hand-poured soy wax in an upcycled glass container.',
-    story:
-      'This candle box was once a premium bottle, now housing a blend of essential oils and soy wax for a clean, sustainable burn.',
-    features: ['Soy wax', 'Essential oils', 'Upcycled glass', '40+ hour burn time'],
-  },
-  {
-    id: '4',
-    name: 'Artisanal Jar',
-    price: 800,
-    category: 'Jar',
-    image:
-      'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=800',
-    beforeImage:
-      'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&q=80&w=800',
-    description: 'A beautiful storage jar for your kitchen or vanity.',
-    story:
-      'Part of our Jars line, these pieces are repurposed from unique bottle shapes to provide elegant storage solutions.',
-    features: ['Airtic seal', 'Hand-finished', 'Sustainable', 'Unique silhouette'],
-  },
 ];
+
+function compareUpcycleProducts(a: Product, b: Product): number {
+  const order = new Map(UPCYCLE_PRODUCT_ORDER.map((id, i) => [id, i]));
+  const groupDiff =
+    UPCYCLE_GROUP_ORDER[getUpcycleProductGroup(a)] -
+    UPCYCLE_GROUP_ORDER[getUpcycleProductGroup(b)];
+  if (groupDiff !== 0) return groupDiff;
+  return (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999);
+}
+
+/** Sort products for shop grids (Upcycle: glass → shot → bowl; Jar: catalog order). */
+export function sortProductsForShop(products: Product[], category: string): Product[] {
+  const catalogIndex = new Map(PRODUCTS.map((p, i) => [p.id, i]));
+
+  if (category === 'Upcycle') {
+    return [...products].sort(compareUpcycleProducts);
+  }
+
+  if (category === 'All') {
+    return [...products].sort((a, b) => {
+      if (a.category === 'Upcycle' && b.category === 'Upcycle') {
+        return compareUpcycleProducts(a, b);
+      }
+      return (catalogIndex.get(a.id) ?? 0) - (catalogIndex.get(b.id) ?? 0);
+    });
+  }
+
+  if (category === 'Jar') {
+    const jarOrder = new Map(JAR_PRODUCT_ORDER.map((id, i) => [id, i]));
+    return [...products].sort(
+      (a, b) => (jarOrder.get(a.id) ?? 99) - (jarOrder.get(b.id) ?? 99)
+    );
+  }
+
+  return products;
+}
 
 export const CATEGORIES: Category[] = [
   { id: 'og', name: 'Upcycle', image: 'https://static.wixstatic.com/media/9356bd_d66b706b85a14615af7895c609e6f96b~mv2.jpeg' },
   { id: 'vault', name: 'Jar', image: 'https://static.wixstatic.com/media/9356bd_27cfc95a85fa4d27a6e441f425046885~mv2.png' },
-  { id: 'flame', name: 'Scented Candles', image: 'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=800' },
-  { id: 'party', name: 'Party Box', image: 'https://images.unsplash.com/photo-1528823872057-9c018a7f07f9?auto=format&fit=crop&q=80&w=800' },
-  { id: 'candle-box', name: 'Candle Box', image: 'https://images.unsplash.com/photo-1566125882500-87e10f726cdc?auto=format&fit=crop&q=80&w=800' },
-  { id: 'corporate', name: 'Corporate Box', image: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?auto=format&fit=crop&q=80&w=800' },
+  { id: 'flame', name: 'Scented Candles', image: CATEGORY_COMING_SOON_IMAGE },
+  { id: 'party', name: 'Party Box', image: CATEGORY_COMING_SOON_IMAGE },
+  { id: 'candle-box', name: 'Candle Box', image: CATEGORY_COMING_SOON_IMAGE },
+  { id: 'corporate', name: 'Corporate Box', image: CATEGORY_COMING_SOON_IMAGE },
 ];
 
 /** Shop filter pills — always matches {@link CATEGORIES} order. */
