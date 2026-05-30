@@ -104,6 +104,12 @@ export const INSTAGRAM_PROFILE_URL = 'https://www.instagram.com/resip_india/';
 /** Site-wide contact phone (display + click-to-call). */
 export const CONTACT_PHONE = '+91 9146700770';
 export const CONTACT_PHONE_TEL = 'tel:+919146700770';
+export const CONTACT_EMAIL = 'hello@resipindia.com';
+export const CONTACT_WHATSAPP_URL = 'https://wa.me/919146700770';
+
+/** Return shipping address for customer care pages. */
+export const RETURN_ADDRESS =
+  'Manegaon Beda, Pohra Road, Tah- Lakhani, Dist- Bhandara, Maharashtra 441804';
 
 /** Rotating promo line above the site header (all pages). */
 export const ANNOUNCEMENT_MESSAGES = [
@@ -124,7 +130,7 @@ export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 export const FOOTER_UPCYCLE_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_13dd710b09c54d24b6e4a77b920dacfe~mv2.png';
 export const FOOTER_MAKE_IN_INDIA_LOGO_SRC =
-  'https://static.wixstatic.com/media/9356bd_5d6a139dc29c4143ad359a8615d47ac1~mv2.png';
+  'https://static.wixstatic.com/media/9356bd_3b1141848e5a4c8ba7a7cd298633fc15~mv2.png';
 
 export interface MediaPartner {
   id: string;
@@ -153,7 +159,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Bombay Sapphire Bottle Glass',
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_d7855bd374c74a3dbb4c3c0e95caf397~mv2.jpg',
     image:
@@ -182,7 +188,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Old Monk Bottle Glass',
     price: 599,
     glassSetPricing: { format: '24', setOf2: 599, setOf4: 1099 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
     image:
@@ -211,7 +217,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Bacardi Bottle Glass',
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_9f9d6945bb6b4af5a4c8218e062c2f31~mv2.jpg',
     image:
@@ -240,7 +246,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Antiquity Bottle Glass',
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_cdd5721644174158945b2ac7afbc3863~mv2.jpg',
     image:
@@ -269,7 +275,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Wine Bottle Glass',
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_363a262f9724416fb27e058bb7e61180~mv2.jpg',
     image:
@@ -298,7 +304,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Black Label Bottle Glass',
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_c460c2389a874c66bd79cb5473838970~mv2.jpg',
     image:
@@ -327,7 +333,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Kingfisher Bottle Glass',
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_6c977076c59b4a46a23c0f50d2328353~mv2.jpg',
     image:
@@ -356,7 +362,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Mid Wine Bottle Glass',
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_363a262f9724416fb27e058bb7e61180~mv2.jpg',
     image:
@@ -385,7 +391,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Antiquity Bottle Shots',
     price: 499,
     glassSetPricing: { format: '612', setOf6: 499, setOf12: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     image:
       'https://static.wixstatic.com/media/9356bd_387e6fd431ae4bfd85e5ed5c74314167~mv2.jpg',
     images: [
@@ -412,7 +418,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Ranthambore Bottle Shots',
     price: 499,
     glassSetPricing: { format: '612', setOf6: 499, setOf12: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     image:
       'https://static.wixstatic.com/media/7dc839_4e4fd2b3586b4830a0256889716d5b96~mv2.jpg',
     images: [
@@ -439,7 +445,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Greater Than Bottle Glass',
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_6552424fe99f44768b8e7f4b2860ad6a~mv2.jpg',
     image:
@@ -468,7 +474,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Corona Bottle Glass',
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_090da3102faf47cf8bf107544f9dd049~mv2.jpg',
     image:
@@ -498,7 +504,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Absolut Bottle jar',
     price: 925,
     glassSetPricing: { format: '24', setOf2: 925, setOf4: 1650 },
-    category: 'Upcycle Jar',
+    category: 'Upcycled Jar',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_7ba73eec14ae4e9c90fdfb6d72bb2185~mv2.jpg',
     image:
@@ -526,7 +532,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Absolut Vodka Bottle Glass',
     price: 625,
     glassSetPricing: { format: '24', setOf2: 625, setOf4: 1250 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     image:
       'https://static.wixstatic.com/media/7dc839_72f14cad36c345e98c216c7143390909~mv2.jpg',
     images: [
@@ -552,7 +558,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Absolut mini jar',
     price: 325,
     glassSetPricing: { format: '24', setOf2: 325, setOf4: 650 },
-    category: 'Upcycle Jar',
+    category: 'Upcycled Jar',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_b53e11c91f274160b4d65120a8f26572~mv2.jpg',
     image:
@@ -580,7 +586,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Budweiser Bottle Glass',
     price: 399,
     glassSetPricing: { format: '24', setOf2: 399, setOf4: 799 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_1d2ee35ba1ce484491b1bee1a68cfdbd~mv2.jpg',
     image:
@@ -608,7 +614,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Old Monk Coffee Bottle Glass',
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
     image:
@@ -636,7 +642,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Ranthambore Bottle Glass',
     price: 499,
     glassSetPricing: { format: '24', setOf2: 499, setOf4: 999 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_09eeee3e17394a0a8485fcb2f9ca4136~mv2.jpg',
     image:
@@ -664,7 +670,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Old Monk Bowl',
     price: 425,
     glassSetPricing: { format: '24', setOf2: 425, setOf4: 850 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_5be595388b024a70abc00252b71f24f0~mv2.jpg',
     image:
@@ -692,7 +698,7 @@ export const PRODUCTS: Product[] = [
     name: 'ReSip Old Monk Face Glass',
     price: 299,
     glassSetPricing: { format: '24', setOf2: 299, setOf4: 599 },
-    category: 'Upcycle Glasses',
+    category: 'Upcycled Glasses',
     beforeImage:
       'https://static.wixstatic.com/media/9356bd_44cb613dd8ee4e958e31c21c19bb1a1a~mv2.jpg',
     image:
@@ -730,20 +736,20 @@ function compareUpcycleProducts(a: Product, b: Product): number {
 export function sortProductsForShop(products: Product[], category: string): Product[] {
   const catalogIndex = new Map(PRODUCTS.map((p, i) => [p.id, i]));
 
-  if (category === 'Upcycle Glasses') {
+  if (category === 'Upcycled Glasses') {
     return [...products].sort(compareUpcycleProducts);
   }
 
   if (category === 'All') {
     return [...products].sort((a, b) => {
-      if (a.category === 'Upcycle Glasses' && b.category === 'Upcycle Glasses') {
+      if (a.category === 'Upcycled Glasses' && b.category === 'Upcycled Glasses') {
         return compareUpcycleProducts(a, b);
       }
       return (catalogIndex.get(a.id) ?? 0) - (catalogIndex.get(b.id) ?? 0);
     });
   }
 
-  if (category === 'Upcycle Jar') {
+  if (category === 'Upcycled Jar') {
     const jarOrder = new Map(JAR_PRODUCT_ORDER.map((id, i) => [id, i]));
     return [...products].sort(
       (a, b) => (jarOrder.get(a.id) ?? 99) - (jarOrder.get(b.id) ?? 99)
@@ -754,8 +760,8 @@ export function sortProductsForShop(products: Product[], category: string): Prod
 }
 
 export const CATEGORIES: Category[] = [
-  { id: 'og', name: 'Upcycle Glasses', image: 'https://static.wixstatic.com/media/9356bd_d66b706b85a14615af7895c609e6f96b~mv2.jpeg' },
-  { id: 'vault', name: 'Upcycle Jar', image: 'https://static.wixstatic.com/media/9356bd_27cfc95a85fa4d27a6e441f425046885~mv2.png' },
+  { id: 'og', name: 'Upcycled Glasses', image: 'https://static.wixstatic.com/media/9356bd_d66b706b85a14615af7895c609e6f96b~mv2.jpeg' },
+  { id: 'vault', name: 'Upcycled Jar', image: 'https://static.wixstatic.com/media/9356bd_27cfc95a85fa4d27a6e441f425046885~mv2.png' },
   { id: 'flame', name: 'Scented Candles', image: CATEGORY_COMING_SOON_IMAGE },
   { id: 'party', name: 'Party Box', image: CATEGORY_COMING_SOON_IMAGE },
   { id: 'candle-box', name: 'Candle Box', image: CATEGORY_COMING_SOON_IMAGE },
@@ -767,10 +773,8 @@ export const SHOP_CATEGORY_FILTERS = ['All', ...CATEGORIES.map((c) => c.name)] a
 
 /** Gallery page — still photos from the ReSip workshop and events. */
 export const GALLERY_IMAGES: string[] = [
-  'https://static.wixstatic.com/media/9356bd_c496d55fa03540c19d26b468b067f3ba~mv2.jpeg',
   'https://static.wixstatic.com/media/9356bd_62a4ffc45b8242e495b34ac3c44bb774~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_c20c4af3d3d84d8c89f2b5592644f6bc~mv2.jpg',
-  'https://static.wixstatic.com/media/9356bd_425c3342b08f442ba4cd201ddec40070~mv2.jpeg',
   'https://static.wixstatic.com/media/9356bd_e30f9bad456049d28277b5806c843429~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_347b8ffa322e47a5b143ec09f73af2f5~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_ae5987478bbe48dda292be427f2ed48f~mv2.jpg',

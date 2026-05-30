@@ -11,6 +11,10 @@ const ProductDetail = lazy(() => import('./ProductDetail'));
 const About = lazy(() => import('./About'));
 const Gallery = lazy(() => import('./Gallery'));
 const Contact = lazy(() => import('./CustomOrders'));
+const ReturnExchangePolicy = lazy(() => import('./ReturnExchangePolicy'));
+const CareInstructions = lazy(() => import('./CareInstructions'));
+const ShippingPolicy = lazy(() => import('./ShippingPolicy'));
+const Faqs = lazy(() => import('./Faqs'));
 
 /** Lightweight spinner shown while a route chunk loads. */
 const RouteFallback = () => (
@@ -55,6 +59,10 @@ export default function App() {
               <Route path="/about" element={<About />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/returns-exchange" element={<ReturnExchangePolicy />} />
+              <Route path="/care-instructions" element={<CareInstructions />} />
+              <Route path="/shipping-policy" element={<ShippingPolicy />} />
+              <Route path="/faqs" element={<Faqs />} />
               <Route path="/corporate" element={<Navigate to="/contact" replace />} />
             </Routes>
           </Suspense>

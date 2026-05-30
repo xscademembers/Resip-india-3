@@ -1,16 +1,17 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Play, X } from 'lucide-react';
 import { GALLERY_IMAGES, GALLERY_VIDEOS } from './constants';
 import OptimizedImage from './OptimizedImage';
-import { cn } from './components';
 import { IMG_WIDTHS } from './image-utils';
-
-type GalleryTab = 'images' | 'videos';
 
 type LightboxItem =
   | { type: 'image'; src: string; index: number }
   | { type: 'video'; src: string; index: number };
+
+type GalleryMediaItem =
+  | { type: 'image'; src: string }
+  | { type: 'video'; src: string };
 
 function GalleryLightbox({
   item,
@@ -159,8 +160,15 @@ function VideoTile({
 
 const Gallery = () => {
   const reduceMotion = useReducedMotion() ?? false;
-  const [activeTab, setActiveTab] = useState<GalleryTab>('images');
   const [lightboxItem, setLightboxItem] = useState<LightboxItem | null>(null);
+
+  const galleryMedia = useMemo<GalleryMediaItem[]>(
+    () => [
+      ...GALLERY_IMAGES.map((src) => ({ type: 'image' as const, src })),
+      ...GALLERY_VIDEOS.map((src) => ({ type: 'video' as const, src })),
+    ],
+    [],
+  );
 
   const openLightbox = useCallback((item: LightboxItem) => {
     setLightboxItem(item);
@@ -169,11 +177,6 @@ const Gallery = () => {
   const closeLightbox = useCallback(() => {
     setLightboxItem(null);
   }, []);
-
-  const tabs: { id: GalleryTab; label: string }[] = [
-    { id: 'images', label: 'Images' },
-    { id: 'videos', label: 'Videos' },
-  ];
 
   return (
     <div className="min-h-screen bg-brand-bg pt-40 pb-32 px-6">
@@ -190,58 +193,18 @@ const Gallery = () => {
           </p>
         </header>
 
-        <nav
-          role="tablist"
-          aria-label="Gallery media type"
-          className="mx-auto mb-12 flex max-w-md justify-center gap-2 rounded-full border border-brand-blue/10 bg-white p-2 shadow-sm"
-        >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                id={`gallery-tab-${tab.id}`}
-                aria-selected={isActive}
-                aria-controls={`gallery-panel-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'flex flex-1 items-center justify-center rounded-full px-4 py-3 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]',
-                  isActive
-                    ? 'bg-brand-blue text-white'
-                    : 'text-charcoal/70 hover:bg-brand-blue/5 hover:text-charcoal',
+        <section className="mx-auto" aria-label="Gallery media">
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
+            {galleryMedia.map((item, index) => (
+              <li key={`${item.type}-${item.src}`}>
+                {item.type === 'image' ? (
+                  <ImageTile src={item.src} index={index} onOpen={openLightbox} />
+                ) : (
+                  <VideoTile src={item.src} index={index} onOpen={openLightbox} />
                 )}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <section
-          role="tabpanel"
-          id={`gallery-panel-${activeTab}`}
-          aria-labelledby={`gallery-tab-${activeTab}`}
-          className="mx-auto"
-        >
-          {activeTab === 'images' ? (
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-              {GALLERY_IMAGES.map((src, index) => (
-                <li key={src}>
-                  <ImageTile src={src} index={index} onOpen={openLightbox} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-              {GALLERY_VIDEOS.map((src, index) => (
-                <li key={src}>
-                  <VideoTile src={src} index={index} onOpen={openLightbox} />
-                </li>
-              ))}
-            </ul>
-          )}
+              </li>
+            ))}
+          </ul>
         </section>
       </div>
 
