@@ -85,6 +85,25 @@
   .glass-reflection::after {
     animation: none;
   }
+
+  .media-partners-marquee-track {
+    animation: none;
+    transform: none;
+  }
+}
+
+@keyframes media-partners-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.media-partners-marquee-track {
+  animation: media-partners-marquee 32s linear infinite;
+  will-change: transform;
 }
 
 .no-scrollbar::-webkit-scrollbar {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { CONTACT_PHONE, CONTACT_PHONE_TEL } from './constants';
 
 const CustomOrders = () => {
   return (
@@ -47,7 +48,9 @@ const CustomOrders = () => {
                 <div className="w-12 h-12 rounded-full bg-brand-blue text-white flex items-center justify-center"><Phone size={20} /></div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-widest text-charcoal/40">Call Us</p>
-                  <p className="text-lg font-bold">+91 98765 43210</p>
+                  <a href={CONTACT_PHONE_TEL} className="text-lg font-bold hover:text-brand-blue transition-colors">
+                    {CONTACT_PHONE}
+                  </a>
                 </div>
               </div>
             </div>

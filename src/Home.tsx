@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ProductCard } from './components';
+import { ProductCard, MediaPartnersMarquee } from './components';
 import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
@@ -329,6 +329,22 @@ const Home = () => {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Media Partners */}
+      <section className="border-t border-brand-blue/10 bg-white py-24 px-6" aria-labelledby="media-partners-heading">
+        <div className="mx-auto max-w-7xl">
+          <header className="mb-16 text-center">
+            <span className="mb-4 block font-display text-xs font-bold uppercase tracking-[0.3em] text-brand-blue">
+              As seen in
+            </span>
+            <h2 id="media-partners-heading" className="text-4xl md:text-5xl">
+              Our Media Partners
+            </h2>
+            <div className="mx-auto mt-6 h-1 w-24 bg-brand-gold" aria-hidden />
+          </header>
+          <MediaPartnersMarquee />
         </div>
       </section>
 

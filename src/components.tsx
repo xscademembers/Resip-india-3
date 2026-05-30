@@ -10,10 +10,14 @@ import {
   getProductPriceCaption,
   ANNOUNCEMENT_MESSAGES,
   INSTAGRAM_PROFILE_URL,
+  FOOTER_UPCYCLE_LOGO_SRC,
+  FOOTER_MAKE_IN_INDIA_LOGO_SRC,
+  MEDIA_PARTNERS,
   BRAND_LOGO_SRC,
   type GlassSetSize,
   type GlassSetPricing,
   type Product,
+  type MediaPartner,
 } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, optimizedSrcSet, IMG_WIDTHS } from './image-utils';
@@ -280,6 +284,20 @@ export const Footer = () => {
               <Twitter size={18} />
             </a>
           </div>
+          <div className="flex flex-wrap items-center gap-4 pt-2" aria-label="Certifications">
+            <OptimizedImage
+              src={FOOTER_UPCYCLE_LOGO_SRC}
+              displayWidth={56}
+              alt="Upcycle logo"
+              className="h-14 w-auto object-contain"
+            />
+            <OptimizedImage
+              src={FOOTER_MAKE_IN_INDIA_LOGO_SRC}
+              displayWidth={56}
+              alt="Make in India"
+              className="h-14 w-auto object-contain"
+            />
+          </div>
         </div>
 
         <div>
@@ -327,6 +345,78 @@ export const Footer = () => {
         </div>
       </div>
     </footer>
+  );
+};
+
+function MediaPartnerLogo({ partner }: { partner: MediaPartner }) {
+  const content = (
+    <OptimizedImage
+      src={partner.logo}
+      displayWidth={160}
+      alt={partner.name}
+      className="h-16 w-auto max-w-[160px] object-contain opacity-75 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 motion-reduce:opacity-100 motion-reduce:grayscale-0"
+    />
+  );
+
+  const className =
+    'flex h-24 w-52 shrink-0 items-center justify-center px-6 sm:w-56';
+
+  if (partner.url) {
+    return (
+      <a
+        href={partner.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        aria-label={partner.name}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
+}
+
+/**
+ * Infinite horizontal marquee — four partner logos visible, seamless loop.
+ */
+export const MediaPartnersMarquee = () => {
+  const reduceMotion = useReducedMotion();
+  const marqueeTrack = [...MEDIA_PARTNERS, ...MEDIA_PARTNERS];
+
+  if (reduceMotion) {
+    return (
+      <ul className="mx-auto grid max-w-5xl list-none grid-cols-2 gap-8 p-0 md:grid-cols-4">
+        {MEDIA_PARTNERS.map((partner) => (
+          <li key={partner.id} className="flex justify-center">
+            <MediaPartnerLogo partner={partner} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden"
+      aria-label="Our media partners"
+      role="region"
+    >
+      <div
+        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent sm:w-24"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent sm:w-24"
+        aria-hidden
+      />
+      <div className="media-partners-marquee-track flex w-max items-center gap-8 sm:gap-12">
+        {marqueeTrack.map((partner, index) => (
+          <MediaPartnerLogo key={`${partner.id}-${index}`} partner={partner} />
+        ))}
+      </div>
+    </div>
   );
 };
 
