@@ -128,9 +128,9 @@ export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 
 /** Footer trust badges — upcycle and Make in India. */
 export const FOOTER_UPCYCLE_LOGO_SRC =
-  'https://static.wixstatic.com/media/9356bd_13dd710b09c54d24b6e4a77b920dacfe~mv2.png';
+  'https://static.wixstatic.com/media/9356bd_5d6a139dc29c4143ad359a8615d47ac1~mv2.png';
 export const FOOTER_MAKE_IN_INDIA_LOGO_SRC =
-  'https://static.wixstatic.com/media/9356bd_3b1141848e5a4c8ba7a7cd298633fc15~mv2.png';
+  'https://static.wixstatic.com/media/9356bd_b43452347b6243e68af9115f066e8e2c~mv2.jpg';
 
 export interface MediaPartner {
   id: string;
