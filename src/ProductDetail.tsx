@@ -4,13 +4,22 @@ import { ChevronLeft, ShoppingCart, ShieldCheck, Truck, Recycle } from 'lucide-r
 import {
   PRODUCTS,
   formatInr,
+  getCandleUsageTips,
   getGlassSetEntryPrice,
   getProductGalleryImages,
   getProductPriceCaption,
+  isCandleProduct,
   sellsGlassSets,
 } from './constants';
 import type { GlassSetSize } from './constants';
-import { BeforeAfterSlider, GlassPackPicker, ProductImageCarousel } from './components';
+import {
+  BeforeAfterSlider,
+  CandleLabelPicker,
+  FragrancePicker,
+  GlassPackPicker,
+  ProductImageCarousel,
+} from './components';
+import type { CandleLabelType } from './components';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
@@ -21,20 +30,40 @@ const ProductDetail = () => {
     return p?.glassSetPricing?.format === '612' ? 6 : 2;
   });
   const [quantity, setQuantity] = useState(1);
+  const [fragrance, setFragrance] = useState('');
+  const [labelType, setLabelType] = useState<CandleLabelType>('text');
   const product = PRODUCTS.find((p) => p.id === id);
 
+  const isCandle = product ? isCandleProduct(product) : false;
   const isSetSku = product ? sellsGlassSets(product) : false;
+  const labelSurcharge =
+    isCandle && labelType === 'image' ? (product?.labelImageSurcharge ?? 0) : 0;
   const unitPrice = useMemo(() => {
-    if (!product?.glassSetPricing) return product?.price ?? 0;
+    if (!product?.glassSetPricing) return (product?.price ?? 0) + labelSurcharge;
     const p = product.glassSetPricing;
+    let base = 0;
     if (p.format === '24') {
-      return setSize === 4 ? p.setOf4 : p.setOf2;
+      base = setSize === 4 ? p.setOf4 : p.setOf2;
+    } else {
+      base = setSize === 12 ? p.setOf12 : p.setOf6;
     }
-    return setSize === 12 ? p.setOf12 : p.setOf6;
-  }, [product, setSize]);
+    return base + labelSurcharge;
+  }, [product, setSize, labelSurcharge]);
 
   useEffect(() => {
     setQuantity(1);
+  }, [id]);
+
+  useEffect(() => {
+    if (!product?.fragrances?.length) {
+      setFragrance('');
+      return;
+    }
+    setFragrance(product.fragrances[0]);
+  }, [id, product?.fragrances]);
+
+  useEffect(() => {
+    setLabelType('text');
   }, [id]);
 
   useEffect(() => {
@@ -47,6 +76,15 @@ const ProductDetail = () => {
     .split(/\n\s*\n/g)
     .map((p) => p.trim())
     .filter(Boolean);
+  const usageTips = getCandleUsageTips(product);
+  const featuresHeading = isCandle
+    ? `Features – ${product.name}`
+    : isSetSku
+      ? `Glass Features – ${product.name}`
+      : `Features – ${product.name}`;
+  const whyChooseHeading =
+    product.whyChooseHeading ??
+    (isCandle ? 'Why Choose Our ReSip Scented Candles?' : 'Why Choose Our Upcycled Glasses?');
 
   return (
     <div className="pt-40 pb-32 px-6 bg-white">
@@ -102,7 +140,7 @@ const ProductDetail = () => {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
-                {isSetSku ? `Glass Features – ${product.name}` : `Features – ${product.name}`}
+                {featuresHeading}
               </h4>
               <ul className="grid grid-cols-2 gap-4">
                 {product.features.map((f, i) => (
@@ -115,7 +153,7 @@ const ProductDetail = () => {
 
             <div className="space-y-4">
               <h4 className="font-bold text-sm uppercase tracking-widest text-charcoal/40">
-                {product.whyChooseHeading ?? 'Why Choose Our Upcycled Glasses?'}
+                {whyChooseHeading}
               </h4>
               <div className="space-y-4 text-charcoal/70 font-light leading-relaxed">
                 {storyParagraphs.map((p, idx) => (
@@ -124,6 +162,31 @@ const ProductDetail = () => {
               </div>
             </div>
 
+            {isCandle ? (
+              <section className="space-y-4" aria-labelledby="candle-usage-heading">
+                <h4
+                  id="candle-usage-heading"
+                  className="font-bold text-sm uppercase tracking-widest text-charcoal/40"
+                >
+                  Usage tips
+                </h4>
+                <ul className="space-y-4 rounded-2xl border border-brand-blue/10 bg-brand-bg p-6">
+                  {usageTips.map((tip) => (
+                    <li
+                      key={tip}
+                      className="flex gap-4 text-sm font-light leading-relaxed text-charcoal/75"
+                    >
+                      <span
+                        className="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-gold"
+                        aria-hidden
+                      />
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
             {/* Add to Cart Section */}
             <div className="pt-10 border-t border-brand-blue/10 space-y-6">
               {isSetSku && product.glassSetPricing ? (
@@ -131,6 +194,22 @@ const ProductDetail = () => {
                   pricing={product.glassSetPricing}
                   selected={setSize}
                   onChange={setSetSize}
+                />
+              ) : null}
+
+              {product.fragrances?.length ? (
+                <FragrancePicker
+                  fragrances={product.fragrances}
+                  selected={fragrance}
+                  onChange={setFragrance}
+                />
+              ) : null}
+
+              {product.labelImageSurcharge != null ? (
+                <CandleLabelPicker
+                  surcharge={product.labelImageSurcharge}
+                  selected={labelType}
+                  onChange={setLabelType}
                 />
               ) : null}
 

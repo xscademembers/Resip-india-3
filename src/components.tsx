@@ -886,6 +886,125 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
   );
 };
 
+export type CandleLabelType = 'text' | 'image';
+
+interface FragrancePickerProps {
+  fragrances: string[];
+  selected: string;
+  onChange: (fragrance: string) => void;
+}
+
+export const FragrancePicker: React.FC<FragrancePickerProps> = ({
+  fragrances,
+  selected,
+  onChange,
+}) => {
+  const baseLabel =
+    'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 motion-safe:transition-colors';
+
+  return (
+    <fieldset className="space-y-4">
+      <legend className="mb-2 block text-sm font-bold uppercase tracking-widest text-charcoal/40">
+        Choose fragrance
+      </legend>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        {fragrances.map((fragrance) => (
+          <label
+            key={fragrance}
+            className={cn(
+              baseLabel,
+              selected === fragrance
+                ? 'border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/5 ring-2 ring-[var(--color-brand-blue)]/25'
+                : 'border-brand-blue/15 hover:border-[var(--color-brand-blue)]/40'
+            )}
+          >
+            <input
+              type="radio"
+              name="candle-fragrance"
+              value={fragrance}
+              checked={selected === fragrance}
+              onChange={() => onChange(fragrance)}
+              className="size-4 shrink-0 accent-[var(--color-brand-blue)]"
+            />
+            <span className="text-sm font-bold text-charcoal">{fragrance}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+};
+
+interface CandleLabelPickerProps {
+  surcharge: number;
+  selected: CandleLabelType;
+  onChange: (label: CandleLabelType) => void;
+}
+
+export const CandleLabelPicker: React.FC<CandleLabelPickerProps> = ({
+  surcharge,
+  selected,
+  onChange,
+}) => {
+  const baseLabel =
+    'flex cursor-pointer flex-col gap-2 rounded-2xl border p-4 motion-safe:transition-colors';
+
+  return (
+    <fieldset className="space-y-4">
+      <legend className="mb-2 block text-sm font-bold uppercase tracking-widest text-charcoal/40">
+        Choose label
+      </legend>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
+        <label
+          className={cn(
+            baseLabel,
+            selected === 'text'
+              ? 'border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/5 ring-2 ring-[var(--color-brand-blue)]/25'
+              : 'border-brand-blue/15 hover:border-[var(--color-brand-blue)]/40'
+          )}
+        >
+          <span className="flex items-start gap-3">
+            <input
+              type="radio"
+              name="candle-label"
+              value="text"
+              checked={selected === 'text'}
+              onChange={() => onChange('text')}
+              className="mt-1 size-4 shrink-0 accent-[var(--color-brand-blue)]"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="font-bold text-charcoal">Label with text</span>
+              <span className="text-sm text-charcoal/60">Included</span>
+            </span>
+          </span>
+        </label>
+        <label
+          className={cn(
+            baseLabel,
+            selected === 'image'
+              ? 'border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/5 ring-2 ring-[var(--color-brand-blue)]/25'
+              : 'border-brand-blue/15 hover:border-[var(--color-brand-blue)]/40'
+          )}
+        >
+          <span className="flex items-start gap-3">
+            <input
+              type="radio"
+              name="candle-label"
+              value="image"
+              checked={selected === 'image'}
+              onChange={() => onChange('image')}
+              className="mt-1 size-4 shrink-0 accent-[var(--color-brand-blue)]"
+            />
+            <span className="flex flex-col gap-1">
+              <span className="font-bold text-charcoal">Label with image</span>
+              <span className="text-sm text-charcoal/60">+ ₹{formatInr(surcharge)} per set</span>
+            </span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+  );
+};
+
 /**
  * Product Card Component
  */

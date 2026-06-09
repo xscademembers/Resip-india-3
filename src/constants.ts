@@ -20,6 +20,33 @@ export interface Product {
   features: string[];
   whyChooseHeading?: string;
   glassSetPricing?: GlassSetPricing;
+  /** Scented candle fragrance options shown on product detail. */
+  fragrances?: string[];
+  /** Extra charge (INR per set) for label with image. */
+  labelImageSurcharge?: number;
+  /** Override shared candle usage tips when a candle needs custom copy. */
+  usageTips?: string[];
+}
+
+/** Usage & safety tips shown on every scented candle product detail page. */
+export const CANDLE_USAGE_TIPS = [
+  'When using it for the first time, leave your candle burning until the entire surface is liquid.',
+  'Afterward, use it for 2 to 3 hours at a time, making sure to trim the wick to 5 mm before each use.',
+  'Never leave a burning candle unattended.',
+  'Keep out of reach of children and animals.',
+  'Do not drink.',
+  'In case of skin contact: wash thoroughly with soap and water.',
+  'Always leave at least 10 cm between each lit candle.',
+  'Ventilate the room after each use.',
+  'Avoid lighting your candle in a draft.',
+] as const;
+
+export function isCandleProduct(product: Product): boolean {
+  return product.category === 'Scented Candles';
+}
+
+export function getCandleUsageTips(product: Product): readonly string[] {
+  return product.usageTips ?? CANDLE_USAGE_TIPS;
 }
 
 /** Ordered gallery for product detail; falls back to the single `image` URL. */
@@ -68,6 +95,14 @@ const UPCYCLE_GROUP_ORDER: Record<UpcycleProductGroup, number> = {
 const JAR_PRODUCT_ORDER = [
   'og-resip-absolut-500ml-jar',
   'og-resip-absolut-mini-180ml',
+] as const;
+
+const CANDLE_PRODUCT_ORDER = [
+  'og-resip-scented-candle-1',
+  'og-resip-scented-candle-2',
+  'og-resip-scented-candle-3',
+  'og-resip-scented-candle-4',
+  'og-resip-scented-candle-5',
 ] as const;
 
 /** Upcycle catalog order: glasses → shots → bowls. */
@@ -721,6 +756,146 @@ export const PRODUCTS: Product[] = [
       'Monk heritage detailing',
     ],
   },
+  {
+    id: 'og-resip-scented-candle-1',
+    name: 'ReSip Scented Candle 1',
+    price: 449,
+    glassSetPricing: { format: '24', setOf2: 449, setOf4: 849 },
+    category: 'Scented Candles',
+    image:
+      'https://static.wixstatic.com/media/9356bd_3b1d93630b284503b032a2cb5b0505ce~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_3b1d93630b284503b032a2cb5b0505ce~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_ced3b40f903146d3bdc1e2ebe55acb4e~mv2.jpg',
+    ],
+    description:
+      'Hand-poured scented candle in an upcycled wine bottle—natural soy wax with a clean, long burn.',
+    whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
+    story:
+      'ReSip Scented Candles give rescued wine bottles a calm second life—poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
+    features: [
+      'Made from upcycled wine bottle',
+      'Format: 250gm · ~65h burn',
+      'Natural soy wax',
+      '100% cotton wick',
+      'Non-toxic & safe',
+      'Choose your fragrance',
+    ],
+    fragrances: ['Lemon', 'Raat Rani', 'Rose', 'Aqua', 'Mogra'],
+    labelImageSurcharge: 25,
+  },
+  {
+    id: 'og-resip-scented-candle-2',
+    name: 'ReSip Scented Candle 2',
+    price: 449,
+    glassSetPricing: { format: '24', setOf2: 449, setOf4: 849 },
+    category: 'Scented Candles',
+    image:
+      'https://static.wixstatic.com/media/9356bd_711c47ea360943e98679f1a4fccd618c~mv2.jpg',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_711c47ea360943e98679f1a4fccd618c~mv2.jpg',
+      'https://static.wixstatic.com/media/9356bd_79b911e9c6824521a2a06309ab10ac8d~mv2.png',
+    ],
+    description:
+      'Hand-poured scented candle in an upcycled beer bottle—natural soy wax with a warm, long burn.',
+    whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
+    story:
+      'ReSip Scented Candle 2 turns rescued beer bottles into ambient light—poured with natural soy wax and a cotton wick for a cozy, non-toxic glow.\n\nPick your fragrance and label style to make each set your own.',
+    features: [
+      'Made from upcycled beer bottle',
+      'Format: 200gm · ~60h burn',
+      'Natural soy wax',
+      '100% cotton wick',
+      'Non-toxic & safe',
+      'Choose your fragrance',
+    ],
+    fragrances: ['Coco', 'Coffee'],
+    labelImageSurcharge: 25,
+  },
+  {
+    id: 'og-resip-scented-candle-3',
+    name: 'ReSip Scented Candle 3',
+    price: 349,
+    glassSetPricing: { format: '24', setOf2: 349, setOf4: 649 },
+    category: 'Scented Candles',
+    image:
+      'https://static.wixstatic.com/media/9356bd_0d48bb17ef10431db70f991b47113c2f~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_0d48bb17ef10431db70f991b47113c2f~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_cbf80fc4f00c4113ab61aa39b0f7ea7c~mv2.png',
+    ],
+    description:
+      'Hand-poured scented candle in an upcycled wine bottle with a sculpted face silhouette—natural soy wax with a warm, long burn.',
+    whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
+    story:
+      'ReSip Scented Candle 3 pairs artisan glass character with a calm pour—rescued wine bottles shaped into a distinctive silhouette, filled with natural soy wax and a cotton wick.\n\nChoose your fragrance and label style to make every set feel personal.',
+    features: [
+      'Made from upcycled wine bottle',
+      'Format: 180gm · ~55h burn',
+      'Natural soy wax',
+      '100% cotton wick',
+      'Non-toxic & safe',
+      'Choose your fragrance',
+    ],
+    fragrances: ['Lemon', 'Raat Rani', 'Rose', 'Aqua', 'Mogra'],
+    labelImageSurcharge: 25,
+  },
+  {
+    id: 'og-resip-scented-candle-4',
+    name: 'ReSip Scented Candle 4',
+    price: 549,
+    glassSetPricing: { format: '24', setOf2: 549, setOf4: 1049 },
+    category: 'Scented Candles',
+    image:
+      'https://static.wixstatic.com/media/9356bd_ccc3a6d2f7af4484a6bb751df2012400~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_ccc3a6d2f7af4484a6bb751df2012400~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_1cd4a95dd2f0416da98fdaabdefcc507~mv2.png',
+    ],
+    description:
+      'Hand-poured scented candle in an upcycled wine bottle with floral wax detailing—natural soy wax with a warm, long burn.',
+    whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
+    story:
+      'ReSip Scented Candle 4 brings a decorative touch to rescued wine bottles—poured with natural soy wax, finished with floral wax accents, and lit with a cotton wick for a cozy glow.\n\nChoose your fragrance and label style to make every set feel personal.',
+    features: [
+      'Made from upcycled wine bottle',
+      'Format: 250gm · ~65h burn',
+      'Natural soy wax',
+      '100% cotton wick',
+      'Non-toxic & safe',
+      'Choose your fragrance',
+    ],
+    fragrances: ['Lemon', 'Raat Rani', 'Rose', 'Aqua', 'Mogra'],
+    labelImageSurcharge: 25,
+  },
+  {
+    id: 'og-resip-scented-candle-5',
+    name: 'ReSip Scented Candle 5',
+    price: 449,
+    glassSetPricing: { format: '24', setOf2: 449, setOf4: 849 },
+    category: 'Scented Candles',
+    image:
+      'https://static.wixstatic.com/media/9356bd_3ee1c796b852485cb8bae573874c8059~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_3ee1c796b852485cb8bae573874c8059~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_ba0dbefe4fe744799b24038a4d672c95~mv2.png',
+    ],
+    description:
+      'Hand-poured scented candle in an upcycled wine bottle—natural soy wax with a clean, long burn.',
+    whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
+    story:
+      'ReSip Scented Candle 5 gives rescued wine bottles a calm second life—poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
+    features: [
+      'Made from upcycled wine bottle',
+      'Format: 150gm · ~45h burn',
+      'Natural soy wax',
+      '100% cotton wick',
+      'Non-toxic & safe',
+      'Choose your fragrance',
+    ],
+    fragrances: ['Lemon', 'Raat Rani', 'Rose', 'Aqua', 'Mogra'],
+    labelImageSurcharge: 25,
+  },
 ];
 
 function compareUpcycleProducts(a: Product, b: Product): number {
@@ -753,6 +928,13 @@ export function sortProductsForShop(products: Product[], category: string): Prod
     const jarOrder = new Map(JAR_PRODUCT_ORDER.map((id, i) => [id, i]));
     return [...products].sort(
       (a, b) => (jarOrder.get(a.id) ?? 99) - (jarOrder.get(b.id) ?? 99)
+    );
+  }
+
+  if (category === 'Scented Candles') {
+    const candleOrder = new Map(CANDLE_PRODUCT_ORDER.map((id, i) => [id, i]));
+    return [...products].sort(
+      (a, b) => (candleOrder.get(a.id) ?? 99) - (candleOrder.get(b.id) ?? 99)
     );
   }
 
