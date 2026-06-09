@@ -15,6 +15,8 @@ import {
   FOOTER_MAKE_IN_INDIA_LOGO_SRC,
   MEDIA_PARTNERS,
   BRAND_LOGO_SRC,
+  CATEGORIES,
+  getShopCategoryPath,
   type GlassSetSize,
   type GlassSetPricing,
   type Product,
@@ -240,6 +242,23 @@ export const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+            <div className="border-t border-brand-blue/10 pt-4">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-charcoal/40">
+                Collections
+              </p>
+              <div className="flex flex-col gap-3">
+                {CATEGORIES.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    to={getShopCategoryPath(cat.name)}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-base font-medium text-charcoal/80 hover:text-brand-blue"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -326,9 +345,24 @@ export const Footer = () => {
           <ul className="space-y-4 text-white/70 font-light">
             <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
             <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-            <li><Link to="/shop" className="hover:text-white transition-colors">Shop</Link></li>
+            <li><Link to="/shop" className="hover:text-white transition-colors">Shop All</Link></li>
             <li><Link to="/gallery" className="hover:text-white transition-colors">Gallery</Link></li>
             <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+          </ul>
+          <h4 className="mt-8 mb-4 text-sm font-bold uppercase tracking-widest text-brand-gold">
+            Collections
+          </h4>
+          <ul className="space-y-3 text-white/70 font-light">
+            {CATEGORIES.map((cat) => (
+              <li key={cat.id}>
+                <Link
+                  to={getShopCategoryPath(cat.name)}
+                  className="hover:text-white transition-colors"
+                >
+                  {cat.name}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 

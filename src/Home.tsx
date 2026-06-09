@@ -20,7 +20,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ProductCard, MediaPartnersMarquee } from './components';
-import { PRODUCTS, CATEGORIES, INSTAGRAM_PROFILE_URL } from './constants';
+import { getVisibleProducts, CATEGORIES, INSTAGRAM_PROFILE_URL, getShopCategoryPath } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
@@ -137,7 +137,7 @@ const Home = () => {
   /* First six catalog products — visuals align with site; tiles link to @resip_india on Instagram. */
   const instagramSpotlight = useMemo(
     () =>
-      PRODUCTS.slice(0, 6).map((p) => ({
+      getVisibleProducts().slice(0, 6).map((p) => ({
         id: p.id,
         src: p.image,
         name: p.name,
@@ -226,7 +226,7 @@ const Home = () => {
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.id}
-                to={`/shop?category=${encodeURIComponent(cat.name)}`}
+                to={getShopCategoryPath(cat.name)}
                 className="group relative block aspect-square overflow-hidden rounded-2xl shadow-lg outline-none transition-transform duration-300 ease-out hover:-translate-y-2 motion-reduce:transform-none motion-reduce:hover:translate-y-0 focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
               >
                 <OptimizedImage
@@ -260,7 +260,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {PRODUCTS.slice(0, 4).map((product) => (
+            {getVisibleProducts().slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

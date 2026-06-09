@@ -26,6 +26,8 @@ export interface Product {
   labelImageSurcharge?: number;
   /** Override shared candle usage tips when a candle needs custom copy. */
   usageTips?: string[];
+  /** When true, product is kept in catalog data but hidden from shop and detail pages. */
+  hidden?: boolean;
 }
 
 /** Usage & safety tips shown on every scented candle product detail page. */
@@ -47,6 +49,15 @@ export function isCandleProduct(product: Product): boolean {
 
 export function getCandleUsageTips(product: Product): readonly string[] {
   return product.usageTips ?? CANDLE_USAGE_TIPS;
+}
+
+export function isProductVisible(product: Product): boolean {
+  return !product.hidden;
+}
+
+/** Products shown on shop, home, and product detail pages. */
+export function getVisibleProducts(): Product[] {
+  return PRODUCTS.filter(isProductVisible);
 }
 
 /** Ordered gallery for product detail; falls back to the single `image` URL. */
@@ -165,7 +176,7 @@ export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 export const FOOTER_UPCYCLE_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_5d6a139dc29c4143ad359a8615d47ac1~mv2.png';
 export const FOOTER_MAKE_IN_INDIA_LOGO_SRC =
-  'https://static.wixstatic.com/media/9356bd_b43452347b6243e68af9115f066e8e2c~mv2.jpg';
+  'https://static.wixstatic.com/media/9356bd_3b1141848e5a4c8ba7a7cd298633fc15~mv2.png';
 
 export interface MediaPartner {
   id: string;
@@ -647,6 +658,7 @@ export const PRODUCTS: Product[] = [
   {
     id: 'og-resip-old-monk-coffee-glass',
     name: 'ReSip Old Monk Coffee Bottle Glass',
+    hidden: true,
     price: 449,
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 899 },
     category: 'Upcycled Glasses',
@@ -952,6 +964,19 @@ export const CATEGORIES: Category[] = [
 
 /** Shop filter pills — always matches {@link CATEGORIES} order. */
 export const SHOP_CATEGORY_FILTERS = ['All', ...CATEGORIES.map((c) => c.name)] as const;
+
+/** Resolve `?category=` query value to a valid shop filter label. */
+export function resolveShopCategory(param: string | null): string {
+  if (!param) return 'All';
+  if ((SHOP_CATEGORY_FILTERS as readonly string[]).includes(param)) return param;
+  return 'All';
+}
+
+/** Shop URL for a collection filter (`All` → `/shop`). */
+export function getShopCategoryPath(category: string): string {
+  if (category === 'All') return '/shop';
+  return `/shop?category=${encodeURIComponent(category)}`;
+}
 
 /** Gallery page — still photos from the ReSip workshop and events. */
 export const GALLERY_IMAGES: string[] = [

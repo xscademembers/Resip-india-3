@@ -8,7 +8,10 @@ import {
   getGlassSetEntryPrice,
   getProductGalleryImages,
   getProductPriceCaption,
+  getShopCategoryPath,
+  getVisibleProducts,
   isCandleProduct,
+  isProductVisible,
   sellsGlassSets,
 } from './constants';
 import type { GlassSetSize } from './constants';
@@ -32,7 +35,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [fragrance, setFragrance] = useState('');
   const [labelType, setLabelType] = useState<CandleLabelType>('text');
-  const product = PRODUCTS.find((p) => p.id === id);
+  const product = PRODUCTS.find((p) => p.id === id && isProductVisible(p));
 
   const isCandle = product ? isCandleProduct(product) : false;
   const isSetSku = product ? sellsGlassSets(product) : false;
@@ -94,6 +97,12 @@ const ProductDetail = () => {
           <Link to="/shop" className="flex items-center gap-2 text-charcoal/40 hover:text-brand-blue transition-colors text-sm font-bold uppercase tracking-widest">
             <ChevronLeft size={16} /> Back to Collection
           </Link>
+          <Link
+            to={getShopCategoryPath(product.category)}
+            className="mt-3 inline-block text-xs font-bold uppercase tracking-widest text-charcoal/40 hover:text-brand-blue transition-colors"
+          >
+            View all in {product.category}
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[35fr_65fr] lg:gap-16">
@@ -117,9 +126,12 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div className="w-full min-w-0 space-y-10">
             <div>
-              <span className="text-brand-gold font-display font-bold tracking-[0.3em] uppercase text-xs mb-4 block">
+              <Link
+                to={getShopCategoryPath(product.category)}
+                className="text-brand-gold font-display font-bold tracking-[0.3em] uppercase text-xs mb-4 block hover:text-brand-blue transition-colors"
+              >
                 {product.category}
-              </span>
+              </Link>
               <h1 className="text-5xl md:text-6xl mb-6">{product.name}</h1>
               {isSetSku && product.glassSetPricing ? (
                 <p className="text-3xl font-display font-bold text-[var(--color-brand-blue)]">
@@ -281,7 +293,7 @@ const ProductDetail = () => {
         <div className="mt-32">
           <h2 className="text-3xl font-bold mb-12">You May Also Like</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {PRODUCTS.filter(p => p.id !== id).slice(0, 4).map(p => (
+            {getVisibleProducts().filter(p => p.id !== id).slice(0, 4).map(p => (
               <Link key={p.id} to={`/product/${p.id}`} onClick={() => window.scrollTo(0, 0)}>
                 <div className="group space-y-4">
                   <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-brand-bg">

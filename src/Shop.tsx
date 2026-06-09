@@ -1,33 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Search } from 'lucide-react';
 import { ProductCard } from './components';
-import { PRODUCTS, SHOP_CATEGORY_FILTERS, sortProductsForShop } from './constants';
+import {
+  getVisibleProducts,
+  SHOP_CATEGORY_FILTERS,
+  getShopCategoryPath,
+  resolveShopCategory,
+  sortProductsForShop,
+} from './constants';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
-  const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    const param = searchParams.get('category');
-    if (!param) {
-      setActiveCategory('All');
-      return;
-    }
-    if ((SHOP_CATEGORY_FILTERS as readonly string[]).includes(param)) {
-      setActiveCategory(param);
-    } else {
-      setActiveCategory('All');
-    }
-  }, [searchParams]);
+  const activeCategory = useMemo(
+    () => resolveShopCategory(searchParams.get('category')),
+    [searchParams]
+  );
 
   const categoryProducts =
     activeCategory === 'All'
-      ? PRODUCTS
-      : PRODUCTS.filter((p) => p.category === activeCategory);
+      ? getVisibleProducts()
+      : getVisibleProducts().filter((p) => p.category === activeCategory);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -59,22 +56,26 @@ const Shop = () => {
 
         {/* Filters & Search */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12 pb-8 border-b border-brand-blue/10">
-          <div className="flex flex-wrap gap-4">
-            {SHOP_CATEGORY_FILTERS.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                  activeCategory === cat 
-                    ? 'bg-brand-blue text-white shadow-lg' 
-                    : 'bg-white text-charcoal/60 hover:bg-brand-blue/5'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-          
+          <nav className="flex flex-wrap gap-4" aria-label="Shop categories">
+            {SHOP_CATEGORY_FILTERS.map((cat) => {
+              const isActive = activeCategory === cat;
+              return (
+                <Link
+                  key={cat}
+                  to={getShopCategoryPath(cat)}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+                    isActive
+                      ? 'bg-brand-blue text-white shadow-lg'
+                      : 'bg-white text-charcoal/60 hover:bg-brand-blue/5'
+                  }`}
+                >
+                  {cat}
+                </Link>
+              );
+            })}
+          </nav>
+
           <div className="relative w-full md:w-72">
             <label htmlFor="shop-search" className="sr-only">
               Search products
