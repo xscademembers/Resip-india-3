@@ -160,19 +160,19 @@ export const RETURN_ADDRESS =
 /** Rotating promo line above the site header (all pages). */
 export const ANNOUNCEMENT_MESSAGES = [
   'Free delivery on orders above ₹999',
-  'Handcrafted upcycled glassware — made in India',
+  'Handcrafted upcycled glassware   made in India',
   'Eco-friendly packaging on every order',
   'Customisation is available for all products',
 ] as const;
 
-/** Primary brand logo — header, footer, and favicon. */
+/** Primary brand logo   header, footer, and favicon. */
 export const BRAND_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png';
 
 export const BRAND_LOGO_HEADER_SRC = BRAND_LOGO_SRC;
 export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 
-/** Footer trust badges — upcycle and Make in India. */
+/** Footer trust badges   upcycle and Make in India. */
 export const FOOTER_UPCYCLE_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_5d6a139dc29c4143ad359a8615d47ac1~mv2.png';
 export const FOOTER_MAKE_IN_INDIA_LOGO_SRC =
@@ -188,7 +188,7 @@ export interface MediaPartner {
 /** Placeholder for collection cards not yet photographed. */
 export const CATEGORY_COMING_SOON_IMAGE = '/images/category-coming-soon.svg';
 
-/** Home page — “Our Media Partners” marquee (replace logos when assets are ready). */
+/** Home page   “Our Media Partners” marquee (replace logos when assets are ready). */
 export const MEDIA_PARTNERS: MediaPartner[] = [
   { id: 'media-partner-1', name: 'Media Partner 1', logo: CATEGORY_COMING_SOON_IMAGE },
   { id: 'media-partner-2', name: 'Media Partner 2', logo: CATEGORY_COMING_SOON_IMAGE },
@@ -217,7 +217,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_c7886d407d5a42f49163699b75b95a3b~mv2.jpg',
     ],
     description:
-      'Hand-cut drinking glass upcycled from Bombay Sapphire bottles—premium sapphire-blue glass for everyday pours.',
+      'Hand-cut drinking glass upcycled from Bombay Sapphire bottles premium sapphire-blue glass for everyday pours.',
     story:
       'ReSip India rescues Bombay Sapphire bottles from bars, cafés, and restaurants and transforms them into reusable drinkware.\n\nEach ReSip Bombay Sapphire Bottle Glass carries a story of transformation: discarded bottle to bold, food-safe tumbler.',
     features: [
@@ -246,9 +246,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_4fe20fde41a94c6eb6134c274535a333~mv2.jpg',
     ],
     description:
-      'Large-format tumbler upcycled from Old Monk bottles—generous pour with unmistakable character.',
+      'Large-format tumbler upcycled from Old Monk bottles generous pour with unmistakable character.',
     story:
-      'A once-used Old Monk bottle becomes a bold, functional ReSip Old Monk Bottle Glass—sustainability with ritual and warmth.\n\nStory and full editorial copy can be expanded when your final content is ready.',
+      'A once-used Old Monk bottle becomes a bold, functional ReSip Old Monk Bottle Glass sustainability with ritual and warmth.\n\nStory and full editorial copy can be expanded when your final content is ready.',
     features: [
       'Hand cut',
       'Volume: 600ml (~20 oz)',
@@ -275,9 +275,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_a33620dba44e4417b0f5ede99f9c77b2~mv2.jpg',
     ],
     description:
-      'Iconic tumbler upcycled from Bacardi bottles—clean lines and a familiar silhouette.',
+      'Iconic tumbler upcycled from Bacardi bottles clean lines and a familiar silhouette.',
     story:
-      'Collected Bacardi bottles are cut, smoothed, and finished into the ReSip Bacardi Bottle Glass—ready for relaxed pours and conscious living.\n\nAdditional brand storytelling to follow.',
+      'Collected Bacardi bottles are cut, smoothed, and finished into the ReSip Bacardi Bottle Glass ready for relaxed pours and conscious living.\n\nAdditional brand storytelling to follow.',
     features: [
       'Hand cut',
       'Volume: 350ml (12 oz)',
@@ -304,9 +304,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_90701fdddc5c4813ae0d10821ed0bb4b~mv2.jpg',
     ],
     description:
-      'Elegant tumbler upcycled from Antiquity whisky bottles—deep royal blue tone.',
+      'Elegant tumbler upcycled from Antiquity whisky bottles deep royal blue tone.',
     story:
-      'Antiquity whisky bottles are reborn as the ReSip Antiquity Bottle Glass—distinct colour and weight for elevated everyday use.\n\nLong-form story pending your final copy.',
+      'Antiquity whisky bottles are reborn as the ReSip Antiquity Bottle Glass distinct colour and weight for elevated everyday use.\n\nLong-form story pending your final copy.',
     features: [
       'Hand cut',
       'Volume: 400ml (~13.5 oz)',
@@ -333,9 +333,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_c75f654abf4d4691af45cffd0a7be545~mv2.jpg',
     ],
     description:
-      'Tumbler upcycled from wine bottles—emerald green glow, perfect for cold brew and soft drinks.',
+      'Tumbler upcycled from wine bottles emerald green glow, perfect for cold brew and soft drinks.',
     story:
-      'Wine bottles diverted from waste become the ReSip Wine Bottle Glass—characterful colour from the source glass.\n\nEditorial expansion to follow.',
+      'Wine bottles diverted from waste become the ReSip Wine Bottle Glass characterful colour from the source glass.\n\nEditorial expansion to follow.',
     features: [
       'Hand cut',
       'Volume: ~350ml (12 oz)',
@@ -391,9 +391,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_e6038534cc2b4163b1b14a942e973286~mv2.jpg',
     ],
     description:
-      'Beer-bottle tumbler upcycled from Kingfisher glass—effortless craft-beer moments.',
+      'Beer-bottle tumbler upcycled from Kingfisher glass effortless craft-beer moments.',
     story:
-      'Kingfisher bottles are transformed into the ReSip Kingfisher Bottle Glass—a familiar shape with a sustainable second life.\n\nExtended copy TBC.',
+      'Kingfisher bottles are transformed into the ReSip Kingfisher Bottle Glass a familiar shape with a sustainable second life.\n\nExtended copy TBC.',
     features: [
       'Hand cut',
       'Volume: 350ml (12 oz)',
@@ -420,7 +420,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_b9278efd5a264ef998d0717d58b6b789~mv2.jpg',
     ],
     description:
-      'Compact wine-bottle tumbler—olive-green tone, ideal for water, tonic, or wine service.',
+      'Compact wine-bottle tumbler olive-green tone, ideal for water, tonic, or wine service.',
     story:
       'The ReSip Mid Wine Bottle Glass gives shorter wine bottle stock a refined second act.\n\nRicher storytelling to follow with your images.',
     features: [
@@ -447,7 +447,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_3ca58910dad34724a18561f18fbedd82~mv2.jpg',
     ],
     description:
-      'Shot glass upcycled from Antiquity whisky bottles—royal blue punch for tastings and celebrations.',
+      'Shot glass upcycled from Antiquity whisky bottles royal blue punch for tastings and celebrations.',
     story:
       'Small but bold: the ReSip Antiquity Bottle Shots line is cut from Antiquity whisky glass for memorable toasts.\n\nFurther copy and photography pending.',
     features: [
@@ -503,7 +503,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_3bdbccbdfe4e4d9ebb63c5713b27f200~mv2.jpg',
     ],
     description:
-      'Gin-forward tumbler upcycled from Greater Than gin bottles—clean profile for everyday sipping.',
+      'Gin-forward tumbler upcycled from Greater Than gin bottles clean profile for everyday sipping.',
     story:
       'The ReSip Greater Than Bottle Glass celebrates a conscious pour from rescued Greater Than bottles.\n\nFull brand story TBC.',
     features: [
@@ -532,10 +532,10 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_c2506012f7df4d47b55bb1b3fa0a3ae8~mv2.png',
     ],
     description:
-      'Relaxed tumbler upcycled from Corona longneck bottles—easy shape for everyday use.',
+      'Relaxed tumbler upcycled from Corona longneck bottles easy shape for everyday use.',
     whyChooseHeading: 'Why Choose Our ReSip Corona Bottle Glass?',
     story:
-      'Corona bottles get a second life as the ReSip Corona Bottle Glass—laid-back, durable, and unmistakably ReSip.\n\nExtended marketing copy to follow.',
+      'Corona bottles get a second life as the ReSip Corona Bottle Glass laid-back, durable, and unmistakably ReSip.\n\nExtended marketing copy to follow.',
     features: [
       'Hand cut',
       'Volume: 250ml (~8.45 oz)',
@@ -562,7 +562,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_70371b206cae4864b3f3e07bb1c41477~mv2.jpg',
     ],
     description:
-      'Upcycled jar from Absolut Vodka bottles—generous capacity for pantry, bar, or display.',
+      'Upcycled jar from Absolut Vodka bottles generous capacity for pantry, bar, or display.',
     story:
       'The ReSip Absolut Bottle jar gives premium bottle glass a second life as storage you will actually use.\n\nFull story can grow with seasonal campaigns.',
     features: [
@@ -588,7 +588,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_e2fc63c50fa842d8b42d8940fb535b78~mv2.jpg',
     ],
     description:
-      'Drinking glass upcycled from Absolut Vodka bottles—balanced pour for everyday use.',
+      'Drinking glass upcycled from Absolut Vodka bottles balanced pour for everyday use.',
     story:
       'ReSip Absolut Vodka Bottle Glass turns rescued bottles into refined tumblers.\n\nExpand copy with your launch campaigns.',
     features: [
@@ -616,7 +616,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_617f48bd756d453f94d1fb68177152ac~mv2.jpg',
     ],
     description:
-      'Compact glass or mini jar from Absolut small-format bottles—ideal for tastings and small pours.',
+      'Compact glass or mini jar from Absolut small-format bottles ideal for tastings and small pours.',
     story:
       'The ReSip Absolut mini jar celebrates compact Absolut glass with zero waste left behind.',
     features: [
@@ -644,7 +644,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_b6df9d7564d340c2acc9584cfd3b1d19~mv2.png',
     ],
     description:
-      'Tumbler upcycled from Budweiser (Magnum line) bottles—bold beer heritage in glass form.',
+      'Tumbler upcycled from Budweiser (Magnum line) bottles bold beer heritage in glass form.',
     story:
       'ReSip Budweiser Bottle Glass brings diverted lager bottles back to the table with clarity and weight.',
     features: [
@@ -673,9 +673,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_a5f49a1b9905464bb32d3d202d892678~mv2.jpg',
     ],
     description:
-      'Drinking glass upcycled from Old Monk coffee liqueur bottles—deep tone and coffee-house charm.',
+      'Drinking glass upcycled from Old Monk coffee liqueur bottles deep tone and coffee-house charm.',
     story:
-      'The ReSip Old Monk Coffee Bottle Glass pairs the Old Monk story with coffee culture—rescued bottles transformed into textured tumblers with unmistakable heritage character.',
+      'The ReSip Old Monk Coffee Bottle Glass pairs the Old Monk story with coffee culture rescued bottles transformed into textured tumblers with unmistakable heritage character.',
     features: [
       'Hand cut',
       'Food-safe finish',
@@ -701,7 +701,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_dbbaf60d8d9e4a04acbbef1e1fe4226e~mv2.png',
     ],
     description:
-      'Full-size tumbler upcycled from Royal Ranthambore whisky bottles—pair with our Ranthambore shot line.',
+      'Full-size tumbler upcycled from Royal Ranthambore whisky bottles pair with our Ranthambore shot line.',
     story:
       'ReSip Ranthambore Bottle Glass complements the shot collection for a cohesive serve.\n\nImagery and narrative TBC.',
     features: [
@@ -729,9 +729,9 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_44ef30afbb954603beb121bb233c196d~mv2.png',
     ],
     description:
-      'Serving bowl from Old Monk bottle glass—snacks, nuts, or signature plating.',
+      'Serving bowl from Old Monk bottle glass snacks, nuts, or signature plating.',
     story:
-      'The ReSip Old Monk Bowl widens the Old Monk story beyond the tumbler—perfect for shared bites.',
+      'The ReSip Old Monk Bowl widens the Old Monk story beyond the tumbler perfect for shared bites.',
     features: [
       'Hand finished',
       'Food-safe where applicable',
@@ -757,7 +757,7 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/7dc839_1dad7c2cc41948a6b39718a824cdeb78~mv2.png',
     ],
     description:
-      'Statement “face” cut glass from Old Monk stock—a signature silhouette for collectors.',
+      'Statement “face” cut glass from Old Monk stock a signature silhouette for collectors.',
     story:
       'The ReSip Old Monk Face Glass highlights artisan cutting from familiar bottle cues.',
     features: [
@@ -781,10 +781,10 @@ export const PRODUCTS: Product[] = [
       'https://static.wixstatic.com/media/9356bd_ced3b40f903146d3bdc1e2ebe55acb4e~mv2.jpg',
     ],
     description:
-      'Hand-poured scented candle in an upcycled wine bottle—natural soy wax with a clean, long burn.',
+      'Hand-poured scented candle in an upcycled wine bottle natural soy wax with a clean, long burn.',
     whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
     story:
-      'ReSip Scented Candles give rescued wine bottles a calm second life—poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
+      'ReSip Scented Candles give rescued wine bottles a calm second life poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
     features: [
       'Made from upcycled wine bottle',
       'Format: 250gm · ~65h burn',
@@ -803,16 +803,16 @@ export const PRODUCTS: Product[] = [
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 849 },
     category: 'Scented Candles',
     image:
-      'https://static.wixstatic.com/media/9356bd_711c47ea360943e98679f1a4fccd618c~mv2.jpg',
-    images: [
-      'https://static.wixstatic.com/media/9356bd_711c47ea360943e98679f1a4fccd618c~mv2.jpg',
       'https://static.wixstatic.com/media/9356bd_79b911e9c6824521a2a06309ab10ac8d~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_79b911e9c6824521a2a06309ab10ac8d~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_711c47ea360943e98679f1a4fccd618c~mv2.jpg',
     ],
     description:
-      'Hand-poured scented candle in an upcycled beer bottle—natural soy wax with a warm, long burn.',
+      'Hand-poured scented candle in an upcycled beer bottle natural soy wax with a warm, long burn.',
     whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
     story:
-      'ReSip Scented Candle 2 turns rescued beer bottles into ambient light—poured with natural soy wax and a cotton wick for a cozy, non-toxic glow.\n\nPick your fragrance and label style to make each set your own.',
+      'ReSip Scented Candle 2 turns rescued beer bottles into ambient light poured with natural soy wax and a cotton wick for a cozy, non-toxic glow.\n\nPick your fragrance and label style to make each set your own.',
     features: [
       'Made from upcycled beer bottle',
       'Format: 200gm · ~60h burn',
@@ -831,16 +831,16 @@ export const PRODUCTS: Product[] = [
     glassSetPricing: { format: '24', setOf2: 349, setOf4: 649 },
     category: 'Scented Candles',
     image:
-      'https://static.wixstatic.com/media/9356bd_0d48bb17ef10431db70f991b47113c2f~mv2.png',
-    images: [
-      'https://static.wixstatic.com/media/9356bd_0d48bb17ef10431db70f991b47113c2f~mv2.png',
       'https://static.wixstatic.com/media/9356bd_cbf80fc4f00c4113ab61aa39b0f7ea7c~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_cbf80fc4f00c4113ab61aa39b0f7ea7c~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_0d48bb17ef10431db70f991b47113c2f~mv2.png',
     ],
     description:
-      'Hand-poured scented candle in an upcycled wine bottle with a sculpted face silhouette—natural soy wax with a warm, long burn.',
+      'Hand-poured scented candle in an upcycled wine bottle with a sculpted face silhouette natural soy wax with a warm, long burn.',
     whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
     story:
-      'ReSip Scented Candle 3 pairs artisan glass character with a calm pour—rescued wine bottles shaped into a distinctive silhouette, filled with natural soy wax and a cotton wick.\n\nChoose your fragrance and label style to make every set feel personal.',
+      'ReSip Scented Candle 3 pairs artisan glass character with a calm pour rescued wine bottles shaped into a distinctive silhouette, filled with natural soy wax and a cotton wick.\n\nChoose your fragrance and label style to make every set feel personal.',
     features: [
       'Made from upcycled wine bottle',
       'Format: 180gm · ~55h burn',
@@ -859,16 +859,16 @@ export const PRODUCTS: Product[] = [
     glassSetPricing: { format: '24', setOf2: 549, setOf4: 1049 },
     category: 'Scented Candles',
     image:
-      'https://static.wixstatic.com/media/9356bd_ccc3a6d2f7af4484a6bb751df2012400~mv2.png',
-    images: [
-      'https://static.wixstatic.com/media/9356bd_ccc3a6d2f7af4484a6bb751df2012400~mv2.png',
       'https://static.wixstatic.com/media/9356bd_1cd4a95dd2f0416da98fdaabdefcc507~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_1cd4a95dd2f0416da98fdaabdefcc507~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_ccc3a6d2f7af4484a6bb751df2012400~mv2.png',
     ],
     description:
-      'Hand-poured scented candle in an upcycled wine bottle with floral wax detailing—natural soy wax with a warm, long burn.',
+      'Hand-poured scented candle in an upcycled wine bottle with floral wax detailing natural soy wax with a warm, long burn.',
     whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
     story:
-      'ReSip Scented Candle 4 brings a decorative touch to rescued wine bottles—poured with natural soy wax, finished with floral wax accents, and lit with a cotton wick for a cozy glow.\n\nChoose your fragrance and label style to make every set feel personal.',
+      'ReSip Scented Candle 4 brings a decorative touch to rescued wine bottles poured with natural soy wax, finished with floral wax accents, and lit with a cotton wick for a cozy glow.\n\nChoose your fragrance and label style to make every set feel personal.',
     features: [
       'Made from upcycled wine bottle',
       'Format: 250gm · ~65h burn',
@@ -887,16 +887,16 @@ export const PRODUCTS: Product[] = [
     glassSetPricing: { format: '24', setOf2: 449, setOf4: 849 },
     category: 'Scented Candles',
     image:
-      'https://static.wixstatic.com/media/9356bd_3ee1c796b852485cb8bae573874c8059~mv2.png',
-    images: [
-      'https://static.wixstatic.com/media/9356bd_3ee1c796b852485cb8bae573874c8059~mv2.png',
       'https://static.wixstatic.com/media/9356bd_ba0dbefe4fe744799b24038a4d672c95~mv2.png',
+    images: [
+      'https://static.wixstatic.com/media/9356bd_ba0dbefe4fe744799b24038a4d672c95~mv2.png',
+      'https://static.wixstatic.com/media/9356bd_3ee1c796b852485cb8bae573874c8059~mv2.png',
     ],
     description:
-      'Hand-poured scented candle in an upcycled wine bottle—natural soy wax with a clean, long burn.',
+      'Hand-poured scented candle in an upcycled wine bottle natural soy wax with a clean, long burn.',
     whyChooseHeading: 'Why Choose Our ReSip Scented Candles?',
     story:
-      'ReSip Scented Candle 5 gives rescued wine bottles a calm second life—poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
+      'ReSip Scented Candle 5 gives rescued wine bottles a calm second life poured with natural soy wax and a cotton wick for a warm, non-toxic glow at home.\n\nEach set lets you pick your fragrance and label style so every candle feels personal.',
     features: [
       'Made from upcycled wine bottle',
       'Format: 150gm · ~45h burn',
@@ -962,7 +962,7 @@ export const CATEGORIES: Category[] = [
   { id: 'corporate', name: 'Corporate Box', image: CATEGORY_COMING_SOON_IMAGE },
 ];
 
-/** Shop filter pills — always matches {@link CATEGORIES} order. */
+/** Shop filter pills   always matches {@link CATEGORIES} order. */
 export const SHOP_CATEGORY_FILTERS = ['All', ...CATEGORIES.map((c) => c.name)] as const;
 
 /** Resolve `?category=` query value to a valid shop filter label. */
@@ -978,10 +978,8 @@ export function getShopCategoryPath(category: string): string {
   return `/shop?category=${encodeURIComponent(category)}`;
 }
 
-/** Gallery page — still photos from the ReSip workshop and events. */
+/** Gallery page   still photos from the ReSip workshop and events. */
 export const GALLERY_IMAGES: string[] = [
-  'https://static.wixstatic.com/media/9356bd_62a4ffc45b8242e495b34ac3c44bb774~mv2.jpg',
-  'https://static.wixstatic.com/media/9356bd_c20c4af3d3d84d8c89f2b5592644f6bc~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_e30f9bad456049d28277b5806c843429~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_347b8ffa322e47a5b143ec09f73af2f5~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_ae5987478bbe48dda292be427f2ed48f~mv2.jpg',
@@ -995,21 +993,9 @@ export const GALLERY_IMAGES: string[] = [
   'https://static.wixstatic.com/media/9356bd_6d3d11e11d2d4b989e9907e67c3bc24b~mv2.png',
   'https://static.wixstatic.com/media/9356bd_4618cd9e756943ddb9aa2c2dbf968041~mv2.png',
   'https://static.wixstatic.com/media/9356bd_f322c680da9a489cbe48cc07afeaea9a~mv2.jpg',
-  'https://static.wixstatic.com/media/9356bd_17aa6aa7e48a43ac955e66091b1929f8~mv2.jpeg',
   'https://static.wixstatic.com/media/9356bd_f761273dadd7444da8afd8f910d71096~mv2.png',
   'https://static.wixstatic.com/media/9356bd_b64db589f83941e2b140637c2b7ab28f~mv2.png',
 ];
 
-/** Gallery page — workshop and event videos. */
-export const GALLERY_VIDEOS: string[] = [
-  'https://video.wixstatic.com/video/9356bd_a9830f9ea50340f49a2d83d820777b48/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_22610953964344878dc2f98bed2dc074/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_a1323fa171b645e3bc47a32392896c1b/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_5fb0cac327f94437a984b61d8d1f56bb/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_9a589266240c429780e11cfeda332c41/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_ce0c1a381b114b2c8e4d1831e95cd0e3/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_dc4febdbe4314d8dafbddde3cdc2c7e9/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_f36ff6403dae40c9a9ff1bf7d52596b3/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_a8b61ecacb884ef58989f3551fbd9db5/1080p/mp4/file.mp4',
-  'https://video.wixstatic.com/video/9356bd_eeeeb4d478eb41239da974954a40b08e/1080p/mp4/file.mp4',
-];
+/** Gallery page   workshop and event videos. */
+export const GALLERY_VIDEOS: string[] = [];

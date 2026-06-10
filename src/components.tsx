@@ -17,6 +17,7 @@ import {
   BRAND_LOGO_SRC,
   CATEGORIES,
   getShopCategoryPath,
+  isCandleProduct,
   type GlassSetSize,
   type GlassSetPricing,
   type Product,
@@ -32,7 +33,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-const BRAND_LOGO_LABEL = 'ReSip India — Upcycling With A Cause';
+const BRAND_LOGO_LABEL = 'ReSip India Upcycling With A Cause';
 
 type BrandLogoProps = {
   /** Full-colour lockup, or white for dark backgrounds. */
@@ -42,7 +43,7 @@ type BrandLogoProps = {
   priority?: boolean;
 };
 
-/** Site logo — colour on light backgrounds, white mask on dark (footer / hero nav). */
+/** Site logo colour on light backgrounds, white mask on dark (footer / hero nav). */
 export function BrandLogo({
   variant = 'color',
   displayWidth = IMG_WIDTHS.LOGO,
@@ -115,12 +116,12 @@ export const AnnouncementBanner = () => {
             className="max-w-full truncate text-center text-[11px] font-semibold uppercase tracking-[0.28em] md:text-xs md:tracking-[0.32em]"
           >
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
-              ◆{' '}
+              � �{' '}
             </span>
             {message}
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
               {' '}
-              ◆
+              � �
             </span>
           </motion.p>
         </AnimatePresence>
@@ -393,7 +394,7 @@ export const Footer = () => {
       </div>
 
       <div className="max-w-7xl mx-auto pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-white/40 font-light">
-        <p>© 2026 Resip India. All rights reserved.</p>
+        <p>� 2026 Resip India. All rights reserved.</p>
         <div className="flex gap-8">
           <a href="#" className="hover:text-white">Privacy Policy</a>
           <a href="#" className="hover:text-white">Terms of Service</a>
@@ -434,7 +435,7 @@ function MediaPartnerLogo({ partner }: { partner: MediaPartner }) {
 }
 
 /**
- * Infinite horizontal marquee — four partner logos visible, seamless loop.
+ * Infinite horizontal marquee four partner logos visible, seamless loop.
  */
 export const MediaPartnersMarquee = () => {
   const reduceMotion = useReducedMotion();
@@ -606,7 +607,7 @@ export const BeforeAfterSlider = ({
       aria-valuemax={100}
       aria-valuenow={Math.round(sliderPos)}
     >
-      {/* After image — full base layer */}
+      {/* After image full base layer */}
       <div className="absolute inset-0 bg-white">
         <OptimizedImage
           src={after}
@@ -616,7 +617,7 @@ export const BeforeAfterSlider = ({
         />
       </div>
 
-      {/* Before image — clipped; inner frame matches full container size */}
+      {/* Before image clipped; inner frame matches full container size */}
       <div
         ref={clipRef}
         className="absolute inset-y-0 left-0 overflow-hidden bg-white"
@@ -673,6 +674,87 @@ export const BeforeAfterSlider = ({
   );
 };
 
+type CandleDualImageHoverProps = {
+  product: Product;
+  variant?: 'card' | 'detail';
+  displayWidth?: number;
+  className?: string;
+};
+
+/** Scented candles: image 1 by default; on hover, fade to image 2 (no zoom). */
+export function CandleDualImageHover({
+  product,
+  variant = 'card',
+  displayWidth,
+  className,
+}: CandleDualImageHoverProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const [hovered, setHovered] = useState(false);
+  const images = getProductGalleryImages(product);
+  const primary = images[0];
+  const secondary = images[1] ?? primary;
+  const width = displayWidth ?? (variant === 'detail' ? IMG_WIDTHS.DETAIL : IMG_WIDTHS.THUMB);
+  const objectFit = variant === 'detail' ? 'object-contain' : 'object-cover';
+  const showSecondary = !shouldReduceMotion && hovered && secondary !== primary;
+  const fadeMs = shouldReduceMotion ? 0 : 500;
+
+  const handleEnter = () => {
+    if (!shouldReduceMotion) setHovered(true);
+  };
+
+  const handleLeave = () => {
+    setHovered(false);
+  };
+
+  return (
+    <div
+      className={cn(
+        'relative aspect-square w-full overflow-hidden bg-brand-bg',
+        variant === 'detail' && 'rounded-2xl shadow-lg',
+        className,
+      )}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={handleLeave}
+      {...(variant === 'detail'
+        ? { tabIndex: 0, 'aria-label': `${product.name} product photos` }
+        : {})}
+    >
+      <img
+        src={optimizedSrc(primary, width)}
+        srcSet={optimizedSrcSet(primary, width)}
+        sizes={`(max-width: ${width}px) 100vw, ${width}px`}
+        alt={product.name}
+        loading={variant === 'detail' ? 'eager' : 'lazy'}
+        decoding="async"
+        referrerPolicy="no-referrer"
+        className={cn('absolute inset-0 h-full w-full', objectFit)}
+        style={{
+          opacity: showSecondary ? 0 : 1,
+          transition: fadeMs ? `opacity ${fadeMs}ms ease-in-out` : undefined,
+        }}
+      />
+      {secondary !== primary ? (
+        <img
+          src={optimizedSrc(secondary, width)}
+          srcSet={optimizedSrcSet(secondary, width)}
+          sizes={`(max-width: ${width}px) 100vw, ${width}px`}
+          alt={`${product.name} alternate view`}
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+          className={cn('absolute inset-0 h-full w-full', objectFit)}
+          style={{
+            opacity: showSecondary ? 1 : 0,
+            transition: fadeMs ? `opacity ${fadeMs}ms ease-in-out` : undefined,
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 /**
  * Product gallery with prev/next controls; respects prefers-reduced-motion.
  */
@@ -721,7 +803,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
             key={currentSrc}
             src={currentSrc}
             displayWidth={IMG_WIDTHS.DETAIL}
-            alt={`${product.name} — image ${index + 1} of ${len}`}
+            alt={`${product.name} image ${index + 1} of ${len}`}
             className="h-full w-full object-contain"
           />
         ) : (
@@ -731,7 +813,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
               src={optimizedSrc(currentSrc, IMG_WIDTHS.DETAIL)}
               srcSet={optimizedSrcSet(currentSrc, IMG_WIDTHS.DETAIL)}
               sizes={`(max-width: ${IMG_WIDTHS.DETAIL}px) 100vw, ${IMG_WIDTHS.DETAIL}px`}
-              alt={`${product.name} — image ${index + 1} of ${len}`}
+              alt={`${product.name} image ${index + 1} of ${len}`}
               className="absolute inset-0 h-full w-full object-contain"
               referrerPolicy="no-referrer"
               loading="lazy"
@@ -775,7 +857,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
 };
 
 /**
- * Set size selector — format 24 (sets of 2 & 4) or 612 (sets of 6 & 12).
+ * Set size selector format 24 (sets of 2 & 4) or 612 (sets of 6 & 12).
  */
 interface GlassSetPickerProps {
   pricing: GlassSetPricing;
@@ -794,7 +876,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
           Choose your set
         </legend>
         <p id="glass-set-hint" className="mb-4 text-sm text-charcoal/60">
-          Sold in sets of 2 or 4 only — price is per set.
+          Sold in sets of 2 or 4 only price is per set.
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
           <label
@@ -818,7 +900,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
               <span className="flex flex-col gap-1">
                 <span className="font-bold text-charcoal">Set of 2</span>
                 <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                  ₹{formatInr(pricing.setOf2)}
+                  ?{formatInr(pricing.setOf2)}
                 </span>
               </span>
             </span>
@@ -844,7 +926,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
               <span className="flex flex-col gap-1">
                 <span className="font-bold text-charcoal">Set of 4</span>
                 <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                  ₹{formatInr(pricing.setOf4)}
+                  ?{formatInr(pricing.setOf4)}
                 </span>
               </span>
             </span>
@@ -860,7 +942,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
         Choose your set
       </legend>
       <p id="glass-set-hint-612" className="mb-4 text-sm text-charcoal/60">
-        Sold in sets of 6 or 12 only — price is per set.
+        Sold in sets of 6 or 12 only price is per set.
       </p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4">
         <label
@@ -884,7 +966,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Set of 6</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                ₹{formatInr(pricing.setOf6)}
+                ?{formatInr(pricing.setOf6)}
               </span>
             </span>
           </span>
@@ -910,7 +992,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Set of 12</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                ₹{formatInr(pricing.setOf12)}
+                ?{formatInr(pricing.setOf12)}
               </span>
             </span>
           </span>
@@ -1030,7 +1112,7 @@ export const CandleLabelPicker: React.FC<CandleLabelPickerProps> = ({
             />
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Label with image</span>
-              <span className="text-sm text-charcoal/60">+ ₹{formatInr(surcharge)} per set</span>
+              <span className="text-sm text-charcoal/60">+ ?{formatInr(surcharge)} per set</span>
             </span>
           </span>
         </label>
@@ -1049,25 +1131,33 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const shouldReduceMotion = useReducedMotion();
   const productPath = `/product/${product.id}`;
+  const isCandle = isCandleProduct(product);
 
   return (
     <motion.article
-      whileHover={shouldReduceMotion ? undefined : { y: -10 }}
-      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-blue/10 bg-white transition-all duration-500 hover:shadow-2xl"
+      whileHover={!isCandle && !shouldReduceMotion ? { y: -10 } : undefined}
+      className={cn(
+        'group flex h-full flex-col overflow-hidden rounded-2xl border border-brand-blue/10 bg-white transition-all duration-500',
+        !isCandle && 'hover:shadow-2xl',
+      )}
     >
       <Link to={productPath} className="block flex-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)]">
-        <div className="relative aspect-square overflow-hidden">
-          <OptimizedImage
-            src={product.image}
-            displayWidth={IMG_WIDTHS.THUMB}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 motion-reduce:group-hover:scale-100"
-          />
-          <div className="absolute inset-0 bg-brand-blue/0 transition-colors duration-500 group-hover:bg-brand-blue/10" />
-          <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-brand-blue opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:opacity-100">
-            Quick View
+        {isCandle ? (
+          <CandleDualImageHover product={product} variant="card" />
+        ) : (
+          <div className="relative aspect-square overflow-hidden">
+            <OptimizedImage
+              src={product.image}
+              displayWidth={IMG_WIDTHS.THUMB}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 motion-reduce:group-hover:scale-100"
+            />
+            <div className="absolute inset-0 bg-brand-blue/0 transition-colors duration-500 group-hover:bg-brand-blue/10" />
+            <div className="absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-brand-blue opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 motion-reduce:opacity-100">
+              Quick View
+            </div>
           </div>
-        </div>
+        )}
         <div className="p-6 pb-4">
           <h3 className="font-display text-xl font-bold leading-tight tracking-tight transition-colors group-hover:text-brand-blue md:text-2xl">
             {product.name}

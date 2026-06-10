@@ -17,6 +17,7 @@ import {
 import type { GlassSetSize } from './constants';
 import {
   BeforeAfterSlider,
+  CandleDualImageHover,
   CandleLabelPicker,
   FragrancePicker,
   GlassPackPicker,
@@ -108,7 +109,11 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[35fr_65fr] lg:gap-16">
           {/* Image Gallery */}
           <div className="w-full min-w-0 space-y-8">
-            <ProductImageCarousel product={product} />
+            {isCandle ? (
+              <CandleDualImageHover product={product} variant="detail" />
+            ) : (
+              <ProductImageCarousel product={product} />
+            )}
 
             {/* Transformation Visual */}
             {product.beforeImage ? (
@@ -175,27 +180,39 @@ const ProductDetail = () => {
             </div>
 
             {isCandle ? (
-              <section className="space-y-4" aria-labelledby="candle-usage-heading">
-                <h4
-                  id="candle-usage-heading"
-                  className="font-bold text-sm uppercase tracking-widest text-charcoal/40"
-                >
-                  Usage tips
-                </h4>
-                <ul className="space-y-4 rounded-2xl border border-brand-blue/10 bg-brand-bg p-6">
-                  {usageTips.map((tip) => (
-                    <li
-                      key={tip}
-                      className="flex gap-4 text-sm font-light leading-relaxed text-charcoal/75"
-                    >
+              <section aria-labelledby="candle-usage-heading">
+                <details className="group rounded-3xl border border-brand-blue/10 bg-white shadow-sm open:shadow-md motion-reduce:open:shadow-sm">
+                  <summary
+                    id="candle-usage-heading"
+                    className="cursor-pointer list-none px-6 py-5 font-display text-lg font-bold text-charcoal marker:content-none md:px-8 md:py-6 md:text-xl [&::-webkit-details-marker]:hidden"
+                  >
+                    <span className="flex items-start justify-between gap-4">
+                      <span>Usage tips</span>
                       <span
-                        className="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-gold"
+                        className="mt-1 shrink-0 text-brand-blue transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none motion-reduce:group-open:rotate-0"
                         aria-hidden
-                      />
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
+                      >
+                        ▾
+                      </span>
+                    </span>
+                  </summary>
+                  <div className="border-t border-brand-blue/10 px-6 pb-6 pt-4 md:px-8 md:pb-8">
+                    <ul className="space-y-4">
+                      {usageTips.map((tip) => (
+                        <li
+                          key={tip}
+                          className="flex gap-4 text-sm font-light leading-relaxed text-charcoal/75 md:text-base"
+                        >
+                          <span
+                            className="mt-2 h-2 w-2 shrink-0 rounded-full bg-brand-gold"
+                            aria-hidden
+                          />
+                          <span>{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </details>
               </section>
             ) : null}
 

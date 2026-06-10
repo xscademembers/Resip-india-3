@@ -73,7 +73,7 @@ const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: L
     step: 1,
     title: 'Origin: The Dump Bottle',
     description:
-      'Every piece starts as a bottle left behind—we intercept it before it becomes landfill.',
+      'Every piece starts as a bottle left behind we intercept it before it becomes landfill.',
     Icon: Wine,
   },
   {
@@ -115,13 +115,13 @@ const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: L
   {
     step: 8,
     title: 'Packaging with Care',
-    description: 'Thoughtful, protective packing—ready to travel without a scratch.',
+    description: 'Thoughtful, protective packing ready to travel without a scratch.',
     Icon: Package,
   },
   {
     step: 9,
     title: 'Delivered to Happy Families',
-    description: 'From our bench to your table—made to be loved for years.',
+    description: 'From our bench to your table made to be loved for years.',
     Icon: Users,
   },
 ];
@@ -170,14 +170,14 @@ function UpcycleStepCard({
 const Home = () => {
   const reduceMotion = useReducedMotion();
 
-  /* First six catalog products — visuals align with site; tiles link to @resip_india on Instagram. */
+  /* First six catalog products   visuals align with site; tiles link to @resip_india on Instagram. */
   const instagramSpotlight = useMemo(
     () =>
       getVisibleProducts().slice(0, 6).map((p) => ({
         id: p.id,
         src: p.image,
         name: p.name,
-        alt: `${p.name} — ReSip India handcrafted glassware`,
+        alt: `${p.name}   ReSip India handcrafted glassware`,
       })),
     []
   );
@@ -293,7 +293,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Process Section — nine steps, simple 1→9 flow */}
+      {/* Process Section   nine steps, simple 1→9 flow */}
       <section
         id="process"
         className="border-t border-brand-blue/10 bg-gradient-to-b from-brand-bg via-white to-brand-bg py-32 px-6"
@@ -308,7 +308,7 @@ const Home = () => {
               The art of <span className="text-brand-blue">upcycling</span>
             </h2>
             <p className="text-base font-light leading-relaxed text-charcoal/65 md:text-lg">
-              Nine deliberate stages—from the dump bottle to delivery—so every glass earns its place in your home.
+              Nine deliberate stages from the dump bottle to delivery so every glass earns its place in your home.
             </p>
           </header>
 
@@ -386,7 +386,7 @@ const Home = () => {
                 On Instagram
               </h2>
               <p className="mt-3 max-w-xl text-charcoal/60 font-light leading-relaxed">
-                Real pours, studio shots, and new drops — see everything on{' '}
+                Real pours, studio shots, and new drops   see everything on{' '}
                 <a
                   href={INSTAGRAM_PROFILE_URL}
                   target="_blank"
