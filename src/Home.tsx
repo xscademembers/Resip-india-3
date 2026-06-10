@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import {
   ArrowRight,
@@ -24,8 +24,49 @@ import { getVisibleProducts, CATEGORIES, INSTAGRAM_PROFILE_URL, getShopCategoryP
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&q=80';
+const HERO_SLIDES = [
+  'https://static.wixstatic.com/media/9356bd_c8da8f804c0040c6917734181d2df3df~mv2.jpeg',
+  'https://static.wixstatic.com/media/9356bd_a9b37b9f80984ce6ad7158b2ffc20bca~mv2.jpeg',
+  'https://static.wixstatic.com/media/9356bd_6d4b2e5ba5d24c67917bd840a5fc3f05~mv2.jpeg',
+] as const;
+
+const HERO_SLIDE_INTERVAL_MS = 6000;
+
+function HeroBackgroundSlideshow({ reduceMotion }: { reduceMotion: boolean }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (reduceMotion || HERO_SLIDES.length <= 1) return;
+    const id = window.setInterval(() => {
+      setActiveIndex((i) => (i + 1) % HERO_SLIDES.length);
+    }, HERO_SLIDE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion]);
+
+  const slideSrc = useMemo(
+    () => HERO_SLIDES.map((src) => optimizedSrc(src, IMG_WIDTHS.HERO, 75)),
+    []
+  );
+
+  return (
+    <div className="absolute inset-0 z-0" aria-hidden>
+      {slideSrc.map((src, i) => (
+        <motion.img
+          key={src}
+          src={src}
+          alt=""
+          animate={{ opacity: reduceMotion ? (i === 0 ? 1 : 0) : i === activeIndex ? 1 : 0 }}
+          transition={{ duration: reduceMotion ? 0 : 1.2, ease: 'easeInOut' }}
+          className="absolute inset-0 h-full w-full object-cover"
+          loading={i === 0 ? 'eager' : 'lazy'}
+          decoding={i === 0 ? 'sync' : 'async'}
+          fetchPriority={i === 0 ? 'high' : undefined}
+        />
+      ))}
+      <div className="absolute inset-0 bg-black/40" />
+    </div>
+  );
+}
 
 const UPCYCLE_STEPS: { step: number; title: string; description: string; Icon: LucideIcon }[] = [
   {
@@ -129,11 +170,6 @@ function UpcycleStepCard({
 const Home = () => {
   const reduceMotion = useReducedMotion();
 
-  const heroImageSrc = useMemo(
-    () => optimizedSrc(HERO_IMAGE, IMG_WIDTHS.HERO, 75),
-    []
-  );
-
   /* First six catalog products — visuals align with site; tiles link to @resip_india on Instagram. */
   const instagramSpotlight = useMemo(
     () =>
@@ -150,17 +186,7 @@ const Home = () => {
     <div className="overflow-hidden">
       {/* Hero Section */}
       <section className="relative flex h-screen items-center justify-center overflow-hidden" style={{ contentVisibility: 'visible' }}>
-        <div className="absolute inset-0 z-0">
-          <img
-            src={heroImageSrc}
-            alt="Elegant cocktail glass on a dark bar background"
-            className="absolute inset-0 h-full w-full object-cover"
-            loading="eager"
-            decoding="sync"
-            fetchPriority="high"
-          />
-          <div className="absolute inset-0 bg-black/40" />
-        </div>
+        <HeroBackgroundSlideshow reduceMotion={!!reduceMotion} />
 
         {/* Glass Reflection Overlay */}
         <div className="glass-reflection pointer-events-none absolute inset-0 z-10 opacity-30" />
