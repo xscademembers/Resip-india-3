@@ -359,16 +359,19 @@ const Home = () => {
       </section>
 
       {/* Media Partners */}
-      <section className="border-t border-brand-blue/10 bg-white py-24 px-6" aria-labelledby="media-partners-heading">
+      <section className="border-t border-brand-blue/10 bg-white py-24 px-6 md:py-28" aria-labelledby="media-partners-heading">
         <div className="mx-auto max-w-7xl">
-          <header className="mb-16 text-center">
+          <header className="mb-12 text-center md:mb-16">
             <span className="mb-4 block font-display text-xs font-bold uppercase tracking-[0.3em] text-brand-blue">
               As seen in
             </span>
             <h2 id="media-partners-heading" className="text-4xl md:text-5xl">
-              Our Media Partners
+              Our Partners
             </h2>
             <div className="mx-auto mt-6 h-1 w-24 bg-brand-gold" aria-hidden />
+            <p className="mx-auto mt-6 max-w-xl text-base font-light leading-relaxed text-charcoal/60">
+              Proudly collaborating with brands and platforms that share our vision for sustainability.
+            </p>
           </header>
           <MediaPartnersMarquee />
         </div>

@@ -182,18 +182,39 @@ export interface MediaPartner {
   id: string;
   name: string;
   logo: string;
+  image: string;
   url?: string;
 }
 
 /** Placeholder for collection cards not yet photographed. */
 export const CATEGORY_COMING_SOON_IMAGE = '/images/category-coming-soon.svg';
 
-/** Home page   “Our Media Partners” marquee (replace logos when assets are ready). */
+/** Home page — "Our Media Partners" scrolling showcase. */
 export const MEDIA_PARTNERS: MediaPartner[] = [
-  { id: 'media-partner-1', name: 'Media Partner 1', logo: CATEGORY_COMING_SOON_IMAGE },
-  { id: 'media-partner-2', name: 'Media Partner 2', logo: CATEGORY_COMING_SOON_IMAGE },
-  { id: 'media-partner-3', name: 'Media Partner 3', logo: CATEGORY_COMING_SOON_IMAGE },
-  { id: 'media-partner-4', name: 'Media Partner 4', logo: CATEGORY_COMING_SOON_IMAGE },
+  {
+    id: 'media-partner-1',
+    name: 'Media Partner',
+    logo: CATEGORY_COMING_SOON_IMAGE,
+    image: 'https://static.wixstatic.com/media/9356bd_fbf501021476490d92d2929af633b251~mv2.jpeg',
+  },
+  {
+    id: 'media-partner-2',
+    name: 'Media Partner',
+    logo: CATEGORY_COMING_SOON_IMAGE,
+    image: 'https://static.wixstatic.com/media/9356bd_b3c4e7ce4a1f4278b1129f2f4da8f17c~mv2.jpeg',
+  },
+  {
+    id: 'media-partner-3',
+    name: 'Media Partner',
+    logo: CATEGORY_COMING_SOON_IMAGE,
+    image: 'https://static.wixstatic.com/media/9356bd_b6af70a4aec94b04aaeae5fb08c0166f~mv2.jpeg',
+  },
+  {
+    id: 'media-partner-4',
+    name: 'Media Partner',
+    logo: CATEGORY_COMING_SOON_IMAGE,
+    image: 'https://static.wixstatic.com/media/9356bd_cd7cf9d6aaa94140bf3ea63f02a25361~mv2.jpeg',
+  },
 ];
 
 /** Placeholder imagery until final assets are provided. */
@@ -956,7 +977,7 @@ export function sortProductsForShop(products: Product[], category: string): Prod
 export const CATEGORIES: Category[] = [
   { id: 'og', name: 'Upcycled Glasses', image: 'https://static.wixstatic.com/media/9356bd_d66b706b85a14615af7895c609e6f96b~mv2.jpeg' },
   { id: 'vault', name: 'Upcycled Jar', image: 'https://static.wixstatic.com/media/9356bd_27cfc95a85fa4d27a6e441f425046885~mv2.png' },
-  { id: 'flame', name: 'Scented Candles', image: CATEGORY_COMING_SOON_IMAGE },
+  { id: 'flame', name: 'Scented Candles', image: 'https://static.wixstatic.com/media/9356bd_3853e6320bdc4f99b492c1e7bc429244~mv2.jpg' },
   { id: 'party', name: 'Party Box', image: CATEGORY_COMING_SOON_IMAGE },
   { id: 'candle-box', name: 'Candle Box', image: CATEGORY_COMING_SOON_IMAGE },
   { id: 'corporate', name: 'Corporate Box', image: CATEGORY_COMING_SOON_IMAGE },

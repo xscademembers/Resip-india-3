@@ -116,12 +116,12 @@ export const AnnouncementBanner = () => {
             className="max-w-full truncate text-center text-[11px] font-semibold uppercase tracking-[0.28em] md:text-xs md:tracking-[0.32em]"
           >
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
-              ù ù{' '}
+              ÔøΩ ÔøΩ{' '}
             </span>
             {message}
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
               {' '}
-              ù ù
+              ÔøΩ ÔøΩ
             </span>
           </motion.p>
         </AnimatePresence>
@@ -286,9 +286,9 @@ function WhatsAppIcon({ size = 18 }: { size?: number }) {
 
 export const Footer = () => {
   return (
-    <footer className="bg-brand-blue text-white pt-20 pb-10 px-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-        <div className="space-y-6">
+    <footer className="bg-brand-blue text-white pt-12 pb-6 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <div className="space-y-4">
           <Link
             to="/"
             className="inline-flex rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)] motion-safe:transition-opacity hover:opacity-95"
@@ -342,34 +342,19 @@ export const Footer = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-bold mb-6 text-brand-gold">Quick Links</h4>
-          <ul className="space-y-4 text-white/70 font-light">
+          <h4 className="text-sm font-bold mb-4 text-brand-gold uppercase tracking-widest">Quick Links</h4>
+          <ul className="space-y-2 text-sm text-white/70 font-light">
             <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
             <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
             <li><Link to="/shop" className="hover:text-white transition-colors">Shop All</Link></li>
             <li><Link to="/gallery" className="hover:text-white transition-colors">Gallery</Link></li>
             <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
           </ul>
-          <h4 className="mt-8 mb-4 text-sm font-bold uppercase tracking-widest text-brand-gold">
-            Collections
-          </h4>
-          <ul className="space-y-3 text-white/70 font-light">
-            {CATEGORIES.map((cat) => (
-              <li key={cat.id}>
-                <Link
-                  to={getShopCategoryPath(cat.name)}
-                  className="hover:text-white transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
 
         <div>
-          <h4 className="text-lg font-bold mb-6 text-brand-gold">Customer Care</h4>
-          <ul className="space-y-4 text-white/70 font-light">
+          <h4 className="text-sm font-bold mb-4 text-brand-gold uppercase tracking-widest">Customer Care</h4>
+          <ul className="space-y-2 text-sm text-white/70 font-light">
             <li><Link to="/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
             <li><Link to="/returns-exchange" className="hover:text-white transition-colors">Returns &amp; Exchanges</Link></li>
             <li><Link to="/care-instructions" className="hover:text-white transition-colors">Care Instructions</Link></li>
@@ -378,8 +363,8 @@ export const Footer = () => {
         </div>
 
         <div>
-          <h4 className="text-lg font-bold mb-6 text-brand-gold">Newsletter</h4>
-          <p className="text-white/70 mb-6 font-light">Join our journey towards a waste-free world.</p>
+          <h4 className="text-sm font-bold mb-4 text-brand-gold uppercase tracking-widest">Newsletter</h4>
+          <p className="text-sm text-white/70 mb-3 font-light">Join our journey towards a waste-free world.</p>
           <form className="flex gap-2">
             <input 
               type="email" 
@@ -393,8 +378,8 @@ export const Footer = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto pt-10 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-white/40 font-light">
-        <p>ù 2026 Resip India. All rights reserved.</p>
+      <div className="max-w-7xl mx-auto pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-white/40 font-light">
+        <p>ÔøΩ 2026 Resip India. All rights reserved.</p>
         <div className="flex gap-8">
           <a href="#" className="hover:text-white">Privacy Policy</a>
           <a href="#" className="hover:text-white">Terms of Service</a>
@@ -404,61 +389,48 @@ export const Footer = () => {
   );
 };
 
-function MediaPartnerLogo({ partner }: { partner: MediaPartner }) {
-  const content = (
-    <OptimizedImage
-      src={partner.logo}
-      displayWidth={160}
-      alt={partner.name}
-      className="h-16 w-auto max-w-[160px] object-contain opacity-75 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 motion-reduce:opacity-100 motion-reduce:grayscale-0"
-    />
+function MediaPartnerCard({ partner }: { partner: MediaPartner }) {
+  return (
+    <div className="group relative shrink-0 overflow-hidden rounded-xl bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-1" style={{ width: 220, height: 160 }}>
+      <img
+        src={partner.image}
+        alt={partner.name}
+        className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
   );
-
-  const className =
-    'flex h-24 w-52 shrink-0 items-center justify-center px-6 sm:w-56';
-
-  if (partner.url) {
-    return (
-      <a
-        href={partner.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-        aria-label={partner.name}
-      >
-        {content}
-      </a>
-    );
-  }
-
-  return <div className={className}>{content}</div>;
 }
 
 /**
- * Infinite horizontal marquee four partner logos visible, seamless loop.
+ * Infinite horizontal scrolling showcase √¢‚Ç¨‚Äù all four partner images visible,
+ * continuously rotating one-by-one in a seamless loop.
  */
 export const MediaPartnersMarquee = () => {
   const reduceMotion = useReducedMotion();
-  const marqueeTrack = [...MEDIA_PARTNERS, ...MEDIA_PARTNERS];
+  // Duplicate the set 3x for a seamless infinite scroll
+  const marqueeTrack = [...MEDIA_PARTNERS, ...MEDIA_PARTNERS, ...MEDIA_PARTNERS];
 
   if (reduceMotion) {
     return (
-      <ul className="mx-auto grid max-w-5xl list-none grid-cols-2 gap-8 p-0 md:grid-cols-4">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-6">
         {MEDIA_PARTNERS.map((partner) => (
-          <li key={partner.id} className="flex justify-center">
-            <MediaPartnerLogo partner={partner} />
-          </li>
+          <div key={partner.id}>
+            <MediaPartnerCard partner={partner} />
+          </div>
         ))}
-      </ul>
+      </div>
     );
   }
 
   return (
     <div
-      className="relative overflow-hidden"
+      className="relative overflow-hidden py-2"
       aria-label="Our media partners"
       role="region"
     >
+      {/* Soft gradient fade on edges */}
       <div
         className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent sm:w-24"
         aria-hidden
@@ -467,9 +439,9 @@ export const MediaPartnersMarquee = () => {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent sm:w-24"
         aria-hidden
       />
-      <div className="media-partners-marquee-track flex w-max items-center gap-8 sm:gap-12">
+      <div className="media-partners-marquee-track flex w-max items-center gap-8">
         {marqueeTrack.map((partner, index) => (
-          <MediaPartnerLogo key={`${partner.id}-${index}`} partner={partner} />
+          <MediaPartnerCard key={`${partner.id}-${index}`} partner={partner} />
         ))}
       </div>
     </div>
