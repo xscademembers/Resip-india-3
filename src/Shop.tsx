@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
 import { Search } from 'lucide-react';
@@ -9,12 +9,36 @@ import {
   getShopCategoryPath,
   resolveShopCategory,
   sortProductsForShop,
+  type Product,
 } from './constants';
+import { productsApi } from './api/products';
+import { mapApiProduct } from './api/mapProduct';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const shouldReduceMotion = useReducedMotion();
+
+  // Load from the API, falling back to bundled constants if the backend is
+  // unavailable so the storefront always renders.
+  const [products, setProducts] = useState<Product[]>(() => getVisibleProducts());
+
+  useEffect(() => {
+    let active = true;
+    productsApi
+      .list({ limit: 200 })
+      .then((res) => {
+        if (active && res.products?.length) {
+          setProducts(res.products.map(mapApiProduct));
+        }
+      })
+      .catch(() => {
+        /* keep constants fallback */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const activeCategory = useMemo(
     () => resolveShopCategory(searchParams.get('category')),
@@ -23,8 +47,8 @@ const Shop = () => {
 
   const categoryProducts =
     activeCategory === 'All'
-      ? getVisibleProducts()
-      : getVisibleProducts().filter((p) => p.category === activeCategory);
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 

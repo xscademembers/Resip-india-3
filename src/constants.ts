@@ -932,7 +932,7 @@ export const PRODUCTS: Product[] = [
 ];
 
 function compareUpcycleProducts(a: Product, b: Product): number {
-  const order = new Map(UPCYCLE_PRODUCT_ORDER.map((id, i) => [id, i]));
+  const order = new Map<string, number>(UPCYCLE_PRODUCT_ORDER.map((id, i) => [id, i]));
   const groupDiff =
     UPCYCLE_GROUP_ORDER[getUpcycleProductGroup(a)] -
     UPCYCLE_GROUP_ORDER[getUpcycleProductGroup(b)];
@@ -958,14 +958,14 @@ export function sortProductsForShop(products: Product[], category: string): Prod
   }
 
   if (category === 'Upcycled Jar') {
-    const jarOrder = new Map(JAR_PRODUCT_ORDER.map((id, i) => [id, i]));
+    const jarOrder = new Map<string, number>(JAR_PRODUCT_ORDER.map((id, i) => [id, i]));
     return [...products].sort(
       (a, b) => (jarOrder.get(a.id) ?? 99) - (jarOrder.get(b.id) ?? 99)
     );
   }
 
   if (category === 'Scented Candles') {
-    const candleOrder = new Map(CANDLE_PRODUCT_ORDER.map((id, i) => [id, i]));
+    const candleOrder = new Map<string, number>(CANDLE_PRODUCT_ORDER.map((id, i) => [id, i]));
     return [...products].sort(
       (a, b) => (candleOrder.get(a.id) ?? 99) - (candleOrder.get(b.id) ?? 99)
     );

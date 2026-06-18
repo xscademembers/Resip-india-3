@@ -1,0 +1,236 @@
+const crypto = require('crypto');
+const Order = require('../models/Order');
+const Payment = require('../models/Payment');
+const Product = require('../models/Product');
+const Inventory = require('../models/Inventory');
+const Cart = require('../models/Cart');
+const User = require('../models/User');
+const asyncHandler = require('../utils/asyncHandler');
+const { ApiError } = require('../middleware/errorHandler');
+const phonePeService = require('../services/phonePeService');
+const emailService = require('../services/emailService');
+
+// @desc    Initiate PhonePe payment
+// @route   POST /api/payments/initiate
+const initiatePayment = asyncHandler(async (req, res) => {
+  const { orderId } = req.body;
+
+  const order = await Order.findOne({
+    $or: [
+      { _id: orderId.match(/^[0-9a-fA-F]{24}$/) ? orderId : undefined },
+      { orderId },
+    ],
+    user: req.user._id,
+  });
+
+  if (!order) {
+    throw new ApiError('Order not found', 404);
+  }
+
+  if (order.paymentStatus === 'paid') {
+    throw new ApiError('Order is already paid', 400);
+  }
+
+  // Generate unique merchant transaction ID
+  const merchantTransactionId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+
+  const callbackUrl = `${process.env.API_URL}/api/payments/callback`;
+  const redirectUrl = `${process.env.CLIENT_URL}/payment/status/${merchantTransactionId}`;
+
+  // Create payment record
+  const payment = await Payment.create({
+    order: order._id,
+    user: req.user._id,
+    transactionId: merchantTransactionId,
+    phonePeMerchantTransactionId: merchantTransactionId,
+    amount: order.totalAmount,
+    method: 'phonepe',
+    status: 'initiated',
+  });
+
+  // Update order with transaction ID
+  order.transactionId = merchantTransactionId;
+  order.phonePeTransactionId = merchantTransactionId;
+  await order.save();
+
+  // Initiate PhonePe payment
+  const result = await phonePeService.initiatePayment({
+    merchantTransactionId,
+    amount: order.totalAmount,
+    userId: req.user._id.toString(),
+    redirectUrl,
+    callbackUrl,
+  });
+
+  if (!result.success) {
+    payment.status = 'failed';
+    await payment.save();
+    throw new ApiError('Payment initiation failed', 500);
+  }
+
+  res.status(200).json({
+    success: true,
+    redirectUrl: result.redirectUrl,
+    merchantTransactionId,
+  });
+});
+
+// @desc    PhonePe S2S callback
+// @route   POST /api/payments/callback
+const paymentCallback = asyncHandler(async (req, res) => {
+  const xVerify = req.headers['x-verify'];
+  const responseBody = JSON.stringify(req.body);
+
+  // Verify checksum (skip in development for testing)
+  if (process.env.NODE_ENV === 'production') {
+    const isValid = phonePeService.verifyChecksum(xVerify, responseBody);
+    if (!isValid) {
+      console.error('Invalid PhonePe callback checksum');
+      return res.status(400).json({ success: false, message: 'Invalid checksum' });
+    }
+  }
+
+  const { merchantTransactionId, code } = req.body.response
+    ? JSON.parse(Buffer.from(req.body.response, 'base64').toString())
+    : req.body;
+
+  const transactionId = merchantTransactionId || req.body.merchantTransactionId;
+
+  if (!transactionId) {
+    return res.status(400).json({ success: false, message: 'Missing transaction ID' });
+  }
+
+  // Find payment
+  const payment = await Payment.findOne({ transactionId });
+  if (!payment) {
+    console.error('Payment not found for transaction:', transactionId);
+    return res.status(404).json({ success: false, message: 'Payment not found' });
+  }
+
+  // Idempotency — skip if already processed
+  if (payment.status === 'success' || payment.status === 'failed') {
+    return res.status(200).json({ success: true, message: 'Already processed' });
+  }
+
+  // Verify payment status with PhonePe
+  const statusResult = await phonePeService.checkStatus(transactionId);
+
+  const order = await Order.findById(payment.order);
+  const user = await User.findById(payment.user);
+
+  if (statusResult.status === 'success') {
+    // Payment successful
+    payment.status = 'success';
+    payment.gatewayResponse = statusResult.data;
+    await payment.save();
+
+    if (order) {
+      order.paymentStatus = 'paid';
+      order.orderStatus = 'Confirmed';
+      order.statusHistory.push({
+        status: 'Confirmed',
+        note: 'Payment received',
+      });
+      await order.save();
+
+      // Reduce inventory
+      for (const item of order.items) {
+        const inventory = await Inventory.findOne({ product: item.product });
+        if (inventory) {
+          await inventory.reduceSaleStock(item.quantity, order._id);
+        } else {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { stock: -item.quantity },
+          });
+        }
+      }
+
+      // Clear user's cart
+      await Cart.findOneAndDelete({ user: payment.user });
+
+      // Send emails
+      if (user) {
+        await emailService.sendPaymentSuccess(order, payment, user);
+        await emailService.sendOrderConfirmation(order, user);
+      }
+    }
+  } else {
+    // Payment failed
+    payment.status = 'failed';
+    payment.gatewayResponse = statusResult.data;
+    await payment.save();
+
+    if (order) {
+      order.paymentStatus = 'failed';
+      await order.save();
+
+      if (user) {
+        await emailService.sendPaymentFailed(order, user);
+      }
+    }
+  }
+
+  res.status(200).json({ success: true });
+});
+
+// @desc    Check payment status
+// @route   GET /api/payments/status/:transactionId
+const getPaymentStatus = asyncHandler(async (req, res) => {
+  const payment = await Payment.findOne({
+    transactionId: req.params.transactionId,
+  }).populate('order', 'orderId orderStatus totalAmount');
+
+  if (!payment) {
+    throw new ApiError('Payment not found', 404);
+  }
+
+  // Verify ownership
+  if (
+    payment.user.toString() !== req.user._id.toString() &&
+    req.user.role !== 'admin'
+  ) {
+    throw new ApiError('Not authorized', 403);
+  }
+
+  // If still pending, check with PhonePe
+  if (payment.status === 'initiated' || payment.status === 'pending') {
+    try {
+      const statusResult = await phonePeService.checkStatus(req.params.transactionId);
+      if (statusResult.status !== 'pending') {
+        // Process the result — simulate callback logic
+        payment.status = statusResult.status === 'success' ? 'success' : 'failed';
+        payment.gatewayResponse = statusResult.data;
+        await payment.save();
+
+        const order = await Order.findById(payment.order);
+        if (order && statusResult.status === 'success') {
+          order.paymentStatus = 'paid';
+          order.orderStatus = 'Confirmed';
+          order.statusHistory.push({ status: 'Confirmed', note: 'Payment verified' });
+          await order.save();
+        }
+      }
+    } catch (err) {
+      // Status check failed — return current state
+      console.error('PhonePe status check failed:', err.message);
+    }
+  }
+
+  res.status(200).json({
+    success: true,
+    payment: {
+      transactionId: payment.transactionId,
+      amount: payment.amount,
+      status: payment.status,
+      method: payment.method,
+      order: payment.order,
+      createdAt: payment.createdAt,
+    },
+  });
+});
+
+module.exports = {
+  initiatePayment,
+  paymentCallback,
+  getPaymentStatus,
+};

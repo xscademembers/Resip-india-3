@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { ShoppingBag, Menu, X, ChevronRight, ChevronLeft, ArrowRight, Instagram, Facebook, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { ShoppingBag, Menu, X, ChevronRight, ChevronLeft, ArrowRight, Instagram, Facebook, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles, User as UserIcon, LayoutDashboard } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useCart } from './context/CartContext';
+import { useAuth } from './context/AuthContext';
+import { useToast } from './context/ToastContext';
+import apiClient from './api/client';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import {
@@ -145,6 +149,8 @@ export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { totalItems } = useCart();
+  const { isAuthenticated, isAdmin } = useAuth();
   const isHome = location.pathname === '/';
   const useTransparent = isHome && !isScrolled;
 
@@ -207,11 +213,42 @@ export const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <Link to="/shop" className={cn(
-            "p-2 rounded-full transition-all duration-300",
-            useTransparent ? "bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm" : "bg-brand-blue text-white hover:bg-brand-gold"
-          )}>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              aria-label="Admin dashboard"
+              className={cn(
+                'p-2 rounded-full transition-all duration-300',
+                useTransparent ? 'text-white hover:bg-white/10' : 'text-charcoal hover:text-brand-gold'
+              )}
+            >
+              <LayoutDashboard size={20} />
+            </Link>
+          )}
+          <Link
+            to={isAuthenticated ? '/account' : '/login'}
+            aria-label={isAuthenticated ? 'My account' : 'Sign in'}
+            className={cn(
+              'p-2 rounded-full transition-all duration-300',
+              useTransparent ? 'text-white hover:bg-white/10' : 'text-charcoal hover:text-brand-gold'
+            )}
+          >
+            <UserIcon size={20} />
+          </Link>
+          <Link
+            to="/cart"
+            aria-label={`Cart with ${totalItems} items`}
+            className={cn(
+              'relative p-2 rounded-full transition-all duration-300',
+              useTransparent ? 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm' : 'bg-brand-blue text-white hover:bg-brand-gold'
+            )}
+          >
             <ShoppingBag size={20} />
+            {totalItems > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-gold px-1 text-[10px] font-bold text-brand-blue">
+                {totalItems}
+              </span>
+            )}
           </Link>
         </div>
 
@@ -260,6 +297,31 @@ export const Navbar = () => {
                 ))}
               </div>
             </div>
+            <div className="flex flex-col gap-3 border-t border-brand-blue/10 pt-4">
+              <Link
+                to="/cart"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2 text-lg font-medium text-charcoal hover:text-brand-blue"
+              >
+                <ShoppingBag size={20} /> Cart {totalItems > 0 ? `(${totalItems})` : ''}
+              </Link>
+              <Link
+                to={isAuthenticated ? '/account' : '/login'}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-2 text-lg font-medium text-charcoal hover:text-brand-blue"
+              >
+                <UserIcon size={20} /> {isAuthenticated ? 'My Account' : 'Sign In'}
+              </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 text-lg font-medium text-charcoal hover:text-brand-blue"
+                >
+                  <LayoutDashboard size={20} /> Admin
+                </Link>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -285,6 +347,25 @@ function WhatsAppIcon({ size = 18 }: { size?: number }) {
 }
 
 export const Footer = () => {
+  const toast = useToast();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setSubscribing(true);
+    try {
+      const { data } = await apiClient.post('/newsletter', { email: newsletterEmail.trim() });
+      toast.success(data?.message || 'Subscribed successfully!');
+      setNewsletterEmail('');
+    } catch (err: any) {
+      toast.error(err?.message || 'Subscription failed');
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   return (
     <footer className="bg-brand-blue text-white pt-12 pb-6 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
@@ -365,14 +446,21 @@ export const Footer = () => {
         <div>
           <h4 className="text-sm font-bold mb-4 text-brand-gold uppercase tracking-widest">Newsletter</h4>
           <p className="text-sm text-white/70 mb-3 font-light">Join our journey towards a waste-free world.</p>
-          <form className="flex gap-2">
-            <input 
-              type="email" 
-              placeholder="Your email" 
+          <form className="flex gap-2" onSubmit={handleNewsletter}>
+            <input
+              type="email"
+              required
+              value={newsletterEmail}
+              onChange={(e) => setNewsletterEmail(e.target.value)}
+              placeholder="Your email"
               className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 flex-1 focus:outline-none focus:border-brand-gold transition-colors"
             />
-            <button className="bg-brand-gold text-brand-blue font-bold px-4 py-2 rounded-lg hover:bg-white transition-colors">
-              Join
+            <button
+              type="submit"
+              disabled={subscribing}
+              className="bg-brand-gold text-brand-blue font-bold px-4 py-2 rounded-lg hover:bg-white transition-colors disabled:opacity-60"
+            >
+              {subscribing ? '…' : 'Join'}
             </button>
           </form>
         </div>
@@ -389,7 +477,7 @@ export const Footer = () => {
   );
 };
 
-function MediaPartnerCard({ partner }: { partner: MediaPartner }) {
+const MediaPartnerCard: React.FC<{ partner: MediaPartner }> = ({ partner }) => {
   return (
     <div className="group relative shrink-0 overflow-hidden rounded-xl bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-1" style={{ width: 220, height: 160 }}>
       <img
@@ -1102,8 +1190,34 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const shouldReduceMotion = useReducedMotion();
-  const productPath = `/product/${product.id}`;
+  const navigate = useNavigate();
+  const { addItem } = useCart();
+  const toast = useToast();
+  const [adding, setAdding] = useState(false);
+  // API products expose Mongo _id; legacy constants products use id/legacyId.
+  const productKey = product.legacyId || product.id || product.slug;
+  const productPath = `/product/${productKey}`;
   const isCandle = isCandleProduct(product);
+  // Products with set sizes or fragrances need option selection on the detail page.
+  const needsOptions = !!product.glassSetPricing || (product.fragrances?.length ?? 0) > 0;
+
+  const handleAddToCart = async () => {
+    // Without a Mongo _id (pure constants data) we can't hit the cart API; send
+    // the shopper to the detail page to pick options instead.
+    if (!product._id || needsOptions) {
+      navigate(productPath);
+      return;
+    }
+    setAdding(true);
+    try {
+      await addItem({ productId: product._id, quantity: 1 });
+      toast.success(`${product.name} added to cart`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not add to cart');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <motion.article
@@ -1167,9 +1281,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Link>
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)]"
+          onClick={handleAddToCart}
+          disabled={adding}
+          className="flex items-center justify-center gap-2 rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-gold)] disabled:opacity-60"
         >
-          Add to Cart <ChevronRight size={16} aria-hidden />
+          {needsOptions ? 'Select Options' : 'Add to Cart'} <ChevronRight size={16} aria-hidden />
         </button>
       </div>
     </motion.article>

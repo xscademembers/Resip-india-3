@@ -1,0 +1,6 @@
+{
+  "name": "resip-india-server",
+  "private": true,
+  "type": "commonjs",
+  "description": "ReSip India Express + MongoDB backend. Forces CommonJS module resolution so the server runs even though the root package.json uses \"type\": \"module\" for the Vite frontend."
+}

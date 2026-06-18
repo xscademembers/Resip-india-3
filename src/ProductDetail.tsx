@@ -15,6 +15,11 @@ import {
   sellsGlassSets,
 } from './constants';
 import type { GlassSetSize } from './constants';
+import { productsApi } from './api/products';
+import { mapApiProduct, type ShopProduct } from './api/mapProduct';
+import { useCart } from './context/CartContext';
+import { useToast } from './context/ToastContext';
+import SEOHead from './components/SEOHead';
 import {
   BeforeAfterSlider,
   CandleDualImageHover,
@@ -36,7 +41,55 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [fragrance, setFragrance] = useState('');
   const [labelType, setLabelType] = useState<CandleLabelType>('text');
-  const product = PRODUCTS.find((p) => p.id === id && isProductVisible(p));
+  const { addItem } = useCart();
+  const toast = useToast();
+
+  // Fetch the live product so we can target the cart API by Mongo _id. The
+  // constants entry is still used for the rich UI when present.
+  const [apiProduct, setApiProduct] = useState<ShopProduct | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setApiProduct(null);
+    if (!id) return;
+    productsApi
+      .get(id)
+      .then((res) => {
+        if (active) setApiProduct(mapApiProduct(res.product));
+      })
+      .catch(() => {
+        /* product may only exist in constants */
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const constantsProduct = PRODUCTS.find((p) => p.id === id && isProductVisible(p));
+  const product = constantsProduct ?? apiProduct ?? undefined;
+
+  const handleAddToCart = async () => {
+    if (!apiProduct?._id) {
+      toast.error('This product is not available for online ordering yet.');
+      return;
+    }
+    setAdding(true);
+    try {
+      await addItem({
+        productId: apiProduct._id,
+        quantity,
+        setSize: sellsGlassSets(apiProduct) ? setSize : undefined,
+        fragrance: fragrance || undefined,
+        labelType: product?.labelImageSurcharge != null ? labelType : undefined,
+      });
+      toast.success(`${apiProduct.name} added to cart`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not add to cart');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   const isCandle = product ? isCandleProduct(product) : false;
   const isSetSku = product ? sellsGlassSets(product) : false;
@@ -92,6 +145,12 @@ const ProductDetail = () => {
 
   return (
     <div className="pt-40 pb-32 px-6 bg-white">
+      <SEOHead
+        title={product.name}
+        description={product.description || `${product.name} — handcrafted upcycled glassware from ReSip India.`}
+        image={getProductGalleryImages(product)[0]}
+        type="product"
+      />
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumbs */}
         <div className="mb-12">
@@ -269,9 +328,11 @@ const ProductDetail = () => {
                 </div>
                 <button
                   type="button"
-                  className="flex flex-1 items-center justify-center gap-3 rounded-full bg-brand-blue py-5 text-lg font-bold text-white shadow-xl shadow-brand-blue/20 transition-all duration-500 hover:bg-brand-gold"
+                  onClick={handleAddToCart}
+                  disabled={adding}
+                  className="flex flex-1 items-center justify-center gap-3 rounded-full bg-brand-blue py-5 text-lg font-bold text-white shadow-xl shadow-brand-blue/20 transition-all duration-500 hover:bg-brand-gold disabled:opacity-60"
                 >
-                  <ShoppingCart size={20} /> Add to Cart
+                  <ShoppingCart size={20} /> {adding ? 'Adding…' : 'Add to Cart'}
                 </button>
               </div>
 
