@@ -132,13 +132,17 @@ app.get('/api/settings/public', async (req, res) => {
 // In production we serve the pre-built `dist` folder as static files.
 // In development we mount Vite in middleware mode so the SAME server
 // serves the React app (with HMR) alongside the API — one process, one port.
-const isProduction = process.env.NODE_ENV === 'production';
+const fs = require('fs');
+const rootPath = path.join(__dirname, '..');
+const distPath = path.join(rootPath, 'dist');
+const hasBuiltFrontend = fs.existsSync(path.join(distPath, 'index.html'));
+// Use static files whenever a production build is present (Docker/Render deploy),
+// even if NODE_ENV was accidentally left as "development" in hosting env vars.
+const useStaticFrontend =
+  process.env.NODE_ENV === 'production' || hasBuiltFrontend;
 
 const setupFrontend = async () => {
-  const rootPath = path.join(__dirname, '..');
-
-  if (isProduction) {
-    const distPath = path.join(rootPath, 'dist');
+  if (useStaticFrontend) {
     app.use(express.static(distPath));
     // SPA fallback: any non-API route returns index.html so client routing works.
     app.get('*', (req, res) => {
