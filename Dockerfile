@@ -2,8 +2,8 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package*.json .npmrc ./
+RUN npm ci --legacy-peer-deps
 
 COPY . .
 RUN npm run build
@@ -14,8 +14,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install only what's needed to run the server.
-COPY package*.json ./
-RUN npm ci --omit=dev
+COPY package*.json .npmrc ./
+RUN npm ci --legacy-peer-deps --omit=dev
 
 # Server source + the built frontend (served as static files in production).
 COPY server ./server
