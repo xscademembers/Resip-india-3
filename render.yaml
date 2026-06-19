@@ -1,0 +1,48 @@
+# Render Blueprint — deploys the ReSip India single server (frontend + API).
+# The Dockerfile builds the Vite frontend and runs the Express server, which
+# serves both the website and the /api routes on one port.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: resip-india
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/settings/public
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render injects PORT automatically; the server reads process.env.PORT.
+      # ---- Secrets: set these in the Render dashboard (Environment tab) ----
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: JWT_COOKIE_EXPIRE
+        value: "7"
+      # CLIENT_URL should match your final site URL (Render URL or custom domain).
+      - key: CLIENT_URL
+        sync: false
+      # ---- Email (optional, for order/verification mails) ----
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # ---- Admin seed (optional) ----
+      - key: ADMIN_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
