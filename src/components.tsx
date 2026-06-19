@@ -960,7 +960,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
               <span className="flex flex-col gap-1">
                 <span className="font-bold text-charcoal">Set of 2</span>
                 <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                  ?{formatInr(pricing.setOf2)}
+                  ₹{formatInr(pricing.setOf2)}
                 </span>
               </span>
             </span>
@@ -986,7 +986,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
               <span className="flex flex-col gap-1">
                 <span className="font-bold text-charcoal">Set of 4</span>
                 <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                  ?{formatInr(pricing.setOf4)}
+                  ₹{formatInr(pricing.setOf4)}
                 </span>
               </span>
             </span>
@@ -1026,7 +1026,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Set of 6</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                ?{formatInr(pricing.setOf6)}
+                ₹{formatInr(pricing.setOf6)}
               </span>
             </span>
           </span>
@@ -1052,7 +1052,7 @@ export const GlassPackPicker: React.FC<GlassSetPickerProps> = ({ pricing, select
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Set of 12</span>
               <span className="font-display text-2xl font-bold text-[var(--color-brand-blue)]">
-                ?{formatInr(pricing.setOf12)}
+                ₹{formatInr(pricing.setOf12)}
               </span>
             </span>
           </span>
@@ -1172,7 +1172,7 @@ export const CandleLabelPicker: React.FC<CandleLabelPickerProps> = ({
             />
             <span className="flex flex-col gap-1">
               <span className="font-bold text-charcoal">Label with image</span>
-              <span className="text-sm text-charcoal/60">+ ?{formatInr(surcharge)} per set</span>
+              <span className="text-sm text-charcoal/60">+ ₹{formatInr(surcharge)} per set</span>
             </span>
           </span>
         </label>

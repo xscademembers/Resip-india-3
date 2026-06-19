@@ -27,7 +27,12 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`❌ MongoDB connection failed: ${error.message}`);
-    process.exit(1);
+    // In production a DB failure is fatal. In development we keep the server
+    // running so the frontend still loads (e.g. while you whitelist your IP).
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+    console.warn('⚠️  Continuing without a database connection (development mode).');
   }
 };
 

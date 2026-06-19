@@ -128,29 +128,54 @@ app.get('/api/settings/public', async (req, res) => {
   }
 });
 
-// ─── Serve Frontend in Production ───────────────────
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.join(__dirname, '..', 'dist');
-  app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
+// ─── Serve Frontend (single server for both dev & production) ───
+// In production we serve the pre-built `dist` folder as static files.
+// In development we mount Vite in middleware mode so the SAME server
+// serves the React app (with HMR) alongside the API — one process, one port.
+const isProduction = process.env.NODE_ENV === 'production';
 
-// ─── Error Handler ──────────────────────────────────
-app.use(errorHandler);
+const setupFrontend = async () => {
+  const rootPath = path.join(__dirname, '..');
+
+  if (isProduction) {
+    const distPath = path.join(rootPath, 'dist');
+    app.use(express.static(distPath));
+    // SPA fallback: any non-API route returns index.html so client routing works.
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+    return;
+  }
+
+  // Development: run Vite as Express middleware (provides HMR + serves the SPA).
+  const { createServer: createViteServer } = await import('vite');
+  const vite = await createViteServer({
+    root: rootPath,
+    appType: 'spa',
+    server: { middlewareMode: true },
+  });
+  app.use(vite.middlewares);
+};
 
 // ─── Start Server ───────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
+  // Mount the frontend (Vite in dev / static dist in prod) BEFORE the error handler.
+  await setupFrontend();
+
+  // Error handler must be registered last, after all routes & middleware.
+  app.use(errorHandler);
 
   const server = app.listen(PORT, () => {
     console.log(`\n🚀 Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-    console.log(`   API:  http://localhost:${PORT}/api`);
-    console.log(`   Client: ${process.env.CLIENT_URL || 'http://localhost:3000'}\n`);
+    console.log(`   App:  http://localhost:${PORT}`);
+    console.log(`   API:  http://localhost:${PORT}/api\n`);
   });
+
+  // Connect to MongoDB after the server is listening so the site still loads
+  // even if the database is unreachable (e.g. IP not yet whitelisted in dev).
+  await connectDB();
 
   // Graceful shutdown
   const shutdown = (signal) => {

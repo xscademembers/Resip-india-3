@@ -4,14 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev": "nodemon --watch server --ext js,json server/server.js",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
-    "server": "node --experimental-modules server/server.js",
-    "server:dev": "nodemon server/server.js",
-    "dev:full": "concurrently \"npm run dev\" \"npm run server:dev\"",
+    "vite": "vite --port=3000 --host=0.0.0.0",
     "seed": "node server/seed.js",
     "start": "node server/server.js"
   },
