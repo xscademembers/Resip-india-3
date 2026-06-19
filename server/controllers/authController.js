@@ -22,13 +22,14 @@ const register = asyncHandler(async (req, res) => {
   const verificationToken = user.generateVerificationToken();
   await user.save({ validateBeforeSave: false });
 
-  // Send verification email
-  await emailService.sendVerificationEmail(user, verificationToken);
-
-  // Send welcome email
-  await emailService.sendWelcomeEmail(user);
-
+  // Respond immediately — don't block account creation on email delivery.
+  // Emails are sent in the background so slow/unreachable SMTP can't hang the request.
   sendTokenResponse(user, 201, res);
+
+  Promise.allSettled([
+    emailService.sendVerificationEmail(user, verificationToken),
+    emailService.sendWelcomeEmail(user),
+  ]).catch(() => {});
 });
 
 // @desc    Login user

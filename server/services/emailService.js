@@ -22,6 +22,10 @@ class EmailService {
           user: process.env.SMTP_USER,
           pass: process.env.SMTP_PASS,
         },
+        // Fail fast instead of hanging when the mail host is slow/unreachable.
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 15000,
       });
     }
     return this.transporter;
