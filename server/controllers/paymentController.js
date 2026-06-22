@@ -31,38 +31,36 @@ const initiatePayment = asyncHandler(async (req, res) => {
     throw new ApiError('Order is already paid', 400);
   }
 
-  // Generate unique merchant transaction ID
-  const merchantTransactionId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  // Generate a unique merchant order ID (V2 uses merchantOrderId).
+  const merchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
-  const callbackUrl = `${process.env.API_URL}/api/payments/callback`;
-  const redirectUrl = `${process.env.CLIENT_URL}/payment/status/${merchantTransactionId}`;
+  // After payment, PhonePe redirects the user here; this page polls the status.
+  const redirectUrl = `${process.env.CLIENT_URL}/payment/pending?transactionId=${merchantOrderId}`;
 
   // Create payment record
   const payment = await Payment.create({
     order: order._id,
     user: req.user._id,
-    transactionId: merchantTransactionId,
-    phonePeMerchantTransactionId: merchantTransactionId,
+    transactionId: merchantOrderId,
+    phonePeMerchantTransactionId: merchantOrderId,
     amount: order.totalAmount,
     method: 'phonepe',
     status: 'initiated',
   });
 
   // Update order with transaction ID
-  order.transactionId = merchantTransactionId;
-  order.phonePeTransactionId = merchantTransactionId;
+  order.transactionId = merchantOrderId;
+  order.phonePeTransactionId = merchantOrderId;
   await order.save();
 
-  // Initiate PhonePe payment
+  // Initiate PhonePe payment (V2 Standard Checkout)
   const result = await phonePeService.initiatePayment({
-    merchantTransactionId,
+    merchantOrderId,
     amount: order.totalAmount,
-    userId: req.user._id.toString(),
     redirectUrl,
-    callbackUrl,
   });
 
-  if (!result.success) {
+  if (!result.success || !result.redirectUrl) {
     payment.status = 'failed';
     await payment.save();
     throw new ApiError('Payment initiation failed', 500);
@@ -71,30 +69,25 @@ const initiatePayment = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     redirectUrl: result.redirectUrl,
-    merchantTransactionId,
+    merchantTransactionId: merchantOrderId,
   });
 });
 
-// @desc    PhonePe S2S callback
+// @desc    PhonePe V2 webhook callback
 // @route   POST /api/payments/callback
 const paymentCallback = asyncHandler(async (req, res) => {
-  const xVerify = req.headers['x-verify'];
-  const responseBody = JSON.stringify(req.body);
-
-  // Verify checksum (skip in development for testing)
-  if (process.env.NODE_ENV === 'production') {
-    const isValid = phonePeService.verifyChecksum(xVerify, responseBody);
-    if (!isValid) {
-      console.error('Invalid PhonePe callback checksum');
-      return res.status(400).json({ success: false, message: 'Invalid checksum' });
-    }
+  // V2 webhooks are authenticated via the Authorization header
+  // (SHA256 of the username:password configured in the PhonePe dashboard).
+  const isValid = phonePeService.verifyCallback(req.headers['authorization']);
+  if (!isValid) {
+    console.error('Invalid PhonePe callback authorization');
+    return res.status(401).json({ success: false, message: 'Invalid authorization' });
   }
 
-  const { merchantTransactionId, code } = req.body.response
-    ? JSON.parse(Buffer.from(req.body.response, 'base64').toString())
-    : req.body;
-
-  const transactionId = merchantTransactionId || req.body.merchantTransactionId;
+  // V2 payload: { event, payload: { merchantOrderId, state, ... } }.
+  const payload = req.body?.payload || req.body;
+  const transactionId =
+    payload?.merchantOrderId || payload?.merchantTransactionId || req.body?.merchantOrderId;
 
   if (!transactionId) {
     return res.status(400).json({ success: false, message: 'Missing transaction ID' });

@@ -1,78 +1,117 @@
 const crypto = require('crypto');
 const axios = require('axios');
 
-const PHONEPE_URLS = {
-  UAT: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
-  PROD: 'https://api.phonepe.com/apis/hermes',
+/**
+ * PhonePe Payment Gateway — Standard Checkout V2 integration.
+ *
+ * V2 uses OAuth client credentials (client_id / client_secret / client_version)
+ * to fetch a short-lived access token, which is then sent as an
+ * `Authorization: O-Bearer <token>` header on every API call. The old V1
+ * salt-key / X-VERIFY signing is no longer used.
+ *
+ * Docs: https://developer.phonepe.com/payment-gateway/website-integration/standard-checkout
+ */
+const PHONEPE_HOSTS = {
+  SANDBOX: {
+    oauth: 'https://api-preprod.phonepe.com/apis/pg-sandbox/v1/oauth/token',
+    pg: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
+  },
+  PRODUCTION: {
+    oauth: 'https://api.phonepe.com/apis/identity-manager/v1/oauth/token',
+    pg: 'https://api.phonepe.com/apis/pg',
+  },
 };
 
 class PhonePeService {
   constructor() {
-    this.merchantId = process.env.PHONEPE_MERCHANT_ID;
-    this.saltKey = process.env.PHONEPE_SALT_KEY;
-    this.saltIndex = process.env.PHONEPE_SALT_INDEX || '1';
-    this.env = process.env.PHONEPE_ENV || 'UAT';
-    this.baseUrl = PHONEPE_URLS[this.env] || PHONEPE_URLS.UAT;
+    this.clientId = process.env.PHONEPE_CLIENT_ID;
+    this.clientSecret = process.env.PHONEPE_CLIENT_SECRET;
+    this.clientVersion = process.env.PHONEPE_CLIENT_VERSION || '1';
+
+    // Accept a few spellings; default to the sandbox for safety.
+    const env = (process.env.PHONEPE_ENV || 'SANDBOX').toUpperCase();
+    this.isProduction = env === 'PRODUCTION' || env === 'PROD';
+    this.hosts = this.isProduction ? PHONEPE_HOSTS.PRODUCTION : PHONEPE_HOSTS.SANDBOX;
+
+    // Cached OAuth token.
+    this._accessToken = null;
+    this._tokenExpiresAt = 0; // epoch seconds
+  }
+
+  isConfigured() {
+    return Boolean(this.clientId && this.clientSecret);
   }
 
   /**
-   * Generate SHA256 checksum for PhonePe API.
+   * Fetch (and cache) an OAuth access token. Refreshes ~1 min before expiry.
    */
-  generateChecksum(payload, endpoint) {
-    const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
-    const string = base64Payload + endpoint + this.saltKey;
-    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
+  async getAccessToken() {
+    const now = Math.floor(Date.now() / 1000);
+    if (this._accessToken && now < this._tokenExpiresAt - 60) {
+      return this._accessToken;
+    }
+
+    if (!this.isConfigured()) {
+      throw new Error('PhonePe is not configured (missing client credentials)');
+    }
+
+    const body = new URLSearchParams({
+      client_id: this.clientId,
+      client_version: this.clientVersion,
+      client_secret: this.clientSecret,
+      grant_type: 'client_credentials',
+    });
+
+    try {
+      const { data } = await axios.post(this.hosts.oauth, body.toString(), {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        timeout: 15000,
+      });
+
+      this._accessToken = data.access_token;
+      // `expires_at` is an epoch timestamp (seconds).
+      this._tokenExpiresAt = data.expires_at || now + 3000;
+      return this._accessToken;
+    } catch (error) {
+      console.error('PhonePe auth error:', error.response?.data || error.message);
+      throw new Error('PhonePe authentication failed');
+    }
+  }
+
+  async authHeaders() {
+    const token = await this.getAccessToken();
     return {
-      base64Payload,
-      checksum: `${sha256}###${this.saltIndex}`,
+      'Content-Type': 'application/json',
+      Authorization: `O-Bearer ${token}`,
     };
   }
 
   /**
-   * Verify callback checksum from PhonePe.
+   * Initiate a Standard Checkout payment.
+   * Returns the hosted checkout `redirectUrl` to send the user to.
    */
-  verifyChecksum(xVerifyHeader, responseBody) {
-    const string = responseBody + this.saltKey;
-    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-    const expectedChecksum = `${sha256}###${this.saltIndex}`;
-    return xVerifyHeader === expectedChecksum;
-  }
-
-  /**
-   * Initiate a payment request with PhonePe Standard Checkout.
-   */
-  async initiatePayment({ merchantTransactionId, amount, userId, redirectUrl, callbackUrl }) {
+  async initiatePayment({ merchantOrderId, amount, redirectUrl }) {
     const payload = {
-      merchantId: this.merchantId,
-      merchantTransactionId,
-      merchantUserId: userId,
-      amount: Math.round(amount * 100), // PhonePe expects paise
-      redirectUrl,
-      redirectMode: 'REDIRECT',
-      callbackUrl,
-      paymentInstrument: {
-        type: 'PAY_PAGE',
+      merchantOrderId,
+      amount: Math.round(amount * 100), // rupees → paise
+      paymentFlow: {
+        type: 'PG_CHECKOUT',
+        merchantUrls: { redirectUrl },
       },
     };
 
-    const endpoint = '/pg/v1/pay';
-    const { base64Payload, checksum } = this.generateChecksum(payload, endpoint);
-
     try {
       const response = await axios.post(
-        `${this.baseUrl}${endpoint}`,
-        { request: base64Payload },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-VERIFY': checksum,
-          },
-        }
+        `${this.hosts.pg}/checkout/v2/pay`,
+        payload,
+        { headers: await this.authHeaders(), timeout: 15000 }
       );
 
       return {
-        success: response.data.success,
-        redirectUrl: response.data.data?.instrumentResponse?.redirectInfo?.url,
+        success: true,
+        orderId: response.data.orderId,
+        redirectUrl: response.data.redirectUrl,
+        state: response.data.state,
         data: response.data,
       };
     } catch (error) {
@@ -84,30 +123,20 @@ class PhonePeService {
   }
 
   /**
-   * Check payment status.
+   * Check the status of an order by the merchant order ID.
    */
-  async checkStatus(merchantTransactionId) {
-    const endpoint = `/pg/v1/status/${this.merchantId}/${merchantTransactionId}`;
-    const string = endpoint + this.saltKey;
-    const sha256 = crypto.createHash('sha256').update(string).digest('hex');
-    const checksum = `${sha256}###${this.saltIndex}`;
-
+  async checkStatus(merchantOrderId) {
     try {
-      const response = await axios.get(`${this.baseUrl}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-VERIFY': checksum,
-          'X-MERCHANT-ID': this.merchantId,
-        },
-      });
+      const response = await axios.get(
+        `${this.hosts.pg}/checkout/v2/order/${merchantOrderId}/status`,
+        { headers: await this.authHeaders(), timeout: 15000 }
+      );
 
-      return {
-        success: response.data.success,
-        code: response.data.code,
-        status: response.data.code === 'PAYMENT_SUCCESS' ? 'success' : 
-                response.data.code === 'PAYMENT_PENDING' ? 'pending' : 'failed',
-        data: response.data.data,
-      };
+      const state = response.data.state; // COMPLETED | PENDING | FAILED
+      const status =
+        state === 'COMPLETED' ? 'success' : state === 'PENDING' ? 'pending' : 'failed';
+
+      return { success: state === 'COMPLETED', state, status, data: response.data };
     } catch (error) {
       console.error('PhonePe status check error:', error.response?.data || error.message);
       throw new Error('Payment status check failed');
@@ -115,39 +144,50 @@ class PhonePeService {
   }
 
   /**
-   * Initiate a refund.
+   * Initiate a refund for a completed order.
    */
-  async initiateRefund({ merchantTransactionId, originalTransactionId, amount }) {
+  async initiateRefund({ merchantRefundId, originalMerchantOrderId, amount }) {
     const payload = {
-      merchantId: this.merchantId,
-      merchantTransactionId,
-      originalTransactionId,
+      merchantRefundId,
+      originalMerchantOrderId,
       amount: Math.round(amount * 100),
     };
 
-    const endpoint = '/pg/v1/refund';
-    const { base64Payload, checksum } = this.generateChecksum(payload, endpoint);
-
     try {
       const response = await axios.post(
-        `${this.baseUrl}${endpoint}`,
-        { request: base64Payload },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-VERIFY': checksum,
-          },
-        }
+        `${this.hosts.pg}/payments/v2/refund`,
+        payload,
+        { headers: await this.authHeaders(), timeout: 15000 }
       );
 
-      return {
-        success: response.data.success,
-        data: response.data,
-      };
+      return { success: true, data: response.data };
     } catch (error) {
       console.error('PhonePe refund error:', error.response?.data || error.message);
       throw new Error('Refund initiation failed');
     }
+  }
+
+  /**
+   * Verify a V2 webhook callback. PhonePe signs callbacks with the SHA256 of
+   * the `username:password` you configure in the dashboard, sent in the
+   * Authorization header. Returns true when verification passes (or when no
+   * callback credentials are configured, e.g. in local development).
+   */
+  verifyCallback(authorizationHeader) {
+    const username = process.env.PHONEPE_CALLBACK_USERNAME;
+    const password = process.env.PHONEPE_CALLBACK_PASSWORD;
+
+    if (!username || !password) {
+      return true; // No webhook auth configured — skip verification.
+    }
+
+    const expected = crypto
+      .createHash('sha256')
+      .update(`${username}:${password}`)
+      .digest('hex');
+
+    const received = (authorizationHeader || '').replace(/^SHA256=/i, '').trim();
+    return received === expected;
   }
 }
 
