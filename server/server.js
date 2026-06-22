@@ -116,7 +116,7 @@ app.get('/api/banners', async (req, res) => {
 const Settings = require('./models/Settings');
 app.get('/api/settings/public', async (req, res) => {
   try {
-    const publicGroups = ['general', 'footer', 'header', 'social', 'seo'];
+    const publicGroups = ['general', 'footer', 'header', 'social', 'seo', 'tax', 'shipping'];
     const settings = await Settings.find({ group: { $in: publicGroups } });
     const result = settings.reduce((acc, s) => {
       acc[s.key] = s.value;

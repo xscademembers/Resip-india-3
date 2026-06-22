@@ -3,14 +3,29 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Inventory = require('../models/Inventory');
 const Coupon = require('../models/Coupon');
+const Settings = require('../models/Settings');
 const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
 const emailService = require('../services/emailService');
 
-// Shipping thresholds
-const FREE_SHIPPING_THRESHOLD = 999;
-const SHIPPING_CHARGE = 99;
-const TAX_PERCENT = 18;
+// Default pricing rules (used when no admin Settings value is present).
+const DEFAULT_FREE_SHIPPING_THRESHOLD = 999;
+const DEFAULT_SHIPPING_CHARGE = 99;
+const DEFAULT_TAX_PERCENT = 18;
+
+/** Load tax/shipping rules from admin Settings, falling back to defaults. */
+const getPricingConfig = async () => {
+  const [taxPercent, freeShippingThreshold, shippingCharge] = await Promise.all([
+    Settings.getSetting('tax_percent', DEFAULT_TAX_PERCENT),
+    Settings.getSetting('free_shipping_threshold', DEFAULT_FREE_SHIPPING_THRESHOLD),
+    Settings.getSetting('shipping_charge', DEFAULT_SHIPPING_CHARGE),
+  ]);
+  return {
+    taxPercent: Number(taxPercent),
+    freeShippingThreshold: Number(freeShippingThreshold),
+    shippingCharge: Number(shippingCharge),
+  };
+};
 
 // @desc    Create order
 // @route   POST /api/orders
@@ -62,9 +77,11 @@ const createOrder = asyncHandler(async (req, res) => {
     }
   }
 
+  const { taxPercent, freeShippingThreshold, shippingCharge: shippingFee } = await getPricingConfig();
+
   const afterDiscount = subtotal - couponDiscount;
-  const taxAmount = Math.round((afterDiscount * TAX_PERCENT) / 100);
-  const shippingCharge = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_CHARGE;
+  const taxAmount = Math.round((afterDiscount * taxPercent) / 100);
+  const shippingCharge = subtotal >= freeShippingThreshold ? 0 : shippingFee;
   const totalAmount = afterDiscount + taxAmount + shippingCharge;
 
   // Create order
@@ -77,7 +94,7 @@ const createOrder = asyncHandler(async (req, res) => {
     couponCode: couponDoc?.code,
     couponDiscount,
     subtotal,
-    taxPercent: TAX_PERCENT,
+    taxPercent,
     taxAmount,
     shippingCharge,
     totalAmount,

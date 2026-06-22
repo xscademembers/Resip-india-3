@@ -11,7 +11,7 @@ import SEOHead from '../../components/SEOHead';
 import type { ApiErrorShape } from '../../api/client';
 
 export default function CartPage() {
-  const { cart, loading, subtotal, tax, shipping, total, totalItems, updateItem, removeItem } = useCart();
+  const { cart, loading, subtotal, totalItems, taxPercent, getTotals, updateItem, removeItem } = useCart();
   const { isAuthenticated } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export default function CartPage() {
     }
     setApplying(true);
     try {
-      const res = await couponsApi.validate(couponCode.trim().toUpperCase());
+      const res = await couponsApi.validate(couponCode.trim().toUpperCase(), subtotal);
       setDiscount(res.discount);
       couponStore.set({ code: couponCode.trim().toUpperCase(), discount: res.discount });
       toast.success(`Coupon applied — you saved ${inr(res.discount)}`);
@@ -84,7 +84,7 @@ export default function CartPage() {
     );
   }
 
-  const grandTotal = Math.max(0, total - discount);
+  const totals = getTotals(discount);
 
   return (
     <PageContainer>
@@ -198,23 +198,23 @@ export default function CartPage() {
                 <dt className="text-charcoal/60">Subtotal</dt>
                 <dd className="font-semibold">{inr(subtotal)}</dd>
               </div>
-              {discount > 0 && (
+              {totals.discount > 0 && (
                 <div className="flex justify-between text-green-600">
                   <dt>Coupon discount</dt>
-                  <dd className="font-semibold">−{inr(discount)}</dd>
+                  <dd className="font-semibold">−{inr(totals.discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
-                <dt className="text-charcoal/60">GST (18%)</dt>
-                <dd className="font-semibold">{inr(tax)}</dd>
+                <dt className="text-charcoal/60">GST ({taxPercent}%)</dt>
+                <dd className="font-semibold">{inr(totals.tax)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-charcoal/60">Shipping</dt>
-                <dd className="font-semibold">{shipping === 0 ? 'Free' : inr(shipping)}</dd>
+                <dd className="font-semibold">{totals.shipping === 0 ? 'Free' : inr(totals.shipping)}</dd>
               </div>
               <div className="flex justify-between border-t border-brand-blue/10 pt-3 text-base">
                 <dt className="font-bold">Total</dt>
-                <dd className="font-bold text-brand-blue">{inr(grandTotal)}</dd>
+                <dd className="font-bold text-brand-blue">{inr(totals.total)}</dd>
               </div>
             </dl>
 

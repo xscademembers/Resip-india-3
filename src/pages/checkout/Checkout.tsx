@@ -26,7 +26,7 @@ const emptyAddress = {
 };
 
 export default function Checkout() {
-  const { cart, subtotal, tax, shipping, total, refresh } = useCart();
+  const { cart, subtotal, taxPercent, getTotals, refresh } = useCart();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -39,7 +39,8 @@ export default function Checkout() {
   const [placing, setPlacing] = useState(false);
 
   const coupon = couponStore.get();
-  const grandTotal = Math.max(0, total - (coupon?.discount || 0));
+  const totals = getTotals(coupon?.discount || 0);
+  const grandTotal = totals.total;
 
   useEffect(() => {
     userApi
@@ -288,19 +289,19 @@ export default function Checkout() {
                 <dt className="text-charcoal/60">Subtotal</dt>
                 <dd className="font-semibold">{inr(subtotal)}</dd>
               </div>
-              {coupon && coupon.discount > 0 && (
+              {totals.discount > 0 && (
                 <div className="flex justify-between text-green-600">
-                  <dt>Coupon ({coupon.code})</dt>
-                  <dd className="font-semibold">−{inr(coupon.discount)}</dd>
+                  <dt>Coupon ({coupon?.code})</dt>
+                  <dd className="font-semibold">−{inr(totals.discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
-                <dt className="text-charcoal/60">GST (18%)</dt>
-                <dd className="font-semibold">{inr(tax)}</dd>
+                <dt className="text-charcoal/60">GST ({taxPercent}%)</dt>
+                <dd className="font-semibold">{inr(totals.tax)}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-charcoal/60">Shipping</dt>
-                <dd className="font-semibold">{shipping === 0 ? 'Free' : inr(shipping)}</dd>
+                <dd className="font-semibold">{totals.shipping === 0 ? 'Free' : inr(totals.shipping)}</dd>
               </div>
               <div className="flex justify-between border-t border-brand-blue/10 pt-3 text-base">
                 <dt className="font-bold">Total</dt>

@@ -19,9 +19,19 @@ export const ordersApi = {
     apiClient.put<{ success: boolean; order: ApiOrder }>(`/orders/${id}/cancel`).then((r) => r.data.order),
 };
 
+export interface ValidatedCoupon {
+  code: string;
+  type: string;
+  value: number;
+  discount: number;
+  description?: string;
+}
+
 export const couponsApi = {
-  validate: (code: string) =>
-    apiClient.post<{ success: boolean; discount: number; coupon: any }>('/coupons/validate', { code }).then((r) => r.data),
+  validate: (code: string, orderTotal: number) =>
+    apiClient
+      .post<{ success: boolean; coupon: ValidatedCoupon }>('/coupons/validate', { code, orderTotal })
+      .then((r) => ({ discount: r.data.coupon.discount, coupon: r.data.coupon })),
 };
 
 export const paymentsApi = {
