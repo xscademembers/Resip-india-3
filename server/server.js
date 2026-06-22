@@ -25,6 +25,10 @@ const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
+// Trust the first proxy (Render/hosting) so req.protocol reflects the real
+// client scheme (https) — needed to build correct payment return URLs.
+app.set('trust proxy', 1);
+
 // ─── Security Middleware ────────────────────────────
 app.use(helmet({
   contentSecurityPolicy: false, // Allow inline scripts for React

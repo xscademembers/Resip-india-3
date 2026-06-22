@@ -35,7 +35,11 @@ const initiatePayment = asyncHandler(async (req, res) => {
   const merchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
   // After payment, PhonePe redirects the user here; this page polls the status.
-  const redirectUrl = `${process.env.CLIENT_URL}/payment/pending?transactionId=${merchantOrderId}`;
+  // Derive the return URL from the live request origin — the single server hosts
+  // both the app and the API, so this always matches the running host/port and
+  // avoids stale CLIENT_URL mismatches. PUBLIC_URL overrides for custom domains.
+  const baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
+  const redirectUrl = `${baseUrl.replace(/\/$/, '')}/payment/pending?transactionId=${merchantOrderId}`;
 
   // Create payment record
   const payment = await Payment.create({
