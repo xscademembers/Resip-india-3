@@ -46,16 +46,10 @@ services:
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
-      # ---- PhonePe Standard Checkout V2 ----
-      - key: PHONEPE_CLIENT_ID
+      # ---- Cashfree Payment Gateway ----
+      - key: CASHFREE_APP_ID
         sync: false
-      - key: PHONEPE_CLIENT_SECRET
+      - key: CASHFREE_SECRET_KEY
         sync: false
-      - key: PHONEPE_CLIENT_VERSION
-        value: "1"
-      - key: PHONEPE_ENV
-        value: SANDBOX
-      - key: PHONEPE_CALLBACK_USERNAME
-        sync: false
-      - key: PHONEPE_CALLBACK_PASSWORD
-        sync: false
+      - key: CASHFREE_ENV
+        value: PRODUCTION

@@ -27,6 +27,13 @@ class CashfreeService {
     this.baseUrl = this.isProduction
       ? CASHFREE_HOSTS.PRODUCTION
       : CASHFREE_HOSTS.SANDBOX;
+
+    // Startup diagnostic — check if credentials are loaded
+    if (!this.appId || !this.secretKey) {
+      console.error('⚠️  Cashfree: CASHFREE_APP_ID or CASHFREE_SECRET_KEY is missing!');
+    } else {
+      console.log(`✅ Cashfree: configured (${this.isProduction ? 'PRODUCTION' : 'SANDBOX'}) — App ID: ${this.appId.slice(0, 8)}...`);
+    }
   }
 
   /** Returns true when both App ID and Secret Key are configured. */
@@ -91,13 +98,15 @@ class CashfreeService {
         data,
       };
     } catch (error) {
+      const errData = error.response?.data;
+      const errStatus = error.response?.status;
       console.error(
-        'Cashfree create order error:',
-        error.response?.data || error.message
+        `Cashfree create order error [${errStatus}]:`,
+        JSON.stringify(errData || error.message)
       );
-      throw new Error(
-        error.response?.data?.message || 'Cashfree order creation failed'
-      );
+      // Surface the actual Cashfree error message for debugging
+      const message = errData?.message || errData?.error?.message || error.message || 'Cashfree order creation failed';
+      throw new Error(`Cashfree error (${errStatus}): ${message}`);
     }
   }
 
