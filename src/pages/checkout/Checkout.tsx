@@ -108,18 +108,31 @@ export default function Checkout() {
       const { order } = await ordersApi.create({
         shippingAddress,
         couponCode: coupon?.code,
-        paymentMethod: 'phonepe',
+        paymentMethod: 'cashfree',
       });
       try {
         const pay = await paymentsApi.initiate(order._id);
         couponStore.clear();
-        if (pay.redirectUrl) {
-          window.location.href = pay.redirectUrl;
+
+        // Use the Cashfree JS SDK to open the hosted checkout.
+        const cashfree = (window as any).Cashfree?.({
+          mode: import.meta.env.PROD ? 'production' : 'sandbox',
+        });
+
+        if (cashfree && pay.paymentSessionId) {
+          cashfree.checkout({
+            paymentSessionId: pay.paymentSessionId,
+            returnUrl: `${window.location.origin}/payment/pending?order_id=${pay.merchantOrderId}`,
+          });
           return;
         }
-        navigate('/payment/pending', { state: { orderId: order.orderId } });
+
+        // Fallback: navigate to pending page for manual polling
+        navigate(`/payment/pending?order_id=${pay.merchantOrderId}`, {
+          state: { orderId: order.orderId },
+        });
       } catch (payErr) {
-        // Order was created but payment gateway is unavailable (e.g. PhonePe not configured).
+        // Order was created but payment gateway is unavailable.
         toast.error((payErr as ApiErrorShape).message || 'Payment could not be started');
         await refresh();
         navigate(`/account/orders/${order.orderId}`);
@@ -271,10 +284,10 @@ export default function Checkout() {
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold disabled:opacity-60"
               >
                 {placing && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-                Pay {inr(grandTotal)} with PhonePe
+                Pay {inr(grandTotal)} Securely
               </button>
               <p className="mt-3 text-center text-xs text-charcoal/40">
-                You will be redirected to PhonePe's secure payment page.
+                You will be redirected to Cashfree's secure payment page.
               </p>
             </div>
           )}

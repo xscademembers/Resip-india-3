@@ -17,7 +17,7 @@ const paymentSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    phonePeMerchantTransactionId: {
+    gatewayOrderId: {
       type: String,
     },
     amount: {
@@ -30,8 +30,8 @@ const paymentSchema = new mongoose.Schema(
     },
     method: {
       type: String,
-      enum: ['phonepe', 'upi', 'card', 'netbanking', 'wallet', 'cod'],
-      default: 'phonepe',
+      enum: ['cashfree', 'upi', 'card', 'netbanking', 'wallet', 'cod'],
+      default: 'cashfree',
     },
     status: {
       type: String,

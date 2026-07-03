@@ -89,8 +89,8 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['phonepe', 'cod', 'upi', 'card', 'netbanking'],
-      default: 'phonepe',
+      enum: ['cashfree', 'cod', 'upi', 'card', 'netbanking'],
+      default: 'cashfree',
     },
     paymentStatus: {
       type: String,
@@ -98,7 +98,7 @@ const orderSchema = new mongoose.Schema(
       default: 'pending',
     },
     transactionId: String,
-    phonePeTransactionId: String,
+    cashfreeOrderId: String,
     orderStatus: {
       type: String,
       enum: [

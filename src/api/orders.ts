@@ -36,8 +36,17 @@ export const couponsApi = {
 
 export const paymentsApi = {
   initiate: (orderId: string) =>
-    apiClient.post<{ success: boolean; redirectUrl: string }>('/payments/initiate', { orderId }).then((r) => r.data),
+    apiClient
+      .post<{ success: boolean; paymentSessionId: string; cfOrderId: string; merchantOrderId: string }>(
+        '/payments/initiate',
+        { orderId }
+      )
+      .then((r) => r.data),
 
   status: (transactionId: string) =>
-    apiClient.get<{ success: boolean; status: string; order?: ApiOrder }>(`/payments/status/${transactionId}`).then((r) => r.data),
+    apiClient
+      .get<{ success: boolean; payment: { status: string; order?: ApiOrder; transactionId: string } }>(
+        `/payments/status/${transactionId}`
+      )
+      .then((r) => r.data),
 };

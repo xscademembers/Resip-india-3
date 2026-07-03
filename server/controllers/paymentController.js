@@ -7,10 +7,10 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
-const phonePeService = require('../services/phonePeService');
+const cashfreeService = require('../services/cashfreeService');
 const emailService = require('../services/emailService');
 
-// @desc    Initiate PhonePe payment
+// @desc    Initiate Cashfree payment
 // @route   POST /api/payments/initiate
 const initiatePayment = asyncHandler(async (req, res) => {
   const { orderId } = req.body;
@@ -31,76 +31,97 @@ const initiatePayment = asyncHandler(async (req, res) => {
     throw new ApiError('Order is already paid', 400);
   }
 
-  // Generate a unique merchant order ID (V2 uses merchantOrderId).
-  const merchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  // Generate a unique Cashfree order ID per payment attempt.
+  const cfMerchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
-  // After payment, PhonePe redirects the user here; this page polls the status.
-  // Derive the return URL from the live request origin — the single server hosts
-  // both the app and the API, so this always matches the running host/port and
-  // avoids stale CLIENT_URL mismatches. PUBLIC_URL overrides for custom domains.
+  // Build the return URL — Cashfree appends ?order_id=... automatically.
   const baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
-  const redirectUrl = `${baseUrl.replace(/\/$/, '')}/payment/pending?transactionId=${merchantOrderId}`;
+  const returnUrl = `${baseUrl.replace(/\/$/, '')}/payment/pending?order_id={order_id}`;
+
+  // Build the webhook URL for server-to-server notifications.
+  const notifyUrl = `${baseUrl.replace(/\/$/, '')}/api/payments/callback`;
+
+  // Get customer details from the authenticated user.
+  const user = await User.findById(req.user._id);
 
   // Create payment record
   const payment = await Payment.create({
     order: order._id,
     user: req.user._id,
-    transactionId: merchantOrderId,
-    phonePeMerchantTransactionId: merchantOrderId,
+    transactionId: cfMerchantOrderId,
+    gatewayOrderId: '', // Will be updated after Cashfree responds
     amount: order.totalAmount,
-    method: 'phonepe',
+    method: 'cashfree',
     status: 'initiated',
   });
 
   // Update order with transaction ID
-  order.transactionId = merchantOrderId;
-  order.phonePeTransactionId = merchantOrderId;
+  order.transactionId = cfMerchantOrderId;
+  order.cashfreeOrderId = cfMerchantOrderId;
   await order.save();
 
-  // Initiate PhonePe payment (V2 Standard Checkout)
-  const result = await phonePeService.initiatePayment({
-    merchantOrderId,
+  // Create Cashfree order
+  const result = await cashfreeService.createOrder({
+    orderId: cfMerchantOrderId,
     amount: order.totalAmount,
-    redirectUrl,
+    customerDetails: {
+      id: req.user._id.toString(),
+      email: user?.email,
+      phone: user?.phone || '9999999999',
+      name: user?.name,
+    },
+    returnUrl,
+    notifyUrl,
   });
 
-  if (!result.success || !result.redirectUrl) {
+  if (!result.success || !result.paymentSessionId) {
     payment.status = 'failed';
     await payment.save();
     throw new ApiError('Payment initiation failed', 500);
   }
 
+  // Store the Cashfree cf_order_id
+  payment.gatewayOrderId = result.cfOrderId || '';
+  await payment.save();
+
   res.status(200).json({
     success: true,
-    redirectUrl: result.redirectUrl,
-    merchantTransactionId: merchantOrderId,
+    paymentSessionId: result.paymentSessionId,
+    cfOrderId: result.cfOrderId,
+    merchantOrderId: cfMerchantOrderId,
   });
 });
 
-// @desc    PhonePe V2 webhook callback
+// @desc    Cashfree webhook callback
 // @route   POST /api/payments/callback
 const paymentCallback = asyncHandler(async (req, res) => {
-  // V2 webhooks are authenticated via the Authorization header
-  // (SHA256 of the username:password configured in the PhonePe dashboard).
-  const isValid = phonePeService.verifyCallback(req.headers['authorization']);
+  // Verify webhook signature
+  const signature = req.headers['x-webhook-signature'];
+  const timestamp = req.headers['x-webhook-timestamp'];
+  const rawBody = req.rawBody || '';
+
+  const isValid = cashfreeService.verifyWebhook(signature, rawBody, timestamp);
   if (!isValid) {
-    console.error('Invalid PhonePe callback authorization');
-    return res.status(401).json({ success: false, message: 'Invalid authorization' });
+    console.error('Invalid Cashfree webhook signature');
+    return res.status(401).json({ success: false, message: 'Invalid signature' });
   }
 
-  // V2 payload: { event, payload: { merchantOrderId, state, ... } }.
-  const payload = req.body?.payload || req.body;
-  const transactionId =
-    payload?.merchantOrderId || payload?.merchantTransactionId || req.body?.merchantOrderId;
+  // Parse the webhook payload.
+  // Cashfree sends: { type, data: { order: { order_id, ... }, payment: { ... } } }
+  const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  const eventType = body?.type;
+  const orderData = body?.data?.order;
+  const paymentData = body?.data?.payment;
 
+  const transactionId = orderData?.order_id;
   if (!transactionId) {
-    return res.status(400).json({ success: false, message: 'Missing transaction ID' });
+    return res.status(400).json({ success: false, message: 'Missing order_id' });
   }
 
   // Find payment
   const payment = await Payment.findOne({ transactionId });
   if (!payment) {
-    console.error('Payment not found for transaction:', transactionId);
+    console.error('Payment not found for Cashfree order:', transactionId);
     return res.status(404).json({ success: false, message: 'Payment not found' });
   }
 
@@ -109,16 +130,18 @@ const paymentCallback = asyncHandler(async (req, res) => {
     return res.status(200).json({ success: true, message: 'Already processed' });
   }
 
-  // Verify payment status with PhonePe
-  const statusResult = await phonePeService.checkStatus(transactionId);
-
   const order = await Order.findById(payment.order);
   const user = await User.findById(payment.user);
 
-  if (statusResult.status === 'success') {
+  // Determine outcome from webhook event type or order status
+  const isSuccess =
+    eventType === 'PAYMENT_SUCCESS_WEBHOOK' ||
+    orderData?.order_status === 'PAID';
+
+  if (isSuccess) {
     // Payment successful
     payment.status = 'success';
-    payment.gatewayResponse = statusResult.data;
+    payment.gatewayResponse = body?.data || {};
     await payment.save();
 
     if (order) {
@@ -126,7 +149,7 @@ const paymentCallback = asyncHandler(async (req, res) => {
       order.orderStatus = 'Confirmed';
       order.statusHistory.push({
         status: 'Confirmed',
-        note: 'Payment received',
+        note: 'Payment received via Cashfree',
       });
       await order.save();
 
@@ -154,7 +177,7 @@ const paymentCallback = asyncHandler(async (req, res) => {
   } else {
     // Payment failed
     payment.status = 'failed';
-    payment.gatewayResponse = statusResult.data;
+    payment.gatewayResponse = body?.data || {};
     await payment.save();
 
     if (order) {
@@ -189,12 +212,12 @@ const getPaymentStatus = asyncHandler(async (req, res) => {
     throw new ApiError('Not authorized', 403);
   }
 
-  // If still pending, check with PhonePe
+  // If still pending, check with Cashfree
   if (payment.status === 'initiated' || payment.status === 'pending') {
     try {
-      const statusResult = await phonePeService.checkStatus(req.params.transactionId);
+      const statusResult = await cashfreeService.getOrderStatus(req.params.transactionId);
       if (statusResult.status !== 'pending') {
-        // Process the result — simulate callback logic
+        // Process the result
         payment.status = statusResult.status === 'success' ? 'success' : 'failed';
         payment.gatewayResponse = statusResult.data;
         await payment.save();
@@ -203,13 +226,16 @@ const getPaymentStatus = asyncHandler(async (req, res) => {
         if (order && statusResult.status === 'success') {
           order.paymentStatus = 'paid';
           order.orderStatus = 'Confirmed';
-          order.statusHistory.push({ status: 'Confirmed', note: 'Payment verified' });
+          order.statusHistory.push({ status: 'Confirmed', note: 'Payment verified via Cashfree' });
           await order.save();
+
+          // Clear cart on successful payment confirmation
+          await Cart.findOneAndDelete({ user: payment.user });
         }
       }
     } catch (err) {
       // Status check failed — return current state
-      console.error('PhonePe status check failed:', err.message);
+      console.error('Cashfree status check failed:', err.message);
     }
   }
 

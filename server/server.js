@@ -42,6 +42,14 @@ app.use(cors({
 }));
 
 // Body parsers
+// Capture the raw body for the Cashfree webhook route so we can verify
+// the HMAC-SHA256 signature. This must come BEFORE express.json().
+app.use('/api/payments/callback', express.json({
+  limit: '1mb',
+  verify: (req, _res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  },
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
