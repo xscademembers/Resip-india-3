@@ -350,6 +350,435 @@ class EmailService {
       },
     });
   }
+
+  /**
+   * Comprehensive customer order confirmation email.
+   * Sent only after Cashfree payment is confirmed SUCCESS.
+   */
+  async sendCustomerOrderConfirmation(order, payment, user) {
+    const brandBlue = '#0047ab';
+    const brandGold = '#d1aa05';
+    const logo = 'https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png';
+    const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric',
+    });
+    const orderUrl = `${this.clientUrl}/account/orders/${order.orderId}`;
+
+    // Build product rows
+    const productRows = order.items.map((item) => `
+      <tr>
+        <td style="padding:12px 10px;border-bottom:1px solid #eee;font-size:14px;color:#333;">
+          ${item.name}
+          ${item.setSize ? `<br><span style="color:#999;font-size:12px;">Set of ${item.setSize}</span>` : ''}
+          ${item.fragrance ? `<br><span style="color:#999;font-size:12px;">Fragrance: ${item.fragrance}</span>` : ''}
+        </td>
+        <td style="padding:12px 10px;border-bottom:1px solid #eee;font-size:14px;color:#333;text-align:center;">${item.quantity}</td>
+        <td style="padding:12px 10px;border-bottom:1px solid #eee;font-size:14px;color:#333;text-align:right;">₹${item.price?.toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    // Build shipping address string
+    const addr = order.shippingAddress || {};
+    const addressLines = [
+      addr.fullName,
+      addr.addressLine1,
+      addr.addressLine2,
+      [addr.city, addr.state, addr.pincode].filter(Boolean).join(', '),
+      addr.country,
+      addr.phone ? `Phone: ${addr.phone}` : '',
+    ].filter(Boolean).join('<br>');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Order Confirmation</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f4f4f4;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
+    <tr>
+      <td align="center" style="padding:20px 10px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background-color:${brandBlue};padding:30px;text-align:center;">
+              <img src="${logo}" alt="ReSip India" style="height:50px;width:auto;" />
+            </td>
+          </tr>
+
+          <!-- Thank You Banner -->
+          <tr>
+            <td style="background:linear-gradient(135deg,${brandBlue} 0%,#003380 100%);padding:30px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:bold;">Thank You for Your Order! 🎉</h1>
+              <p style="margin:10px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Your order has been confirmed and is being processed.</p>
+            </td>
+          </tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:30px 40px 10px;">
+              <p style="margin:0;color:#333;font-size:16px;line-height:1.6;">Hi <strong>${user.name || 'there'}</strong>,</p>
+              <p style="margin:8px 0 0;color:#555;font-size:14px;line-height:1.6;">Thank you for shopping with ReSip India! We're thrilled to have you as part of our mission to upcycle with a cause. Here are your order details:</p>
+            </td>
+          </tr>
+
+          <!-- Order Info Card -->
+          <tr>
+            <td style="padding:10px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;border-radius:10px;border:1px solid #e9ecef;">
+                <tr>
+                  <td style="padding:20px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Order ID</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;font-weight:bold;text-align:right;">${order.orderId}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Order Date</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${orderDate}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Customer</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${user.name || ''}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Email</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${user.email || ''}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Payment Method</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${(order.paymentMethod || 'Online').replace('cashfree', 'Online Payment')}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding:4px 0;font-size:13px;color:#888;">Payment Status</td>
+                        <td style="padding:4px 0;font-size:14px;color:#27ae60;font-weight:bold;text-align:right;">✅ Paid</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Shipping Address -->
+          <tr>
+            <td style="padding:15px 40px 5px;">
+              <h3 style="margin:0;color:${brandBlue};font-size:15px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Shipping Address</h3>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:5px 40px 15px;">
+              <div style="background-color:#f8f9fa;border-radius:8px;padding:15px;font-size:14px;color:#333;line-height:1.7;border-left:3px solid ${brandBlue};">
+                ${addressLines}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Products Table -->
+          <tr>
+            <td style="padding:15px 40px 5px;">
+              <h3 style="margin:0;color:${brandBlue};font-size:15px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Items Ordered</h3>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:5px 40px 15px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #eee;border-radius:8px;overflow:hidden;">
+                <tr style="background-color:${brandBlue};">
+                  <th style="padding:10px;font-size:13px;color:#fff;text-align:left;font-weight:600;">Product</th>
+                  <th style="padding:10px;font-size:13px;color:#fff;text-align:center;font-weight:600;">Qty</th>
+                  <th style="padding:10px;font-size:13px;color:#fff;text-align:right;font-weight:600;">Price</th>
+                </tr>
+                ${productRows}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Totals -->
+          <tr>
+            <td style="padding:10px 40px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;border-radius:8px;overflow:hidden;">
+                <tr>
+                  <td style="padding:10px 15px;font-size:14px;color:#555;">Subtotal</td>
+                  <td style="padding:10px 15px;font-size:14px;color:#333;text-align:right;">₹${order.subtotal?.toLocaleString('en-IN')}</td>
+                </tr>
+                ${order.couponDiscount > 0 ? `
+                <tr>
+                  <td style="padding:6px 15px;font-size:14px;color:#27ae60;">Discount${order.couponCode ? ` (${order.couponCode})` : ''}</td>
+                  <td style="padding:6px 15px;font-size:14px;color:#27ae60;text-align:right;">−₹${order.couponDiscount?.toLocaleString('en-IN')}</td>
+                </tr>` : ''}
+                <tr>
+                  <td style="padding:6px 15px;font-size:14px;color:#555;">Shipping</td>
+                  <td style="padding:6px 15px;font-size:14px;color:#333;text-align:right;">${order.shippingCharge === 0 ? '<span style="color:#27ae60;">Free</span>' : '₹' + order.shippingCharge?.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 15px;font-size:14px;color:#555;">Tax (GST ${order.taxPercent || 18}%)</td>
+                  <td style="padding:6px 15px;font-size:14px;color:#333;text-align:right;">₹${order.taxAmount?.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 15px;font-size:18px;font-weight:bold;color:${brandBlue};border-top:2px solid ${brandBlue};">Order Total</td>
+                  <td style="padding:12px 15px;font-size:18px;font-weight:bold;color:${brandBlue};text-align:right;border-top:2px solid ${brandBlue};">₹${order.totalAmount?.toLocaleString('en-IN')}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Estimated Delivery -->
+          <tr>
+            <td style="padding:15px 40px;">
+              <div style="background-color:#fff8e1;border-radius:8px;padding:15px;text-align:center;border:1px solid #ffe082;">
+                <p style="margin:0;font-size:14px;color:#f57f17;font-weight:bold;">📦 Estimated Delivery: 5–7 Business Days</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA Button -->
+          <tr>
+            <td style="padding:20px 40px;text-align:center;">
+              <a href="${orderUrl}" style="display:inline-block;padding:14px 40px;background-color:${brandBlue};color:#ffffff;text-decoration:none;border-radius:30px;font-weight:bold;font-size:15px;">View My Order</a>
+            </td>
+          </tr>
+
+          <!-- Contact Info -->
+          <tr>
+            <td style="padding:10px 40px 20px;">
+              <p style="margin:0;font-size:13px;color:#888;text-align:center;line-height:1.6;">
+                Questions about your order? Contact us at
+                <a href="mailto:hello@resipindia.com" style="color:${brandBlue};text-decoration:none;font-weight:bold;">hello@resipindia.com</a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8f8f8;padding:25px 40px;text-align:center;border-top:1px solid #eee;">
+              <p style="margin:0;font-size:12px;color:#999;">© ${new Date().getFullYear()} ReSip India. All rights reserved.</p>
+              <p style="margin:4px 0 0;font-size:12px;color:#aaa;">Upcycling With A Cause</p>
+              <p style="margin:10px 0 0;">
+                <a href="${this.clientUrl}" style="color:${brandBlue};text-decoration:none;font-size:13px;font-weight:bold;">Visit our website</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    try {
+      const info = await this.getTransporter().sendMail({
+        from: this.from,
+        to: user.email,
+        subject: 'Thank You for Your Order - ReSip India',
+        html,
+      });
+      console.log(`📧 Customer order email sent: ${order.orderId} → ${user.email} (${info.messageId})`);
+      return info;
+    } catch (error) {
+      console.error(`❌ Customer order email failed: ${order.orderId} → ${user.email}`, error.message);
+      return null;
+    }
+  }
+
+  /**
+   * Admin order notification email with full details in HTML table.
+   * Sent only after Cashfree payment is confirmed SUCCESS.
+   */
+  async sendAdminOrderNotification(order, payment, user) {
+    const brandBlue = '#0047ab';
+    const adminEmail = process.env.SMTP_USER || 'hello@resipindia.com';
+    const orderDate = new Date(order.createdAt).toLocaleString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true,
+    });
+
+    // Extract Cashfree payment ID and transaction ID from gateway response
+    const gatewayData = payment.gatewayResponse || {};
+    const cfPaymentId = gatewayData.payment?.cf_payment_id || payment.gatewayOrderId || 'N/A';
+    const cfTransactionId = payment.transactionId || 'N/A';
+
+    // Build product rows with SKU
+    const productRows = order.items.map((item) => `
+      <tr>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;">
+          ${item.name}
+          ${item.setSize ? `<br><span style="color:#888;font-size:11px;">Set of ${item.setSize}</span>` : ''}
+          ${item.fragrance ? `<br><span style="color:#888;font-size:11px;">Fragrance: ${item.fragrance}</span>` : ''}
+        </td>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#888;text-align:center;">${item.product || '—'}</td>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:center;">${item.quantity}</td>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:right;">₹${item.price?.toLocaleString('en-IN')}</td>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:right;font-weight:bold;">₹${item.subtotal?.toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    // Shipping address
+    const addr = order.shippingAddress || {};
+    const addressLines = [
+      addr.fullName,
+      addr.addressLine1,
+      addr.addressLine2,
+      [addr.city, addr.state, addr.pincode].filter(Boolean).join(', '),
+      addr.country,
+      addr.phone ? `Phone: ${addr.phone}` : '',
+    ].filter(Boolean).join('<br>');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>New Order Notification</title>
+</head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f4f4f4;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
+    <tr>
+      <td align="center" style="padding:20px 10px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background-color:${brandBlue};padding:25px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">🛒 New Order Received</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India — Admin Notification</p>
+            </td>
+          </tr>
+
+          <!-- Order & Customer Details -->
+          <tr>
+            <td style="padding:25px 30px 10px;">
+              <h3 style="margin:0 0 12px;color:${brandBlue};font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Order Details</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dee2e6;border-radius:6px;overflow:hidden;">
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;width:40%;">Order ID</td>
+                  <td style="padding:8px 12px;font-size:14px;color:#333;font-weight:bold;border-bottom:1px solid #dee2e6;">${order.orderId}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Order Date & Time</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${orderDate}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Customer Name</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${user.name || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Customer Email</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${user.email || 'N/A'}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Customer Phone</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${user.phone || addr.phone || 'N/A'}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Status</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#27ae60;font-weight:bold;border-bottom:1px solid #dee2e6;">✅ ${order.paymentStatus?.toUpperCase() || 'PAID'}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Method</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${(order.paymentMethod || 'cashfree').replace('cashfree', 'Cashfree (Online)')}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Cashfree Payment ID</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;font-family:monospace;border-bottom:1px solid #dee2e6;">${cfPaymentId}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#888;">Transaction ID</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;font-family:monospace;">${cfTransactionId}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Shipping Address -->
+          <tr>
+            <td style="padding:15px 30px 5px;">
+              <h3 style="margin:0 0 8px;color:${brandBlue};font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Shipping Address</h3>
+              <div style="background-color:#f8f9fa;border-radius:6px;padding:12px;font-size:13px;color:#333;line-height:1.7;border-left:3px solid ${brandBlue};">
+                ${addressLines}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Products Table -->
+          <tr>
+            <td style="padding:20px 30px 5px;">
+              <h3 style="margin:0 0 8px;color:${brandBlue};font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Products Ordered</h3>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #dee2e6;border-radius:6px;overflow:hidden;">
+                <tr style="background-color:${brandBlue};">
+                  <th style="padding:10px 8px;font-size:12px;color:#fff;text-align:left;font-weight:600;">Product</th>
+                  <th style="padding:10px 8px;font-size:12px;color:#fff;text-align:center;font-weight:600;">SKU / ID</th>
+                  <th style="padding:10px 8px;font-size:12px;color:#fff;text-align:center;font-weight:600;">Qty</th>
+                  <th style="padding:10px 8px;font-size:12px;color:#fff;text-align:right;font-weight:600;">Unit Price</th>
+                  <th style="padding:10px 8px;font-size:12px;color:#fff;text-align:right;font-weight:600;">Total</th>
+                </tr>
+                ${productRows}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Totals Table -->
+          <tr>
+            <td style="padding:15px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dee2e6;border-radius:6px;overflow:hidden;">
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#555;border-bottom:1px solid #dee2e6;">Subtotal</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #dee2e6;">₹${order.subtotal?.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#555;border-bottom:1px solid #dee2e6;">Shipping</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #dee2e6;">${order.shippingCharge === 0 ? 'Free' : '₹' + order.shippingCharge?.toLocaleString('en-IN')}</td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:8px 12px;font-size:13px;color:#555;border-bottom:1px solid #dee2e6;">Tax (GST ${order.taxPercent || 18}%)</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #dee2e6;">₹${order.taxAmount?.toLocaleString('en-IN')}</td>
+                </tr>
+                ${order.couponDiscount > 0 ? `
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#27ae60;border-bottom:1px solid #dee2e6;">Discount${order.couponCode ? ` (${order.couponCode})` : ''}</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#27ae60;text-align:right;border-bottom:1px solid #dee2e6;">−₹${order.couponDiscount?.toLocaleString('en-IN')}</td>
+                </tr>` : ''}
+                <tr style="background-color:${brandBlue};">
+                  <td style="padding:12px;font-size:15px;font-weight:bold;color:#fff;">Grand Total</td>
+                  <td style="padding:12px;font-size:15px;font-weight:bold;color:#fff;text-align:right;">₹${order.totalAmount?.toLocaleString('en-IN')}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color:#f8f8f8;padding:20px 30px;text-align:center;border-top:1px solid #eee;">
+              <p style="margin:0;font-size:11px;color:#999;">This is an automated notification from ReSip India.</p>
+              <p style="margin:4px 0 0;font-size:11px;color:#aaa;">© ${new Date().getFullYear()} ReSip India</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    try {
+      const info = await this.getTransporter().sendMail({
+        from: this.from,
+        to: adminEmail,
+        subject: 'New Order Received - ReSip India',
+        html,
+      });
+      console.log(`📧 Admin order notification sent: ${order.orderId} → ${adminEmail} (${info.messageId})`);
+      return info;
+    } catch (error) {
+      console.error(`❌ Admin order notification failed: ${order.orderId} → ${adminEmail}`, error.message);
+      return null;
+    }
+  }
 }
 
 module.exports = new EmailService();
