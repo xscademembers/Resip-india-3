@@ -1,6 +1,6 @@
 import React from 'react';
-import { PageContainer } from '../../components/ui';
-import SEOHead from '../../components/SEOHead';
+import { PageContainer } from '../components/ui';
+import SEOHead from '../components/SEOHead';
 
 export default function PrivacyPolicy() {
   return (

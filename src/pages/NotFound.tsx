@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { PageContainer } from '../../components/ui';
-import SEOHead from '../../components/SEOHead';
+import { PageContainer } from '../components/ui';
+import SEOHead from '../components/SEOHead';
 
 export default function NotFound() {
   return (
