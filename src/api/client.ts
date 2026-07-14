@@ -57,6 +57,10 @@ apiClient.interceptors.response.use(
     // Auto-logout on auth failure so the UI doesn't get stuck with a stale token.
     if (error.response?.status === 401 && tokenStore.get()) {
       tokenStore.clear();
+      // Redirect to login if unauthorized, unless already on login page
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     const normalised: ApiErrorShape = {
       message:

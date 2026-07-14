@@ -1,16 +1,21 @@
 const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const cloudinary = require('../config/cloudinary');
+const path = require('path');
+const fs = require('fs');
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'resip-india',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-    transformation: [
-      { width: 1200, height: 1200, crop: 'limit', quality: 'auto', fetch_format: 'auto' },
-    ],
+// Ensure upload directory exists
+const uploadDir = path.join(__dirname, '../../public/uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
   },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'resip-' + uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
 const upload = multer({
@@ -30,33 +35,32 @@ const upload = multer({
 });
 
 /**
- * Delete an image from Cloudinary by its public_id.
+ * Delete a local image by its URL or filename.
  */
-const deleteImage = async (publicId) => {
+const deleteImage = async (filename) => {
+  if (!filename) return;
   try {
-    await cloudinary.uploader.destroy(publicId);
+    // If a full URL is passed, extract the filename
+    const name = filename.split('/').pop();
+    const filePath = path.join(uploadDir, name);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   } catch (error) {
-    console.error('Failed to delete image from Cloudinary:', error.message);
+    console.error('Failed to delete image from local storage:', error.message);
   }
 };
 
 /**
- * Extract public_id from a Cloudinary URL.
- * Returns null for non-Cloudinary URLs (e.g. Wix-hosted images), so callers
- * skip the Cloudinary delete call entirely for externally hosted images.
+ * Extract filename from a URL.
+ * Designed to act as a drop-in replacement for the old Cloudinary public_id extractor.
  */
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
-  if (!url.includes('res.cloudinary.com')) return null;
-  try {
-    const parts = url.split('/');
-    const filename = parts[parts.length - 1];
-    const folder = parts[parts.length - 2];
-    const publicId = `${folder}/${filename.split('.')[0]}`;
-    return publicId;
-  } catch {
-    return null;
+  if (url.includes('/uploads/')) {
+    return url.split('/').pop();
   }
+  return null;
 };
 
 module.exports = { upload, deleteImage, getPublicIdFromUrl };

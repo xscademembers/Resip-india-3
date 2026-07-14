@@ -101,6 +101,18 @@ export default function Checkout() {
     }
   };
 
+  const loadCashfreeSdk = () => {
+    return new Promise<boolean>((resolve) => {
+      if ((window as any).Cashfree) return resolve(true);
+      const script = document.createElement('script');
+      script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const placeOrder = async () => {
     if (!shippingAddress) return;
     setPlacing(true);
@@ -114,20 +126,24 @@ export default function Checkout() {
         const pay = await paymentsApi.initiate(order._id);
         couponStore.clear();
 
-        // Use the Cashfree JS SDK to open the hosted checkout.
-        const cashfree = (window as any).Cashfree?.({
-          mode: import.meta.env.PROD ? 'production' : 'sandbox',
-        });
-
-        if (cashfree && pay.paymentSessionId) {
-          cashfree.checkout({
-            paymentSessionId: pay.paymentSessionId,
-            returnUrl: `${window.location.origin}/payment/pending?order_id=${pay.merchantOrderId}`,
+        // Dynamically load SDK before initializing
+        const isLoaded = await loadCashfreeSdk();
+        
+        if (isLoaded) {
+          const cashfree = (window as any).Cashfree({
+            mode: import.meta.env.PROD ? 'production' : 'sandbox',
           });
-          return;
+          
+          if (cashfree && pay.paymentSessionId) {
+            cashfree.checkout({
+              paymentSessionId: pay.paymentSessionId,
+              returnUrl: `${window.location.origin}/payment/pending?order_id=${pay.merchantOrderId}`,
+            });
+            return;
+          }
         }
 
-        // Fallback: navigate to pending page for manual polling
+        // Fallback: navigate to pending page for manual polling if SDK fails to load or init
         navigate(`/payment/pending?order_id=${pay.merchantOrderId}`, {
           state: { orderId: order.orderId },
         });

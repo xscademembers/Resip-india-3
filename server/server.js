@@ -147,6 +147,11 @@ app.get('/api/settings/public', async (req, res) => {
 const fs = require('fs');
 const rootPath = path.join(__dirname, '..');
 const distPath = path.join(rootPath, 'dist');
+const publicPath = path.join(rootPath, 'public');
+
+// Serve static assets from public folder (e.g. for /uploads)
+app.use(express.static(publicPath));
+
 const hasBuiltFrontend = fs.existsSync(path.join(distPath, 'index.html'));
 // Use static files whenever a production build is present (Docker/Render deploy),
 // even if NODE_ENV was accidentally left as "development" in hosting env vars.

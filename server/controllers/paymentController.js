@@ -35,11 +35,16 @@ const initiatePayment = asyncHandler(async (req, res) => {
   const cfMerchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
   // Build the return URL — Cashfree appends ?order_id=... automatically.
-  const baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
-  const returnUrl = `${baseUrl.replace(/\/$/, '')}/payment/pending?order_id={order_id}`;
+  // Use PUBLIC_URL if defined, otherwise construct from request headers.
+  // If behind a proxy (like Render), req.protocol is correctly set to 'https' 
+  // because of `app.set('trust proxy', 1)` in server.js.
+  let baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
+  baseUrl = baseUrl.replace(/\/$/, '');
+  
+  const returnUrl = `${baseUrl}/payment/pending?order_id={order_id}`;
 
   // Build the webhook URL for server-to-server notifications.
-  const notifyUrl = `${baseUrl.replace(/\/$/, '')}/api/payments/callback`;
+  const notifyUrl = `${baseUrl}/api/payments/callback`;
 
   // Get customer details from the authenticated user.
   const user = await User.findById(req.user._id);

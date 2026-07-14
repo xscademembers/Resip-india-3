@@ -439,6 +439,8 @@ export const Footer = () => {
             <li><Link to="/shipping-policy" className="hover:text-white transition-colors">Shipping Policy</Link></li>
             <li><Link to="/returns-exchange" className="hover:text-white transition-colors">Returns &amp; Exchanges</Link></li>
             <li><Link to="/care-instructions" className="hover:text-white transition-colors">Care Instructions</Link></li>
+            <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+            <li><Link to="/terms-and-conditions" className="hover:text-white transition-colors">Terms &amp; Conditions</Link></li>
             <li><Link to="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
           </ul>
         </div>

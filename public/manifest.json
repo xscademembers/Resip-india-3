@@ -1,0 +1,20 @@
+{
+  "short_name": "ReSip India",
+  "name": "ReSip India | Premium Upcycled Glassware",
+  "icons": [
+    {
+      "src": "https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1a365d",
+  "background_color": "#ffffff"
+}
