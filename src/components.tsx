@@ -252,13 +252,31 @@ export const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile Menu Toggle */}
-        <button 
-          className={cn("md:hidden p-2", useTransparent ? "text-white" : "text-charcoal")}
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        {/* Mobile: cart icon + menu toggle */}
+        <div className="flex items-center gap-1 md:hidden">
+          <Link
+            to="/cart"
+            aria-label={`Cart with ${totalItems} items`}
+            className={cn(
+              'relative p-2 rounded-full transition-all duration-300',
+              useTransparent ? 'text-white hover:bg-white/10' : 'text-charcoal hover:text-brand-gold'
+            )}
+          >
+            <ShoppingBag size={22} />
+            {totalItems > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand-gold px-1 text-[10px] font-bold text-brand-blue">
+                {totalItems}
+              </span>
+            )}
+          </Link>
+          <button
+            className={cn('p-2', useTransparent ? 'text-white' : 'text-charcoal')}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}

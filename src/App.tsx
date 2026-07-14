@@ -83,27 +83,34 @@ const ScrollToTop = () => {
 };
 
 /** Main storefront layout: header + footer wrap all customer-facing pages. */
-const MainLayout = () => (
-  <div className="flex flex-col min-h-screen">
-    <SiteHeader />
-    <main className="flex-grow">
-      <Suspense fallback={<RouteFallback />}>
-        <Outlet />
-      </Suspense>
-    </main>
-    <Footer />
+const MainLayout = () => {
+  const { pathname } = useLocation();
+  const showShopCta = pathname === '/';
 
-    {/* Sticky Mobile CTA */}
-    <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
-      <Link
-        to="/shop"
-        className="flex items-center justify-center gap-3 bg-brand-blue text-white py-4 rounded-full font-bold shadow-2xl shadow-brand-blue/40 border border-white/10 backdrop-blur-sm"
-      >
-        <ShoppingBag size={20} /> Shop Collection
-      </Link>
+  return (
+    <div className="flex flex-col min-h-screen">
+      <SiteHeader />
+      <main className="flex-grow">
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
+      </main>
+      <Footer />
+
+      {/* Sticky mobile CTA — homepage only so it doesn't block shop/collection views */}
+      {showShopCta && (
+        <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
+          <Link
+            to="/shop"
+            className="flex items-center justify-center gap-3 bg-brand-blue text-white py-4 rounded-full font-bold shadow-2xl shadow-brand-blue/40 border border-white/10 backdrop-blur-sm"
+          >
+            <ShoppingBag size={20} /> Shop Collection
+          </Link>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default function App() {
   return (

@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { cartApi, type AddToCartPayload } from '../api/cart';
 import { settingsApi } from '../api/settings';
-import { cartSessionStore } from '../api/client';
+import { cartSessionStore, guestCartStore } from '../api/client';
 import type { ApiCart } from '../api/types';
 import { useAuth } from './AuthContext';
 
@@ -48,6 +48,26 @@ interface CartContextValue extends CartTotals {
 
 const emptyCart: ApiCart = { items: [] };
 
+function readGuestCartFromStorage(): ApiCart | null {
+  try {
+    const raw = guestCartStore.get();
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ApiCart;
+    return parsed?.items ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistGuestCart(cart: ApiCart) {
+  guestCartStore.set(JSON.stringify(cart));
+}
+
+function clearGuestStorage() {
+  cartSessionStore.clear();
+  guestCartStore.clear();
+}
+
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -58,7 +78,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     freeShippingThreshold: DEFAULT_FREE_SHIPPING_THRESHOLD,
     shippingCharge: DEFAULT_SHIPPING_CHARGE,
   });
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const wasAuthenticated = useRef(isAuthenticated);
+
+  const applyCart = useCallback((next: ApiCart | null | undefined) => {
+    const resolved = next || emptyCart;
+    setCart(resolved);
+    if (!isAuthenticated) {
+      persistGuestCart(resolved);
+    }
+  }, [isAuthenticated]);
 
   // Load admin-configured tax/shipping rules so the cart matches checkout.
   useEffect(() => {
@@ -80,53 +109,76 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const next = await cartApi.get();
-      setCart(next || emptyCart);
+      applyCart(next);
     } catch {
-      setCart(emptyCart);
+      if (!isAuthenticated) {
+        const cached = readGuestCartFromStorage();
+        setCart(cached || emptyCart);
+      } else {
+        setCart(emptyCart);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applyCart, isAuthenticated]);
 
-  // Reload the cart whenever the auth state changes (login/logout). On login we
-  // also try to merge any known guest session into the user's cart.
+  // Reload the cart whenever auth state changes. On login/signup we merge the
+  // guest session stored in localStorage into the user's account cart.
   useEffect(() => {
+    if (authLoading) return;
+
     const sync = async () => {
+      const justAuthenticated = isAuthenticated && !wasAuthenticated.current;
+
       if (isAuthenticated) {
-        const guestSession = cartSessionStore.get();
-        if (guestSession) {
-          try {
-            await cartApi.merge(guestSession);
-          } catch {
-            /* best effort */
+        if (justAuthenticated) {
+          const guestSession = cartSessionStore.get();
+          if (guestSession) {
+            try {
+              await cartApi.merge(guestSession);
+            } catch {
+              /* best effort */
+            }
           }
-          cartSessionStore.clear();
+          clearGuestStorage();
         }
+        await refresh();
+      } else {
+        const cached = readGuestCartFromStorage();
+        if (cached?.items?.length) {
+          setCart(cached);
+        }
+        await refresh();
       }
-      await refresh();
+
+      wasAuthenticated.current = isAuthenticated;
     };
+
     sync();
-  }, [isAuthenticated, refresh]);
+  }, [isAuthenticated, authLoading, refresh]);
 
   const addItem = useCallback(async (payload: AddToCartPayload) => {
     const next = await cartApi.add(payload);
-    setCart(next || emptyCart);
-  }, []);
+    applyCart(next);
+  }, [applyCart]);
 
   const updateItem = useCallback(async (itemId: string, quantity: number) => {
     const next = await cartApi.update(itemId, quantity);
-    setCart(next || emptyCart);
-  }, []);
+    applyCart(next);
+  }, [applyCart]);
 
   const removeItem = useCallback(async (itemId: string) => {
     const next = await cartApi.remove(itemId);
-    setCart(next || emptyCart);
-  }, []);
+    applyCart(next);
+  }, [applyCart]);
 
   const clear = useCallback(async () => {
     await cartApi.clear();
     setCart(emptyCart);
-  }, []);
+    if (!isAuthenticated) {
+      guestCartStore.clear();
+    }
+  }, [isAuthenticated]);
 
   const subtotal = useMemo(
     () => (cart.items || []).reduce((sum, i) => sum + i.price * i.quantity, 0),

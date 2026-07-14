@@ -3,6 +3,12 @@ const Product = require('../models/Product');
 const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
 
+function attachGuestSessionHeader(res, cart) {
+  if (cart?.sessionId) {
+    res.setHeader('x-cart-session', cart.sessionId);
+  }
+}
+
 // @desc    Get cart
 // @route   GET /api/cart
 const getCart = asyncHandler(async (req, res) => {
@@ -27,6 +33,7 @@ const getCart = asyncHandler(async (req, res) => {
     cart = { items: [], totalItems: 0, subtotal: 0 };
   }
 
+  attachGuestSessionHeader(res, cart);
   res.status(200).json({ success: true, cart });
 });
 
@@ -110,6 +117,7 @@ const addToCart = asyncHandler(async (req, res) => {
     'name slug price images stock glassSetPricing fragrances labelImageSurcharge categoryName'
   );
 
+  attachGuestSessionHeader(res, cart);
   res.status(200).json({ success: true, cart });
 });
 
@@ -150,6 +158,7 @@ const updateCartItem = asyncHandler(async (req, res) => {
     'name slug price images stock glassSetPricing fragrances labelImageSurcharge categoryName'
   );
 
+  attachGuestSessionHeader(res, updated);
   res.status(200).json({ success: true, cart: updated });
 });
 
@@ -173,6 +182,7 @@ const removeCartItem = asyncHandler(async (req, res) => {
     'name slug price images stock glassSetPricing fragrances labelImageSurcharge categoryName'
   );
 
+  attachGuestSessionHeader(res, updated);
   res.status(200).json({ success: true, cart: updated });
 });
 
