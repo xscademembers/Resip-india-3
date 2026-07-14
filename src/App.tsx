@@ -19,7 +19,6 @@ const ReturnExchangePolicy = lazy(() => import('./ReturnExchangePolicy'));
 const CareInstructions = lazy(() => import('./CareInstructions'));
 const ShippingPolicy = lazy(() => import('./ShippingPolicy'));
 const Faqs = lazy(() => import('./Faqs'));
-const Faqs = lazy(() => import('./Faqs'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsAndConditions = lazy(() => import('./pages/TermsAndConditions'));
