@@ -105,6 +105,42 @@ app.post('/api/newsletter', async (req, res) => {
   }
 });
 
+// Contact / inquiry form endpoint
+const emailService = require('./services/emailService');
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, company, orderType, message } = req.body || {};
+
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your name, email, and a message.',
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address.' });
+    }
+
+    const info = await emailService.sendContactInquiry({ name, email, company, orderType, message });
+    if (!info) {
+      return res.status(502).json({
+        success: false,
+        message: 'We could not send your message right now. Please try again later.',
+      });
+    }
+
+    res.status(200).json({ success: true, message: "Thank you! Your inquiry has been sent. We'll get back to you soon." });
+  } catch (error) {
+    console.error('❌ Contact form failed:', error.message);
+    res.status(500).json({
+      success: false,
+      message: 'Something went wrong while sending your message. Please try again later.',
+    });
+  }
+});
+
 // Banner public endpoint
 const Banner = require('./models/Banner');
 app.get('/api/banners', async (req, res) => {

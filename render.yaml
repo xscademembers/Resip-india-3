@@ -26,7 +26,12 @@ services:
       # CLIENT_URL should match your final site URL (Render URL or custom domain).
       - key: CLIENT_URL
         sync: false
-      # ---- Email (optional, for order/verification mails) ----
+      # ---- Email ----
+      # Render blocks outbound SMTP ports (25/465/587), so email is sent via the
+      # Brevo HTTP API. Set BREVO_API_KEY to enable it. SMTP_* vars below are only
+      # used as a fallback for local development.
+      - key: BREVO_API_KEY
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

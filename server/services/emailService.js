@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 
@@ -7,10 +8,15 @@ class EmailService {
     this.transporter = null;
     this.from = process.env.EMAIL_FROM || 'ReSip India <noreply@resipindia.com>';
     this.clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    // When set, email is delivered over Brevo's HTTPS API (port 443) instead of
+    // SMTP. This is required on hosts like Render that block outbound SMTP ports
+    // (25/465/587), which otherwise cause "Connection timeout" errors.
+    this.brevoApiKey = process.env.BREVO_API_KEY;
   }
 
   /**
    * Initialize the SMTP transporter (lazy init).
+   * Only used as a fallback for local dev when BREVO_API_KEY is not set.
    */
   getTransporter() {
     if (!this.transporter) {
@@ -29,6 +35,56 @@ class EmailService {
       });
     }
     return this.transporter;
+  }
+
+  /**
+   * Parse an "EMAIL_FROM" string like "ReSip India <hello@resipindia.com>"
+   * into the { name, email } shape Brevo expects.
+   */
+  parseSender() {
+    const raw = this.from || 'ReSip India <noreply@resipindia.com>';
+    const match = raw.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+    if (match) {
+      return { name: match[1] || 'ReSip India', email: match[2].trim() };
+    }
+    return { name: 'ReSip India', email: raw.trim() };
+  }
+
+  /**
+   * Deliver a single email. Uses the Brevo HTTP API when BREVO_API_KEY is set
+   * (works on Render/hosts that block SMTP ports); otherwise falls back to SMTP.
+   * `replyTo` (optional) lets the recipient reply directly to a third party
+   * (e.g. the customer who filled the contact form).
+   */
+  async deliver({ to, subject, html, replyTo }) {
+    if (this.brevoApiKey) {
+      const payload = {
+        sender: this.parseSender(),
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      };
+      if (replyTo) {
+        payload.replyTo = { email: replyTo };
+      }
+      const response = await axios.post(
+        'https://api.brevo.com/v3/smtp/email',
+        payload,
+        {
+          headers: {
+            'api-key': this.brevoApiKey,
+            'Content-Type': 'application/json',
+            accept: 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
+      return { messageId: response.data?.messageId || 'brevo' };
+    }
+
+    const mailOptions = { from: this.from, to, subject, html };
+    if (replyTo) mailOptions.replyTo = replyTo;
+    return this.getTransporter().sendMail(mailOptions);
   }
 
   /**
@@ -199,14 +255,7 @@ class EmailService {
     try {
       const html = this.loadTemplate(template, variables);
 
-      const mailOptions = {
-        from: this.from,
-        to,
-        subject,
-        html,
-      };
-
-      const info = await this.getTransporter().sendMail(mailOptions);
+      const info = await this.deliver({ to, subject, html });
       console.log(`📧 Email sent: ${subject} → ${to} (${info.messageId})`);
       return info;
     } catch (error) {
@@ -570,8 +619,7 @@ class EmailService {
 </html>`;
 
     try {
-      const info = await this.getTransporter().sendMail({
-        from: this.from,
+      const info = await this.deliver({
         to: user.email,
         subject: 'Thank You for Your Order - ReSip India',
         html,
@@ -766,8 +814,7 @@ class EmailService {
 </html>`;
 
     try {
-      const info = await this.getTransporter().sendMail({
-        from: this.from,
+      const info = await this.deliver({
         to: adminEmail,
         subject: 'New Order Received - ReSip India',
         html,
@@ -778,6 +825,77 @@ class EmailService {
       console.error(`❌ Admin order notification failed: ${order.orderId} → ${adminEmail}`, error.message);
       return null;
     }
+  }
+
+  /**
+   * Contact / inquiry form submission from the website.
+   * Sent to the business inbox; reply-to is set to the customer so staff can
+   * reply directly. Throws on failure so the API can report an error to the UI.
+   */
+  async sendContactInquiry({ name, email, company, orderType, message }) {
+    const brandBlue = '#0047ab';
+    const to = process.env.CONTACT_EMAIL || 'hello@resipindia.com';
+    const safe = (v) => (v ? String(v) : '—');
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;background-color:#f4f4f4;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
+    <tr>
+      <td align="center" style="padding:20px 10px;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <tr>
+            <td style="background-color:${brandBlue};padding:25px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">📩 New Contact Inquiry</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India — Website Contact Form</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:25px 30px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dee2e6;border-radius:6px;overflow:hidden;">
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:10px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;width:35%;">Name</td>
+                  <td style="padding:10px 12px;font-size:14px;color:#333;font-weight:bold;border-bottom:1px solid #dee2e6;">${safe(name)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Email</td>
+                  <td style="padding:10px 12px;font-size:14px;color:#333;border-bottom:1px solid #dee2e6;"><a href="mailto:${safe(email)}" style="color:${brandBlue};text-decoration:none;">${safe(email)}</a></td>
+                </tr>
+                <tr style="background-color:#f8f9fa;">
+                  <td style="padding:10px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Company</td>
+                  <td style="padding:10px 12px;font-size:14px;color:#333;border-bottom:1px solid #dee2e6;">${safe(company)}</td>
+                </tr>
+                <tr>
+                  <td style="padding:10px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Order Type</td>
+                  <td style="padding:10px 12px;font-size:14px;color:#333;border-bottom:1px solid #dee2e6;">${safe(orderType)}</td>
+                </tr>
+              </table>
+              <h3 style="margin:20px 0 8px;color:${brandBlue};font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">Message</h3>
+              <div style="background-color:#f8f9fa;border-radius:6px;padding:15px;font-size:14px;color:#333;line-height:1.7;border-left:3px solid ${brandBlue};white-space:pre-wrap;">${safe(message)}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f8f8f8;padding:18px 30px;text-align:center;border-top:1px solid #eee;">
+              <p style="margin:0;font-size:11px;color:#999;">Reply to this email to respond directly to the customer.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    const info = await this.deliver({
+      to,
+      subject: `New Contact Inquiry from ${name || 'Website'} — ReSip India`,
+      html,
+      replyTo: email || undefined,
+    });
+    console.log(`📧 Contact inquiry sent: ${email} → ${to} (${info.messageId})`);
+    return info;
   }
 }
 
