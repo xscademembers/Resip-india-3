@@ -42,6 +42,12 @@ const paymentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    // Guards against sending the order confirmation emails more than once when
+    // both the webhook and the status-check path process the same payment.
+    confirmationEmailsSent: {
+      type: Boolean,
+      default: false,
+    },
     refundId: String,
     refundAmount: Number,
     refundStatus: {

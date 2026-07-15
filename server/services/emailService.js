@@ -67,19 +67,34 @@ class EmailService {
       if (replyTo) {
         payload.replyTo = { email: replyTo };
       }
-      const response = await axios.post(
-        'https://api.brevo.com/v3/smtp/email',
-        payload,
-        {
-          headers: {
-            'api-key': this.brevoApiKey,
-            'Content-Type': 'application/json',
-            accept: 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
-      return { messageId: response.data?.messageId || 'brevo' };
+      try {
+        const response = await axios.post(
+          'https://api.brevo.com/v3/smtp/email',
+          payload,
+          {
+            headers: {
+              'api-key': this.brevoApiKey,
+              'Content-Type': 'application/json',
+              accept: 'application/json',
+            },
+            timeout: 15000,
+          }
+        );
+        return { messageId: response.data?.messageId || 'brevo' };
+      } catch (err) {
+        // Surface Brevo's actual error (e.g. invalid key, unverified sender)
+        // instead of a generic "status code 401".
+        const brevo = err.response?.data;
+        const keyPrefix = (this.brevoApiKey || '').slice(0, 9);
+        const detail = brevo
+          ? `${brevo.code || ''} ${brevo.message || ''}`.trim()
+          : err.message;
+        console.error(
+          `❌ Brevo API error (${err.response?.status || '?'}): ${detail} ` +
+          `[from=${this.parseSender().email}, keyStartsWith=${keyPrefix}]`
+        );
+        throw new Error(`Brevo: ${detail}`);
+      }
     }
 
     const mailOptions = { from: this.from, to, subject, html };

@@ -173,12 +173,19 @@ const paymentCallback = asyncHandler(async (req, res) => {
       // Clear user's cart
       await Cart.findOneAndDelete({ user: payment.user });
 
-      // Send comprehensive order confirmation emails (non-blocking)
+      // Send order confirmation emails exactly once. Atomically "claim" the
+      // right to send so the webhook and status-check paths can't both send.
       if (user) {
-        Promise.allSettled([
-          emailService.sendCustomerOrderConfirmation(order, payment, user),
-          emailService.sendAdminOrderNotification(order, payment, user),
-        ]).catch(() => {});
+        const claim = await Payment.findOneAndUpdate(
+          { _id: payment._id, confirmationEmailsSent: { $ne: true } },
+          { $set: { confirmationEmailsSent: true } }
+        );
+        if (claim) {
+          Promise.allSettled([
+            emailService.sendCustomerOrderConfirmation(order, payment, user),
+            emailService.sendAdminOrderNotification(order, payment, user),
+          ]).catch(() => {});
+        }
       }
     }
   } else {
@@ -239,13 +246,20 @@ const getPaymentStatus = asyncHandler(async (req, res) => {
           // Clear cart on successful payment confirmation
           await Cart.findOneAndDelete({ user: payment.user });
 
-          // Send confirmation emails for delayed verification (non-blocking)
+          // Send confirmation emails exactly once. Atomically "claim" the right
+          // to send so the webhook and status-check paths can't both send.
           const emailUser = await User.findById(payment.user);
           if (emailUser) {
-            Promise.allSettled([
-              emailService.sendCustomerOrderConfirmation(order, payment, emailUser),
-              emailService.sendAdminOrderNotification(order, payment, emailUser),
-            ]).catch(() => {});
+            const claim = await Payment.findOneAndUpdate(
+              { _id: payment._id, confirmationEmailsSent: { $ne: true } },
+              { $set: { confirmationEmailsSent: true } }
+            );
+            if (claim) {
+              Promise.allSettled([
+                emailService.sendCustomerOrderConfirmation(order, payment, emailUser),
+                emailService.sendAdminOrderNotification(order, payment, emailUser),
+              ]).catch(() => {});
+            }
           }
         }
       }
