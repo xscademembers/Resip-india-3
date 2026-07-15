@@ -198,7 +198,7 @@ class EmailService {
   async send({ to, subject, template, variables = {} }) {
     try {
       const html = this.loadTemplate(template, variables);
-      
+
       const mailOptions = {
         from: this.from,
         to,
