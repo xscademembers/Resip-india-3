@@ -6,7 +6,6 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
-const path = require('path');
 
 // .env.local overrides .env (matches Vite behaviour).
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
