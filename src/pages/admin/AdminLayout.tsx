@@ -9,6 +9,7 @@ import {
   Boxes,
   Star,
   Image,
+  Megaphone,
   Settings as SettingsIcon,
   Menu,
   X,
@@ -27,6 +28,7 @@ const navItems = [
   { to: '/admin/inventory', label: 'Inventory', icon: Boxes, end: false },
   { to: '/admin/reviews', label: 'Reviews', icon: Star, end: false },
   { to: '/admin/banners', label: 'Banners', icon: Image, end: false },
+  { to: '/admin/announcements', label: 'Announcements', icon: Megaphone, end: false },
   { to: '/admin/settings', label: 'Settings', icon: SettingsIcon, end: false },
 ];
 

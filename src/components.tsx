@@ -6,6 +6,7 @@ import { useCart } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
 import { useToast } from './context/ToastContext';
 import apiClient from './api/client';
+import { settingsApi } from './api/settings';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import {
@@ -83,13 +84,47 @@ const BRAND_LOGO_BOX_FOOTER = 'h-24 w-[200px] md:h-28 md:w-[220px]';
 
 const ANNOUNCEMENT_INTERVAL_MS = 4500;
 
+/** Normalise raw announcement settings into a clean list of non-empty strings. */
+const normalizeAnnouncements = (value: unknown): string[] => {
+  const list = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? value.split('\n')
+      : [];
+  return list.map((m) => String(m).trim()).filter(Boolean);
+};
+
 /**
  * Rotating promo strip above the navbar (marquee-style, all pages).
+ * Messages are managed from the admin dashboard (Announcements) and fall back
+ * to the built-in defaults when none are configured.
  */
 export const AnnouncementBanner = () => {
   const shouldReduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
-  const len = ANNOUNCEMENT_MESSAGES.length;
+  const [messages, setMessages] = useState<string[]>(() => [...ANNOUNCEMENT_MESSAGES]);
+
+  useEffect(() => {
+    let active = true;
+    settingsApi
+      .public()
+      .then((settings) => {
+        if (!active) return;
+        const fromDb = normalizeAnnouncements(settings.announcement_messages);
+        if (fromDb.length) {
+          setMessages(fromDb);
+          setIndex(0);
+        }
+      })
+      .catch(() => {
+        /* keep built-in defaults on failure */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const len = messages.length;
 
   useEffect(() => {
     if (len <= 1) return;
@@ -99,7 +134,7 @@ export const AnnouncementBanner = () => {
     return () => window.clearInterval(id);
   }, [len]);
 
-  const message = ANNOUNCEMENT_MESSAGES[index] ?? ANNOUNCEMENT_MESSAGES[0];
+  const message = messages[index] ?? messages[0];
 
   return (
     <div
@@ -120,12 +155,12 @@ export const AnnouncementBanner = () => {
             className="max-w-full truncate text-center text-[11px] font-semibold uppercase tracking-[0.28em] md:text-xs md:tracking-[0.32em]"
           >
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
-              � �{' '}
+              ◆{' '}
             </span>
             {message}
             <span className="text-[var(--color-brand-gold)]" aria-hidden>
               {' '}
-              � �
+              ◆
             </span>
           </motion.p>
         </AnimatePresence>

@@ -54,6 +54,7 @@ const AdminCoupons = lazy(() => import('./pages/admin/Coupons'));
 const AdminInventory = lazy(() => import('./pages/admin/Inventory'));
 const AdminReviews = lazy(() => import('./pages/admin/Reviews'));
 const AdminBanners = lazy(() => import('./pages/admin/Banners'));
+const AdminAnnouncements = lazy(() => import('./pages/admin/Announcements'));
 const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 
 /** Lightweight spinner shown while a route chunk loads. */
@@ -219,6 +220,7 @@ export default function App() {
                   <Route path="inventory" element={<AdminInventory />} />
                   <Route path="reviews" element={<AdminReviews />} />
                   <Route path="banners" element={<AdminBanners />} />
+                  <Route path="announcements" element={<AdminAnnouncements />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
               </Routes>

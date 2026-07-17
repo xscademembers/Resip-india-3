@@ -160,7 +160,7 @@ export const RETURN_ADDRESS =
 /** Rotating promo line above the site header (all pages). */
 export const ANNOUNCEMENT_MESSAGES = [
   'Free delivery on orders above ₹999',
-  'Handcrafted upcycled glassware   made in India',
+  'Handcrafted upcycled glassware — made in India',
   'Eco-friendly packaging on every order',
   'Customisation is available for all products',
 ] as const;
