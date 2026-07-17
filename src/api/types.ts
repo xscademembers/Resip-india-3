@@ -114,6 +114,7 @@ export interface ApiOrder {
   taxAmount: number;
   taxPercent?: number;
   shippingCharge: number;
+  codCharge?: number;
   couponDiscount?: number;
   totalAmount: number;
   paymentMethod?: string;

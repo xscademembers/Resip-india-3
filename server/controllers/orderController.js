@@ -10,27 +10,31 @@ const emailService = require('../services/emailService');
 
 // Default pricing rules (used when no admin Settings value is present).
 const DEFAULT_FREE_SHIPPING_THRESHOLD = 999;
-const DEFAULT_SHIPPING_CHARGE = 99;
+const DEFAULT_SHIPPING_CHARGE = 50;
 const DEFAULT_TAX_PERCENT = 18;
+const DEFAULT_COD_CHARGE = 50;
 
-/** Load tax/shipping rules from admin Settings, falling back to defaults. */
+/** Load tax/shipping/COD rules from admin Settings, falling back to defaults. */
 const getPricingConfig = async () => {
-  const [taxPercent, freeShippingThreshold, shippingCharge] = await Promise.all([
+  const [taxPercent, freeShippingThreshold, shippingCharge, codCharge] = await Promise.all([
     Settings.getSetting('tax_percent', DEFAULT_TAX_PERCENT),
     Settings.getSetting('free_shipping_threshold', DEFAULT_FREE_SHIPPING_THRESHOLD),
     Settings.getSetting('shipping_charge', DEFAULT_SHIPPING_CHARGE),
+    Settings.getSetting('cod_charge', DEFAULT_COD_CHARGE),
   ]);
   return {
     taxPercent: Number(taxPercent),
     freeShippingThreshold: Number(freeShippingThreshold),
     shippingCharge: Number(shippingCharge),
+    codCharge: Number(codCharge),
   };
 };
 
 // @desc    Create order
 // @route   POST /api/orders
 const createOrder = asyncHandler(async (req, res) => {
-  const { shippingAddress, billingAddress, couponCode, paymentMethod = 'phonepe' } = req.body;
+  const { shippingAddress, billingAddress, couponCode, paymentMethod = 'cashfree' } = req.body;
+  const isCod = paymentMethod === 'cod';
 
   // Get user's cart
   const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
@@ -77,14 +81,18 @@ const createOrder = asyncHandler(async (req, res) => {
     }
   }
 
-  const { taxPercent, freeShippingThreshold, shippingCharge: shippingFee } = await getPricingConfig();
+  const { taxPercent, freeShippingThreshold, shippingCharge: shippingFee, codCharge: codFee } =
+    await getPricingConfig();
 
   const afterDiscount = subtotal - couponDiscount;
   const taxAmount = Math.round((afterDiscount * taxPercent) / 100);
   const shippingCharge = subtotal >= freeShippingThreshold ? 0 : shippingFee;
-  const totalAmount = afterDiscount + taxAmount + shippingCharge;
+  // Extra handling fee charged only for Cash on Delivery orders.
+  const codCharge = isCod ? codFee : 0;
+  const totalAmount = afterDiscount + taxAmount + shippingCharge + codCharge;
 
-  // Create order
+  // COD orders are confirmed immediately (no online payment step); online
+  // orders stay Pending until the payment gateway confirms.
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
@@ -97,11 +105,14 @@ const createOrder = asyncHandler(async (req, res) => {
     taxPercent,
     taxAmount,
     shippingCharge,
+    codCharge,
     totalAmount,
     paymentMethod,
-    orderStatus: 'Pending',
+    orderStatus: isCod ? 'Confirmed' : 'Pending',
     paymentStatus: 'pending',
-    statusHistory: [{ status: 'Pending', note: 'Order created' }],
+    statusHistory: [
+      { status: isCod ? 'Confirmed' : 'Pending', note: isCod ? 'Order placed (Cash on Delivery)' : 'Order created' },
+    ],
   });
 
   // Update coupon usage
@@ -109,6 +120,29 @@ const createOrder = asyncHandler(async (req, res) => {
     couponDoc.usedCount += 1;
     couponDoc.usedBy.push(req.user._id);
     await couponDoc.save();
+  }
+
+  // For COD there is no payment gateway callback, so finalise the order now:
+  // reduce inventory, clear the cart, and send confirmation emails.
+  if (isCod) {
+    for (const item of order.items) {
+      const inventory = await Inventory.findOne({ product: item.product });
+      if (inventory) {
+        await inventory.reduceSaleStock(item.quantity, order._id);
+      } else {
+        await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.quantity } });
+      }
+    }
+
+    await Cart.findOneAndDelete({ user: req.user._id });
+
+    const user = await require('../models/User').findById(req.user._id);
+    if (user) {
+      Promise.allSettled([
+        emailService.sendCustomerOrderConfirmation(order, { amount: 0, transactionId: 'COD', gatewayResponse: {} }, user),
+        emailService.sendAdminOrderNotification(order, { amount: 0, transactionId: 'COD', gatewayResponse: {} }, user),
+      ]).catch(() => {});
+    }
   }
 
   res.status(201).json({ success: true, order });

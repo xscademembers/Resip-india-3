@@ -8,12 +8,15 @@ import { useAuth } from './AuthContext';
 /** Default pricing rules — overridden by admin Settings once they load. */
 export const DEFAULT_TAX_PERCENT = 18;
 export const DEFAULT_FREE_SHIPPING_THRESHOLD = 999;
-export const DEFAULT_SHIPPING_CHARGE = 99;
+export const DEFAULT_SHIPPING_CHARGE = 50;
+export const DEFAULT_COD_CHARGE = 50;
 
 interface PricingConfig {
   taxPercent: number;
   freeShippingThreshold: number;
   shippingCharge: number;
+  codCharge: number;
+  codEnabled: boolean;
 }
 
 interface CartTotals {
@@ -30,6 +33,7 @@ export interface TotalsBreakdown {
   discount: number;
   tax: number;
   shipping: number;
+  codCharge: number;
   total: number;
 }
 
@@ -37,8 +41,10 @@ interface CartContextValue extends CartTotals {
   cart: ApiCart;
   loading: boolean;
   taxPercent: number;
+  codCharge: number;
+  codEnabled: boolean;
   /** Compute totals for an applied discount (mirrors the server order math). */
-  getTotals: (discount?: number) => TotalsBreakdown;
+  getTotals: (discount?: number, isCod?: boolean) => TotalsBreakdown;
   addItem: (payload: AddToCartPayload) => Promise<void>;
   updateItem: (itemId: string, quantity: number) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
@@ -77,6 +83,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     taxPercent: DEFAULT_TAX_PERCENT,
     freeShippingThreshold: DEFAULT_FREE_SHIPPING_THRESHOLD,
     shippingCharge: DEFAULT_SHIPPING_CHARGE,
+    codCharge: DEFAULT_COD_CHARGE,
+    codEnabled: true,
   });
   const { isAuthenticated, loading: authLoading } = useAuth();
   const wasAuthenticated = useRef(isAuthenticated);
@@ -98,6 +106,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           taxPercent: Number(s.tax_percent ?? DEFAULT_TAX_PERCENT),
           freeShippingThreshold: Number(s.free_shipping_threshold ?? DEFAULT_FREE_SHIPPING_THRESHOLD),
           shippingCharge: Number(s.shipping_charge ?? DEFAULT_SHIPPING_CHARGE),
+          codCharge: Number(s.cod_charge ?? DEFAULT_COD_CHARGE),
+          codEnabled: s.cod_enabled === undefined ? true : Boolean(s.cod_enabled),
         });
       })
       .catch(() => {
@@ -192,14 +202,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Mirrors the backend order math: discount applies before tax; free shipping
   // is decided on the (pre-discount) subtotal.
   const getTotals = useCallback(
-    (discount = 0): TotalsBreakdown => {
+    (discount = 0, isCod = false): TotalsBreakdown => {
       const safeDiscount = Math.min(Math.max(discount, 0), subtotal);
       const afterDiscount = subtotal - safeDiscount;
       const tax = Math.round((afterDiscount * pricing.taxPercent) / 100);
       const shipping =
         subtotal === 0 || subtotal >= pricing.freeShippingThreshold ? 0 : pricing.shippingCharge;
-      const total = afterDiscount + tax + shipping;
-      return { subtotal, discount: safeDiscount, tax, shipping, total };
+      const codCharge = isCod ? pricing.codCharge : 0;
+      const total = afterDiscount + tax + shipping + codCharge;
+      return { subtotal, discount: safeDiscount, tax, shipping, codCharge, total };
     },
     [subtotal, pricing]
   );
@@ -210,6 +221,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     cart,
     loading,
     taxPercent: pricing.taxPercent,
+    codCharge: pricing.codCharge,
+    codEnabled: pricing.codEnabled,
     getTotals,
     addItem,
     updateItem,

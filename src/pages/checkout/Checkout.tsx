@@ -25,8 +25,10 @@ const emptyAddress = {
   landmark: '',
 };
 
+type PayMethod = 'cashfree' | 'cod';
+
 export default function Checkout() {
-  const { cart, subtotal, taxPercent, getTotals, refresh } = useCart();
+  const { cart, subtotal, taxPercent, getTotals, refresh, codEnabled } = useCart();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -37,9 +39,10 @@ export default function Checkout() {
   const [useNew, setUseNew] = useState(false);
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PayMethod>('cashfree');
 
   const coupon = couponStore.get();
-  const totals = getTotals(coupon?.discount || 0);
+  const totals = getTotals(coupon?.discount || 0, paymentMethod === 'cod');
   const grandTotal = totals.total;
 
   useEffect(() => {
@@ -116,6 +119,28 @@ export default function Checkout() {
   const placeOrder = async () => {
     if (!shippingAddress) return;
     setPlacing(true);
+
+    // Cash on Delivery: create the order and go straight to the order page —
+    // there is no online payment step.
+    if (paymentMethod === 'cod') {
+      try {
+        const { order } = await ordersApi.create({
+          shippingAddress,
+          couponCode: coupon?.code,
+          paymentMethod: 'cod',
+        });
+        couponStore.clear();
+        await refresh();
+        toast.success('Order placed successfully! Pay on delivery.');
+        navigate(`/account/orders/${order.orderId}`);
+      } catch (err) {
+        toast.error((err as ApiErrorShape).message);
+      } finally {
+        setPlacing(false);
+      }
+      return;
+    }
+
     try {
       const { order } = await ordersApi.create({
         shippingAddress,
@@ -293,6 +318,56 @@ export default function Checkout() {
                   </li>
                 ))}
               </ul>
+
+              {/* Payment method */}
+              <h3 className="mt-6 font-display text-base font-bold text-brand-blue">Payment Method</h3>
+              <div className="mt-3 space-y-3">
+                <label
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+                    paymentMethod === 'cashfree' ? 'border-brand-blue bg-brand-blue/5' : 'border-brand-blue/15'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    className="mt-1"
+                    checked={paymentMethod === 'cashfree'}
+                    onChange={() => setPaymentMethod('cashfree')}
+                  />
+                  <span className="text-sm">
+                    <strong>Pay Online</strong>
+                    <br />
+                    <span className="text-charcoal/50">Credit/Debit Card, UPI, Netbanking — secured by Cashfree</span>
+                  </span>
+                </label>
+
+                {codEnabled && (
+                  <label
+                    className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
+                      paymentMethod === 'cod' ? 'border-brand-blue bg-brand-blue/5' : 'border-brand-blue/15'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      className="mt-1"
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                    />
+                    <span className="text-sm">
+                      <strong>Cash on Delivery</strong>
+                      {totals.codCharge > 0 && (
+                        <span className="ml-1 rounded-full bg-brand-gold/15 px-2 py-0.5 text-xs font-semibold text-brand-gold">
+                          +{inr(totals.codCharge)} handling fee
+                        </span>
+                      )}
+                      <br />
+                      <span className="text-charcoal/50">Pay in cash when your order is delivered</span>
+                    </span>
+                  </label>
+                )}
+              </div>
+
               <button
                 type="button"
                 onClick={placeOrder}
@@ -300,10 +375,12 @@ export default function Checkout() {
                 className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-blue py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold disabled:opacity-60"
               >
                 {placing && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />}
-                Pay {inr(grandTotal)} Securely
+                {paymentMethod === 'cod' ? `Place Order · ${inr(grandTotal)}` : `Pay ${inr(grandTotal)} Securely`}
               </button>
               <p className="mt-3 text-center text-xs text-charcoal/40">
-                You will be redirected to Cashfree's secure payment page.
+                {paymentMethod === 'cod'
+                  ? 'Your order will be confirmed and payment collected on delivery.'
+                  : "You will be redirected to Cashfree's secure payment page."}
               </p>
             </div>
           )}
@@ -332,6 +409,12 @@ export default function Checkout() {
                 <dt className="text-charcoal/60">Shipping</dt>
                 <dd className="font-semibold">{totals.shipping === 0 ? 'Free' : inr(totals.shipping)}</dd>
               </div>
+              {totals.codCharge > 0 && (
+                <div className="flex justify-between">
+                  <dt className="text-charcoal/60">COD Charges</dt>
+                  <dd className="font-semibold">{inr(totals.codCharge)}</dd>
+                </div>
+              )}
               <div className="flex justify-between border-t border-brand-blue/10 pt-3 text-base">
                 <dt className="font-bold">Total</dt>
                 <dd className="font-bold text-brand-blue">{inr(grandTotal)}</dd>

@@ -427,6 +427,11 @@ class EmailService {
       day: 'numeric', month: 'long', year: 'numeric',
     });
     const orderUrl = `${this.clientUrl}/account/orders/${order.orderId}`;
+    const isCod = order.paymentMethod === 'cod';
+    const paymentMethodLabel = isCod ? 'Cash on Delivery' : 'Online Payment';
+    const paymentStatusHtml = isCod
+      ? '<span style="color:#f57f17;">💵 Pay on Delivery</span>'
+      : '✅ Paid';
 
     // Build product rows
     const productRows = order.items.map((item) => `
@@ -514,11 +519,11 @@ class EmailService {
                       </tr>
                       <tr>
                         <td style="padding:4px 0;font-size:13px;color:#888;">Payment Method</td>
-                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${(order.paymentMethod || 'Online').replace('cashfree', 'Online Payment')}</td>
+                        <td style="padding:4px 0;font-size:14px;color:#333;text-align:right;">${paymentMethodLabel}</td>
                       </tr>
                       <tr>
                         <td style="padding:4px 0;font-size:13px;color:#888;">Payment Status</td>
-                        <td style="padding:4px 0;font-size:14px;color:#27ae60;font-weight:bold;text-align:right;">✅ Paid</td>
+                        <td style="padding:4px 0;font-size:14px;color:#27ae60;font-weight:bold;text-align:right;">${paymentStatusHtml}</td>
                       </tr>
                     </table>
                   </td>
@@ -581,6 +586,11 @@ class EmailService {
                   <td style="padding:6px 15px;font-size:14px;color:#555;">Tax (GST ${order.taxPercent || 18}%)</td>
                   <td style="padding:6px 15px;font-size:14px;color:#333;text-align:right;">₹${order.taxAmount?.toLocaleString('en-IN')}</td>
                 </tr>
+                ${order.codCharge > 0 ? `
+                <tr>
+                  <td style="padding:6px 15px;font-size:14px;color:#555;">COD Charges</td>
+                  <td style="padding:6px 15px;font-size:14px;color:#333;text-align:right;">₹${order.codCharge?.toLocaleString('en-IN')}</td>
+                </tr>` : ''}
                 <tr>
                   <td style="padding:12px 15px;font-size:18px;font-weight:bold;color:${brandBlue};border-top:2px solid ${brandBlue};">Order Total</td>
                   <td style="padding:12px 15px;font-size:18px;font-weight:bold;color:${brandBlue};text-align:right;border-top:2px solid ${brandBlue};">₹${order.totalAmount?.toLocaleString('en-IN')}</td>
@@ -653,7 +663,8 @@ class EmailService {
    */
   async sendAdminOrderNotification(order, payment, user) {
     const brandBlue = '#0047ab';
-    const adminEmail = process.env.SMTP_USER || 'hello@resipindia.com';
+    const adminEmail = process.env.CONTACT_EMAIL || process.env.SMTP_USER || 'hello@resipindia.com';
+    const isCod = order.paymentMethod === 'cod';
     const orderDate = new Date(order.createdAt).toLocaleString('en-IN', {
       day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit', hour12: true,
@@ -739,11 +750,11 @@ class EmailService {
                 </tr>
                 <tr>
                   <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Status</td>
-                  <td style="padding:8px 12px;font-size:13px;color:#27ae60;font-weight:bold;border-bottom:1px solid #dee2e6;">✅ ${order.paymentStatus?.toUpperCase() || 'PAID'}</td>
+                  <td style="padding:8px 12px;font-size:13px;color:${isCod ? '#f57f17' : '#27ae60'};font-weight:bold;border-bottom:1px solid #dee2e6;">${isCod ? '💵 COD — Pay on Delivery' : '✅ ' + (order.paymentStatus?.toUpperCase() || 'PAID')}</td>
                 </tr>
                 <tr style="background-color:#f8f9fa;">
                   <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Method</td>
-                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${(order.paymentMethod || 'cashfree').replace('cashfree', 'Cashfree (Online)')}</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;border-bottom:1px solid #dee2e6;">${isCod ? 'Cash on Delivery (COD)' : 'Cashfree (Online)'}</td>
                 </tr>
                 <tr>
                   <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Cashfree Payment ID</td>
@@ -800,6 +811,11 @@ class EmailService {
                   <td style="padding:8px 12px;font-size:13px;color:#555;border-bottom:1px solid #dee2e6;">Tax (GST ${order.taxPercent || 18}%)</td>
                   <td style="padding:8px 12px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #dee2e6;">₹${order.taxAmount?.toLocaleString('en-IN')}</td>
                 </tr>
+                ${order.codCharge > 0 ? `
+                <tr>
+                  <td style="padding:8px 12px;font-size:13px;color:#555;border-bottom:1px solid #dee2e6;">COD Charges</td>
+                  <td style="padding:8px 12px;font-size:13px;color:#333;text-align:right;border-bottom:1px solid #dee2e6;">₹${order.codCharge?.toLocaleString('en-IN')}</td>
+                </tr>` : ''}
                 ${order.couponDiscount > 0 ? `
                 <tr>
                   <td style="padding:8px 12px;font-size:13px;color:#27ae60;border-bottom:1px solid #dee2e6;">Discount${order.couponCode ? ` (${order.couponCode})` : ''}</td>

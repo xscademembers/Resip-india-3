@@ -138,7 +138,9 @@ const DEFAULT_SETTINGS = [
   { key: 'instagram_url', value: 'https://www.instagram.com/resip_india/', group: 'social' },
   { key: 'tax_percent', value: 18, group: 'tax' },
   { key: 'free_shipping_threshold', value: 999, group: 'shipping' },
-  { key: 'shipping_charge', value: 99, group: 'shipping' },
+  { key: 'shipping_charge', value: 50, group: 'shipping' },
+  { key: 'cod_enabled', value: true, group: 'payment' },
+  { key: 'cod_charge', value: 50, group: 'payment' },
   { key: 'announcement_messages', value: ['Free delivery on orders above ₹999', 'Handcrafted upcycled glassware made in India', 'Eco-friendly packaging on every order', 'Customisation is available for all products'], group: 'header' },
 ];
 

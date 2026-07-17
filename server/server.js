@@ -164,7 +164,7 @@ app.get('/api/banners', async (req, res) => {
 const Settings = require('./models/Settings');
 app.get('/api/settings/public', async (req, res) => {
   try {
-    const publicGroups = ['general', 'footer', 'header', 'social', 'seo', 'tax', 'shipping'];
+    const publicGroups = ['general', 'footer', 'header', 'social', 'seo', 'tax', 'shipping', 'payment'];
     const settings = await Settings.find({ group: { $in: publicGroups } });
     const result = settings.reduce((acc, s) => {
       acc[s.key] = s.value;
@@ -233,6 +233,28 @@ const startServer = async () => {
   // Connect to MongoDB after the server is listening so the site still loads
   // even if the database is unreachable (e.g. IP not yet whitelisted in dev).
   await connectDB();
+
+  // Ensure pricing/payment settings exist so they show up (and are editable)
+  // in the admin panel. Only creates missing keys — never overwrites values
+  // an admin has already customised.
+  try {
+    const defaults = [
+      { key: 'tax_percent', value: 18, group: 'tax' },
+      { key: 'free_shipping_threshold', value: 999, group: 'shipping' },
+      { key: 'shipping_charge', value: 50, group: 'shipping' },
+      { key: 'cod_enabled', value: true, group: 'payment' },
+      { key: 'cod_charge', value: 50, group: 'payment' },
+    ];
+    for (const d of defaults) {
+      const existing = await Settings.findOne({ key: d.key });
+      if (!existing) {
+        await Settings.setSetting(d.key, d.value, d.group);
+        console.log(`   ⚙️  Created default setting: ${d.key} = ${d.value}`);
+      }
+    }
+  } catch (err) {
+    console.error('Failed to ensure default settings:', err.message);
+  }
 
   // Graceful shutdown
   const shutdown = (signal) => {

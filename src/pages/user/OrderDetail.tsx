@@ -151,6 +151,12 @@ export default function OrderDetail() {
                 <dt className="text-charcoal/60">Shipping</dt>
                 <dd>{order.shippingCharge === 0 ? 'Free' : inr(order.shippingCharge)}</dd>
               </div>
+              {order.codCharge ? (
+                <div className="flex justify-between">
+                  <dt className="text-charcoal/60">COD Charges</dt>
+                  <dd>{inr(order.codCharge)}</dd>
+                </div>
+              ) : null}
               <div className="flex justify-between border-t border-brand-blue/10 pt-2 text-base font-bold">
                 <dt>Total</dt>
                 <dd className="text-brand-blue">{inr(order.totalAmount)}</dd>
