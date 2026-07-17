@@ -47,6 +47,15 @@ export const adminApi = {
     apiClient.get<{ success: boolean; order: any }>(`/admin/orders/${id}`).then((r) => r.data.order),
   updateOrderStatus: (id: string, data: { status: string; trackingNumber?: string; note?: string }) =>
     apiClient.put(`/admin/orders/${id}/status`, data).then((r) => r.data),
+  delhiveryPickupLocations: () =>
+    apiClient
+      .get<{ success: boolean; locations: string[]; default: string }>('/admin/delhivery/pickup-locations')
+      .then((r) => r.data),
+  shipWithDelhivery: (id: string, pickupLocation?: string) =>
+    apiClient.post<{ success: boolean; message: string; order: any; delhivery: { waybill: string; trackingUrl: string } }>(
+      `/admin/orders/${id}/ship-delhivery`,
+      pickupLocation ? { pickupLocation } : {}
+    ).then((r) => r.data),
 
   // Customers
   customers: (params: Record<string, any> = {}) =>

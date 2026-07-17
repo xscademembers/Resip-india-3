@@ -18,6 +18,9 @@ export default function AdminOrders() {
   const [tracking, setTracking] = useState('');
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const [shipping, setShipping] = useState(false);
+  const [pickupLocations, setPickupLocations] = useState<string[]>([]);
+  const [pickupLocation, setPickupLocation] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -34,6 +37,19 @@ export default function AdminOrders() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    adminApi
+      .delhiveryPickupLocations()
+      .then((res) => {
+        setPickupLocations(res.locations);
+        setPickupLocation(res.default);
+      })
+      .catch(() => {
+        setPickupLocations([]);
+        setPickupLocation('');
+      });
+  }, []);
 
   const openOrder = (o: any) => {
     setSelected(o);
@@ -57,6 +73,29 @@ export default function AdminOrders() {
       setSaving(false);
     }
   };
+
+  const shipWithDelhivery = async () => {
+    if (!selected) return;
+    setShipping(true);
+    try {
+      const res = await adminApi.shipWithDelhivery(
+        selected._id,
+        pickupLocations.length > 1 ? pickupLocation : undefined
+      );
+      toast.success(`Delhivery AWB: ${res.delhivery.waybill}`);
+      setSelected(null);
+      load();
+    } catch (err) {
+      toast.error((err as ApiErrorShape).message);
+    } finally {
+      setShipping(false);
+    }
+  };
+
+  const canShipWithDelhivery =
+    selected &&
+    !selected.trackingNumber &&
+    ['Confirmed', 'Packed'].includes(selected.orderStatus);
 
   return (
     <>
@@ -143,7 +182,30 @@ export default function AdminOrders() {
             <Field label="Note (optional)">
               <input className={inputClass} value={note} onChange={(e) => setNote(e.target.value)} />
             </Field>
-            <PrimaryButton type="submit" disabled={saving} className="w-full">
+            {canShipWithDelhivery && pickupLocations.length > 1 && (
+              <Field label="Pickup Location">
+                <select
+                  className={inputClass}
+                  value={pickupLocation}
+                  onChange={(e) => setPickupLocation(e.target.value)}
+                >
+                  {pickupLocations.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            {canShipWithDelhivery && (
+              <button
+                type="button"
+                onClick={shipWithDelhivery}
+                disabled={shipping || saving}
+                className="mb-3 w-full rounded-xl border border-brand-blue/20 bg-brand-blue/5 px-4 py-3 text-sm font-bold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+              >
+                {shipping ? 'Creating Delhivery shipment…' : 'Ship with Delhivery'}
+              </button>
+            )}
+            <PrimaryButton type="submit" disabled={saving || shipping} className="w-full">
               {saving ? 'Saving…' : 'Update Status'}
             </PrimaryButton>
           </form>

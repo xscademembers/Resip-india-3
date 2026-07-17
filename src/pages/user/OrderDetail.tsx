@@ -82,6 +82,20 @@ export default function OrderDetail() {
         {new Date(order.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
       </p>
 
+      {order.trackingNumber && (
+        <p className="mt-2 text-sm text-charcoal/70">
+          Tracking:{' '}
+          <a
+            href={`https://www.delhivery.com/track/package/${encodeURIComponent(order.trackingNumber)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-brand-blue underline-offset-4 hover:underline"
+          >
+            {order.trackingNumber}
+          </a>
+        </p>
+      )}
+
       <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-3">
         <div className="md:col-span-2">
           <div className="rounded-2xl border border-brand-blue/10 bg-white p-6 shadow-sm">

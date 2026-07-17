@@ -58,3 +58,10 @@ services:
         sync: false
       - key: CASHFREE_ENV
         value: PRODUCTION
+      # ---- Delhivery Shipping ----
+      - key: DELHIVERY_API_TOKEN
+        sync: false
+      - key: DELHIVERY_PICKUP_LOCATION
+        sync: false
+      - key: DELHIVERY_ENV
+        value: PRODUCTION

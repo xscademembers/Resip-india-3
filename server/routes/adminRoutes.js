@@ -6,7 +6,7 @@ const {
   getDashboard,
   getAdminProducts, createProduct, updateProduct, deleteProduct, uploadProductImages,
   createCategory, updateCategory, deleteCategory,
-  getAdminOrders, getAdminOrderDetail, updateOrderStatus,
+  getAdminOrders, getAdminOrderDetail, updateOrderStatus, getDelhiveryPickupLocations, shipOrderWithDelhivery,
   getCustomers, getCustomerDetail,
   getAdminCoupons, createCoupon, updateCoupon, deleteCoupon,
   getInventory, updateInventory,
@@ -39,6 +39,8 @@ router.delete('/categories/:id', deleteCategory);
 router.get('/orders', getAdminOrders);
 router.get('/orders/:id', getAdminOrderDetail);
 router.put('/orders/:id/status', updateOrderStatus);
+router.get('/delhivery/pickup-locations', getDelhiveryPickupLocations);
+router.post('/orders/:id/ship-delhivery', shipOrderWithDelhivery);
 
 // Customers
 router.get('/customers', getCustomers);

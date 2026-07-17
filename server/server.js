@@ -6,7 +6,11 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
-require('dotenv').config();
+const path = require('path');
+
+// .env.local overrides .env (matches Vite behaviour).
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
 
 const connectDB = require('./config/db');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -22,6 +26,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const couponRoutes = require('./routes/couponRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const shippingRoutes = require('./routes/shippingRoutes');
 
 const app = express();
 
@@ -82,6 +87,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/shipping', shippingRoutes);
 
 // Newsletter endpoint
 const Newsletter = require('./models/Newsletter');

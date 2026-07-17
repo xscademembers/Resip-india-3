@@ -11,6 +11,7 @@ const Payment = require('../models/Payment');
 const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
 const emailService = require('../services/emailService');
+const delhiveryService = require('../services/delhiveryService');
 const { deleteImage, getPublicIdFromUrl } = require('../middleware/upload');
 
 // ═══════════════════════════════════════════════
@@ -336,6 +337,70 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, order });
 });
 
+const getDelhiveryPickupLocations = asyncHandler(async (_req, res) => {
+  if (!delhiveryService.isConfigured()) {
+    throw new ApiError('Delhivery is not configured', 503);
+  }
+
+  const locations = delhiveryService.getPickupLocations();
+  res.status(200).json({
+    success: true,
+    locations,
+    default: delhiveryService.getDefaultPickupLocation(),
+  });
+});
+
+const shipOrderWithDelhivery = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError('Order not found', 404);
+
+  if (order.trackingNumber) {
+    throw new ApiError('Order already has a tracking number', 400);
+  }
+
+  const shippableStatuses = ['Confirmed', 'Packed'];
+  if (!shippableStatuses.includes(order.orderStatus)) {
+    throw new ApiError(`Order must be Confirmed or Packed before shipping (current: ${order.orderStatus})`, 400);
+  }
+
+  if (order.orderStatus === 'Cancelled' || order.paymentStatus === 'failed') {
+    throw new ApiError('Cannot ship a cancelled or unpaid order', 400);
+  }
+
+  if (order.paymentMethod !== 'cod' && order.paymentStatus !== 'paid') {
+    throw new ApiError('Order payment must be confirmed before shipping', 400);
+  }
+
+  const shipment = await delhiveryService.createShipment(order, {
+    pickupLocation: req.body?.pickupLocation,
+  });
+
+  order.trackingNumber = shipment.waybill;
+  order.orderStatus = 'Shipped';
+  order.statusHistory.push({
+    status: 'Shipped',
+    note: `Shipped via Delhivery (${shipment.pickupLocation}) — AWB ${shipment.waybill}`,
+    updatedBy: req.user._id,
+  });
+
+  await order.save();
+
+  const user = await User.findById(order.user);
+  if (user) {
+    await emailService.sendOrderStatusUpdate(order, user);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: 'Shipment created with Delhivery',
+    order,
+    delhivery: {
+      waybill: shipment.waybill,
+      trackingUrl: delhiveryService.getTrackingUrl(shipment.waybill),
+    },
+  });
+});
+
 // ═══════════════════════════════════════════════
 //  CUSTOMERS ADMIN
 // ═══════════════════════════════════════════════
@@ -559,7 +624,7 @@ module.exports = {
   getDashboard,
   getAdminProducts, createProduct, updateProduct, deleteProduct, uploadProductImages,
   createCategory, updateCategory, deleteCategory,
-  getAdminOrders, getAdminOrderDetail, updateOrderStatus,
+  getAdminOrders, getAdminOrderDetail, updateOrderStatus, getDelhiveryPickupLocations, shipOrderWithDelhivery,
   getCustomers, getCustomerDetail,
   getAdminCoupons, createCoupon, updateCoupon, deleteCoupon,
   getInventory, updateInventory,

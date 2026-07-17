@@ -3,7 +3,9 @@
  * 
  * Run: node server/seed.js
  */
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env') });
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
 const mongoose = require('mongoose');
 const connectDB = require('./config/db');
 
