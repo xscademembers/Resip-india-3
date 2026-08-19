@@ -29,7 +29,7 @@ import {
   type MediaPartner,
 } from './constants';
 import OptimizedImage from './OptimizedImage';
-import { optimizedSrc, optimizedSrcSet, IMG_WIDTHS } from './image-utils';
+import { optimizedSrc, optimizedSrcSet, prefetchImage, IMG_WIDTHS } from './image-utils';
 
 /**
  * Utility for Tailwind class merging
@@ -535,12 +535,11 @@ export const Footer = () => {
 const MediaPartnerCard: React.FC<{ partner: MediaPartner }> = ({ partner }) => {
   return (
     <div className="group relative shrink-0 overflow-hidden rounded-xl bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-1" style={{ width: 220, height: 160 }}>
-      <img
+      <OptimizedImage
         src={partner.image}
+        displayWidth={IMG_WIDTHS.PARTNER}
         alt={partner.name}
         className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-        decoding="async"
       />
     </div>
   );
@@ -812,6 +811,7 @@ export function CandleDualImageHover({
   const objectFit = variant === 'detail' ? 'object-contain' : 'object-cover';
   const showSecondary = !shouldReduceMotion && hovered && secondary !== primary;
   const fadeMs = shouldReduceMotion ? 0 : 500;
+  const loadSecondary = hovered || variant === 'detail';
 
   const handleEnter = () => {
     if (!shouldReduceMotion) setHovered(true);
@@ -842,7 +842,8 @@ export function CandleDualImageHover({
         sizes={`(max-width: ${width}px) 100vw, ${width}px`}
         alt={product.name}
         loading={variant === 'detail' ? 'eager' : 'lazy'}
-        decoding="async"
+        decoding={variant === 'detail' ? 'sync' : 'async'}
+        fetchPriority={variant === 'detail' ? 'high' : undefined}
         referrerPolicy="no-referrer"
         className={cn('absolute inset-0 h-full w-full', objectFit)}
         style={{
@@ -850,7 +851,7 @@ export function CandleDualImageHover({
           transition: fadeMs ? `opacity ${fadeMs}ms ease-in-out` : undefined,
         }}
       />
-      {secondary !== primary ? (
+      {loadSecondary && secondary !== primary ? (
         <img
           src={optimizedSrc(secondary, width)}
           srcSet={optimizedSrcSet(secondary, width)}
@@ -885,6 +886,13 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
   const len = images.length;
   const currentSrc = images[index] ?? product.image;
 
+  // Prefetch adjacent slides so next/prev feel instant
+  useEffect(() => {
+    if (len <= 1) return;
+    prefetchImage(images[(index + 1) % len], IMG_WIDTHS.DETAIL);
+    prefetchImage(images[(index - 1 + len) % len], IMG_WIDTHS.DETAIL);
+  }, [index, images, len]);
+
   const goPrev = () => setIndex((i) => (i - 1 + len) % len);
   const goNext = () => setIndex((i) => (i + 1) % len);
 
@@ -918,6 +926,7 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
             key={currentSrc}
             src={currentSrc}
             displayWidth={IMG_WIDTHS.DETAIL}
+            priority
             alt={`${product.name} image ${index + 1} of ${len}`}
             className="h-full w-full object-contain"
           />
@@ -931,12 +940,13 @@ export const ProductImageCarousel: React.FC<{ product: Product }> = ({ product }
               alt={`${product.name} image ${index + 1} of ${len}`}
               className="absolute inset-0 h-full w-full object-contain"
               referrerPolicy="no-referrer"
-              loading="lazy"
+              loading="eager"
               decoding="async"
-              initial={{ opacity: 0 }}
+              fetchPriority={index === 0 ? 'high' : undefined}
+              initial={{ opacity: 0.85 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
+              exit={{ opacity: 0.85 }}
+              transition={{ duration: 0.15 }}
             />
           </AnimatePresence>
         )}

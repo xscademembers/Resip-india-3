@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const axios = require('axios');
 
 /**
- * Cashfree Payment Gateway — Standard Checkout integration.
+ * Cashfree Payment Gateway   Standard Checkout integration.
  *
  * Uses App ID + Secret Key headers (x-client-id / x-client-secret) for
  * server-side API calls. The frontend loads the Cashfree JS SDK and opens
@@ -28,11 +28,11 @@ class CashfreeService {
       ? CASHFREE_HOSTS.PRODUCTION
       : CASHFREE_HOSTS.SANDBOX;
 
-    // Startup diagnostic — check if credentials are loaded
+    // Startup diagnostic   check if credentials are loaded
     if (!this.appId || !this.secretKey) {
       console.error('⚠️  Cashfree: CASHFREE_APP_ID or CASHFREE_SECRET_KEY is missing!');
     } else {
-      console.log(`✅ Cashfree: configured (${this.isProduction ? 'PRODUCTION' : 'SANDBOX'}) — App ID: ${this.appId.slice(0, 8)}...`);
+      console.log(`✅ Cashfree: configured (${this.isProduction ? 'PRODUCTION' : 'SANDBOX'})   App ID: ${this.appId.slice(0, 8)}...`);
     }
   }
 
@@ -218,7 +218,7 @@ class CashfreeService {
    */
   verifyWebhook(signature, rawBody, timestamp) {
     if (!this.secretKey) {
-      // No secret configured — skip verification in dev.
+      // No secret configured   skip verification in dev.
       console.warn('Cashfree webhook verification skipped (no secret key)');
       return true;
     }

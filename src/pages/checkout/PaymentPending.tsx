@@ -37,7 +37,7 @@ export default function PaymentPending() {
       <h1 className="mt-6 font-display text-3xl font-bold tracking-tight text-brand-blue">Confirming your payment…</h1>
       <p className="mt-3 text-charcoal/60">
         Please wait while we confirm your payment with PhonePe. This usually takes a few seconds.
-        {attempts > 6 && ' Still processing — you can safely check your orders later.'}
+        {attempts > 6 && ' Still processing you can safely check your orders later.'}
       </p>
       <div className="mt-8">
         <Link

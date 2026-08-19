@@ -8,20 +8,24 @@
 
 /** Preset widths for common contexts. */
 export const IMG_WIDTHS = {
+  /** Cart / wishlist / order line-item thumbnail. */
+  MINI: 128,
   /** Product card thumbnail in a grid. */
-  THUMB: 400,
+  THUMB: 320,
   /** Category card / Instagram grid. */
-  CARD: 560,
+  CARD: 480,
   /** Product detail carousel – main image. */
-  DETAIL: 800,
+  DETAIL: 640,
   /** Full-width hero / banner image. */
   HERO: 1280,
   /** "Related product" small thumbnail. */
-  RELATED: 360,
+  RELATED: 280,
   /** Navbar logo. */
   LOGO: 200,
   /** Footer logo. */
   LOGO_FOOTER: 240,
+  /** Media partner logo card. */
+  PARTNER: 220,
 } as const;
 
 type ImgWidth = (typeof IMG_WIDTHS)[keyof typeof IMG_WIDTHS];
@@ -32,7 +36,9 @@ function wixTransformHeight(width: ImgWidth | number): number {
   if (width === IMG_WIDTHS.LOGO || width === IMG_WIDTHS.LOGO_FOOTER) {
     return Math.round((width * 80) / 280);
   }
+  if (width === IMG_WIDTHS.PARTNER) return Math.round((width * 160) / 220);
   if (width === IMG_WIDTHS.DETAIL) return Math.round((width * 5) / 4);
+  if (width === IMG_WIDTHS.MINI) return width;
   return width;
 }
 
@@ -45,7 +51,7 @@ function wixTransformHeight(width: ImgWidth | number): number {
  *   and forces WebP via `fm=webp`.
  * - **Other URLs**: returned as-is.
  */
-export function optimizedSrc(src: string, width: ImgWidth | number, quality = 75): string {
+export function optimizedSrc(src: string, width: ImgWidth | number, quality = 70): string {
   if (!src) return src;
 
   // ── Wix ───────────────────────────────────────────────
@@ -73,10 +79,26 @@ export function optimizedSrc(src: string, width: ImgWidth | number, quality = 75
 
 /**
  * Generate a `srcSet` string for responsive loading.
- * Provides 1× and 2× variants.
+ * Small thumbnails only need 1×; larger images get 1× and 1.25× variants.
  */
-export function optimizedSrcSet(src: string, width: ImgWidth | number, quality = 75): string {
+export function optimizedSrcSet(src: string, width: ImgWidth | number, quality = 70): string {
   const w1 = width;
-  const w2 = Math.round(width * 1.5);
+  if (width <= IMG_WIDTHS.MINI) {
+    return `${optimizedSrc(src, w1, quality)} ${w1}w`;
+  }
+  const w2 = Math.round(width * 1.25);
   return `${optimizedSrc(src, w1, quality)} ${w1}w, ${optimizedSrc(src, w2, quality)} ${w2}w`;
+}
+
+/** Prefetch an image URL into the browser cache (e.g. carousel next/prev slide). */
+export function prefetchImage(src: string, width: ImgWidth | number, quality = 70): void {
+  if (!src) return;
+  const href = optimizedSrc(src, width, quality);
+  const existing = document.querySelector(`link[rel="prefetch"][href="${href}"]`);
+  if (existing) return;
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.as = 'image';
+  link.href = href;
+  document.head.appendChild(link);
 }

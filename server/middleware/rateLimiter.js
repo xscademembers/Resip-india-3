@@ -1,7 +1,7 @@
 const rateLimit = require('express-rate-limit');
 
 /**
- * General API rate limiter — 500 requests per 15 minutes.
+ * General API rate limiter   500 requests per 15 minutes.
  */
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -15,7 +15,7 @@ const apiLimiter = rateLimit({
 });
 
 /**
- * Auth rate limiter — 10 attempts per 15 minutes.
+ * Auth rate limiter   10 attempts per 15 minutes.
  * Protects against brute-force login attacks.
  */
 const authLimiter = rateLimit({
@@ -30,7 +30,7 @@ const authLimiter = rateLimit({
 });
 
 /**
- * Payment rate limiter — 5 requests per minute.
+ * Payment rate limiter   5 requests per minute.
  * Prevents payment abuse.
  */
 const paymentLimiter = rateLimit({

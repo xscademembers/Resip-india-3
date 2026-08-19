@@ -1,5 +1,5 @@
 /**
- * Database Seeder — migrates existing product data from constants.ts into MongoDB.
+ * Database Seeder   migrates existing product data from constants.ts into MongoDB.
  * 
  * Run: node server/seed.js
  */

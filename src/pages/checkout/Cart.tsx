@@ -31,7 +31,7 @@ export default function CartPage() {
       const res = await couponsApi.validate(couponCode.trim().toUpperCase(), subtotal);
       setDiscount(res.discount);
       couponStore.set({ code: couponCode.trim().toUpperCase(), discount: res.discount });
-      toast.success(`Coupon applied — you saved ${inr(res.discount)}`);
+      toast.success(`Coupon applied you saved ${inr(res.discount)}`);
     } catch (err) {
       setDiscount(0);
       couponStore.clear();
@@ -188,7 +188,7 @@ export default function CartPage() {
                   onClick={removeCoupon}
                   className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-green-600"
                 >
-                  <Tag size={12} /> {inr(discount)} off applied — remove
+                  <Tag size={12} /> {inr(discount)} off applied remove
                 </button>
               )}
             </div>

@@ -379,7 +379,7 @@ const shipOrderWithDelhivery = asyncHandler(async (req, res) => {
   order.orderStatus = 'Shipped';
   order.statusHistory.push({
     status: 'Shipped',
-    note: `Shipped via Delhivery (${shipment.pickupLocation}) — AWB ${shipment.waybill}`,
+    note: `Shipped via Delhivery (${shipment.pickupLocation})   AWB ${shipment.waybill}`,
     updatedBy: req.user._id,
   });
 

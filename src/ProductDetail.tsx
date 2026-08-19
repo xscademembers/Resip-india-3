@@ -147,7 +147,7 @@ const ProductDetail = () => {
     <div className="pt-40 pb-32 px-6 bg-white">
       <SEOHead
         title={product.name}
-        description={product.description || `${product.name} — handcrafted upcycled glassware from ReSip India.`}
+        description={product.description || `${product.name} handcrafted upcycled glassware from ReSip India.`}
         image={getProductGalleryImages(product)[0]}
         type="product"
       />

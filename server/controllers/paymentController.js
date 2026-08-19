@@ -34,7 +34,7 @@ const initiatePayment = asyncHandler(async (req, res) => {
   // Generate a unique Cashfree order ID per payment attempt.
   const cfMerchantOrderId = `RSP${Date.now()}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
-  // Build the return URL — Cashfree appends ?order_id=... automatically.
+  // Build the return URL   Cashfree appends ?order_id=... automatically.
   // Use PUBLIC_URL if defined, otherwise construct from request headers.
   // If behind a proxy (like Render), req.protocol is correctly set to 'https' 
   // because of `app.set('trust proxy', 1)` in server.js.
@@ -130,7 +130,7 @@ const paymentCallback = asyncHandler(async (req, res) => {
     return res.status(404).json({ success: false, message: 'Payment not found' });
   }
 
-  // Idempotency — skip if already processed
+  // Idempotency   skip if already processed
   if (payment.status === 'success' || payment.status === 'failed') {
     return res.status(200).json({ success: true, message: 'Already processed' });
   }
@@ -264,7 +264,7 @@ const getPaymentStatus = asyncHandler(async (req, res) => {
         }
       }
     } catch (err) {
-      // Status check failed — return current state
+      // Status check failed   return current state
       console.error('Cashfree status check failed:', err.message);
     }
   }

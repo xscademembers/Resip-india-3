@@ -1,4 +1,4 @@
-# Render Blueprint — deploys the ReSip India single server (frontend + API).
+# Render Blueprint   deploys the ReSip India single server (frontend + API).
 # The Dockerfile builds the Vite frontend and runs the Express server, which
 # serves both the website and the /api routes on one port.
 # Docs: https://render.com/docs/blueprint-spec

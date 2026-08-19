@@ -294,7 +294,7 @@ export default function AdminProducts() {
           <Field label="Image URLs (one per line)">
             <textarea className={inputClass} rows={3} value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
           </Field>
-          <Field label="Before image URL (optional — the original bottle photo)">
+          <Field label="Before image URL (optional the original bottle photo)">
             <input className={inputClass} value={form.beforeImage} onChange={(e) => setForm({ ...form, beforeImage: e.target.value })} />
           </Field>
 

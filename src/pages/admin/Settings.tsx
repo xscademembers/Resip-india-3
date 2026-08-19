@@ -77,7 +77,7 @@ export default function AdminSettings() {
     <>
       <AdminHeading
         title="Settings"
-        subtitle="Site configuration — tax, shipping, contact details and more"
+        subtitle="Site configuration tax, shipping, contact details and more"
         action={
           <PrimaryButton onClick={save} disabled={saving}>
             {saving ? 'Saving…' : 'Save All'}

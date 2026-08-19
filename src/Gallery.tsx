@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Play, X } from 'lucide-react';
 import { GALLERY_IMAGES, GALLERY_VIDEOS } from './constants';
 import OptimizedImage from './OptimizedImage';
-import { IMG_WIDTHS } from './image-utils';
+import { optimizedSrc, IMG_WIDTHS } from './image-utils';
 
 type LightboxItem =
   | { type: 'image'; src: string; index: number }
@@ -76,10 +76,11 @@ function GalleryLightbox({
       >
         {item.type === 'image' ? (
           <img
-            src={item.src}
+            src={optimizedSrc(item.src, IMG_WIDTHS.HERO)}
             alt={`ReSip gallery photo ${item.index + 1}`}
             className="max-h-[calc(100vh-128px)] max-w-full object-contain"
             referrerPolicy="no-referrer"
+            decoding="async"
           />
         ) : (
           <video

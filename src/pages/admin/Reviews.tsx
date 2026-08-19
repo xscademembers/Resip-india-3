@@ -63,8 +63,8 @@ export default function AdminReviews() {
         >
           {reviews.map((r) => (
             <tr key={r._id}>
-              <Td className="font-semibold text-charcoal">{r.product?.name || '—'}</Td>
-              <Td className="text-charcoal/60">{r.user?.name || '—'}</Td>
+              <Td className="font-semibold text-charcoal">{r.product?.name || ' '}</Td>
+              <Td className="text-charcoal/60">{r.user?.name || ' '}</Td>
               <Td>
                 <span className="inline-flex items-center gap-1 text-brand-gold">
                   <Star size={14} fill="currentColor" /> {r.rating}

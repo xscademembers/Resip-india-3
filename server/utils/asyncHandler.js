@@ -1,5 +1,5 @@
 /**
- * Async handler — wraps async route handlers to catch errors automatically.
+ * Async handler   wraps async route handlers to catch errors automatically.
  * Eliminates the need for try/catch in every controller.
  */
 const asyncHandler = (fn) => (req, res, next) =>

@@ -129,7 +129,7 @@ const About = () => {
             About <span className="text-brand-blue">Us</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-base font-light leading-relaxed text-charcoal/65 md:text-lg">
-            The people, place, and craft behind every ReSip piece   from a founder&apos;s vision to
+            The people, place, and craft behind every ReSip piece from a founder&apos;s vision to
             the hands that shape each bottle.
           </p>
         </div>
@@ -214,12 +214,12 @@ const About = () => {
                 <p className="text-base font-light leading-relaxed text-charcoal/70 md:text-lg">
                   In our village workshop, discarded glass bottles arrive as waste and leave as
                   refined, usable products. What you see in the comparison above is where we
-                  started   a modest space built with purpose   and how that same ground now holds
+                  started a modest space built with purpose and how that same ground now holds
                   a thriving hub of upcycling, local employment, and craft.
                 </p>
                 <p className="text-base font-light leading-relaxed text-charcoal/70 md:text-lg">
                   Every beam, every bench, and every bottle processed here represents a commitment
-                  to turning environmental challenge into community opportunity   one piece of
+                  to turning environmental challenge into community opportunity one piece of
                   glass at a time.
                 </p>
               </div>
@@ -239,7 +239,7 @@ const About = () => {
               eyebrow="The hands behind every piece"
               title="Our"
               accent="Artisans"
-              description="Three skilled craftspeople guide each bottle through segregation, cutting, and finishing   the heart of every ReSip product."
+              description="Three skilled craftspeople guide each bottle through segregation, cutting, and finishing the heart of every ReSip product."
               align="center"
               light
               headingId="artisans-heading"
@@ -259,7 +259,7 @@ const About = () => {
                   <OptimizedImage
                     src={artisan.image}
                     displayWidth={IMG_WIDTHS.CARD}
-                    alt={`${artisan.name}   ${artisan.role}`}
+                    alt={`${artisan.name} ${artisan.role}`}
                     className="aspect-[4/5] w-full object-cover transition-transform duration-500 motion-reduce:transition-none motion-reduce:hover:scale-100 hover:scale-[1.02]"
                   />
                 </div>

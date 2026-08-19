@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authApi.logout();
     } catch {
-      // Ignore network errors on logout — clear locally regardless.
+      // Ignore network errors on logout   clear locally regardless.
     }
     tokenStore.clear();
     setUser(null);

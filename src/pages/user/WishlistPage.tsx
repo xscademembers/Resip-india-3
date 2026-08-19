@@ -7,6 +7,8 @@ import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import AccountNav from './AccountNav';
 import SEOHead from '../../components/SEOHead';
+import OptimizedImage from '../../OptimizedImage';
+import { IMG_WIDTHS } from '../../image-utils';
 import type { ApiProduct } from '../../api/types';
 import type { ApiErrorShape } from '../../api/client';
 
@@ -72,11 +74,11 @@ export default function WishlistPage() {
             <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {products.map((product) => (
                 <li key={product._id} className="flex gap-4 rounded-2xl border border-brand-blue/10 bg-white p-4 shadow-sm">
-                  <img
-                    src={product.image || product.images?.[0]}
+                  <OptimizedImage
+                    src={product.image || product.images?.[0] || ''}
+                    displayWidth={IMG_WIDTHS.MINI}
                     alt={product.name}
                     className="h-24 w-24 shrink-0 rounded-xl object-cover"
-                    loading="lazy"
                   />
                   <div className="flex flex-1 flex-col">
                     <Link

@@ -131,7 +131,7 @@ export default function AdminCoupons() {
               <Td className="font-bold text-brand-blue">{c.code}</Td>
               <Td className="text-charcoal/60">{c.type}</Td>
               <Td>{c.type === 'percentage' ? `${c.value}%` : `₹${c.value}`}</Td>
-              <Td className="text-charcoal/60">{c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-IN') : '—'}</Td>
+              <Td className="text-charcoal/60">{c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-IN') : ' '}</Td>
               <Td>{c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ''}</Td>
               <Td>
                 <span className={`rounded-full px-2 py-1 text-xs font-bold ${c.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>

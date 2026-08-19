@@ -167,7 +167,7 @@ class EmailService {
         <h1 style="color:${brandBlue};font-size:24px;">Welcome to ReSip India!</h1>
         <p style="color:#333;line-height:1.6;">Hi ${vars.name || 'there'},</p>
         <p style="color:#555;line-height:1.6;">Thank you for joining the ReSip family! We're thrilled to have you on board.</p>
-        <p style="color:#555;line-height:1.6;">At ReSip India, we transform discarded bottles into stunning, handcrafted glassware — sustainable luxury for your home.</p>
+        <p style="color:#555;line-height:1.6;">At ReSip India, we transform discarded bottles into stunning, handcrafted glassware sustainable luxury for your home.</p>
         <div style="text-align:center;margin:30px 0;">
           <a href="${this.clientUrl}/shop" style="display:inline-block;padding:14px 32px;background-color:${brandBlue};color:#fff;text-decoration:none;border-radius:30px;font-weight:bold;">Explore Our Collection</a>
         </div>
@@ -275,7 +275,7 @@ class EmailService {
       return info;
     } catch (error) {
       console.error(`❌ Email failed: ${subject} → ${to}`, error.message);
-      // Don't throw — email failures shouldn't break the flow
+      // Don't throw email failures shouldn't break the flow
       return null;
     }
   }
@@ -295,7 +295,7 @@ class EmailService {
     const verificationUrl = `${this.clientUrl}/verify-email/${token}`;
     return this.send({
       to: user.email,
-      subject: 'Verify Your Email — ReSip India',
+      subject: 'Verify Your Email ReSip India',
       template: 'verification',
       variables: { name: user.name, verificationUrl },
     });
@@ -305,7 +305,7 @@ class EmailService {
     const resetUrl = `${this.clientUrl}/reset-password/${token}`;
     return this.send({
       to: user.email,
-      subject: 'Reset Your Password — ReSip India',
+      subject: 'Reset Your Password ReSip India',
       template: 'forgotPassword',
       variables: { name: user.name, resetUrl },
     });
@@ -314,7 +314,7 @@ class EmailService {
   async sendPasswordResetConfirmation(user) {
     return this.send({
       to: user.email,
-      subject: 'Password Changed — ReSip India',
+      subject: 'Password Changed ReSip India',
       template: 'passwordReset',
       variables: { name: user.name },
     });
@@ -337,7 +337,7 @@ class EmailService {
 
     return this.send({
       to: user.email,
-      subject: `Order Confirmed: ${order.orderId} — ReSip India`,
+      subject: `Order Confirmed: ${order.orderId} ReSip India`,
       template: 'orderConfirmation',
       variables: {
         name: user.name,
@@ -352,7 +352,7 @@ class EmailService {
   async sendPaymentSuccess(order, payment, user) {
     return this.send({
       to: user.email,
-      subject: `Payment Received: ${order.orderId} — ReSip India`,
+      subject: `Payment Received: ${order.orderId} ReSip India`,
       template: 'paymentSuccess',
       variables: {
         name: user.name,
@@ -366,7 +366,7 @@ class EmailService {
   async sendPaymentFailed(order, user) {
     return this.send({
       to: user.email,
-      subject: `Payment Failed: ${order.orderId} — ReSip India`,
+      subject: `Payment Failed: ${order.orderId} ReSip India`,
       template: 'paymentFailed',
       variables: {
         name: user.name,
@@ -378,7 +378,7 @@ class EmailService {
   async sendOrderStatusUpdate(order, user) {
     return this.send({
       to: user.email,
-      subject: `Order ${order.orderStatus}: ${order.orderId} — ReSip India`,
+      subject: `Order ${order.orderStatus}: ${order.orderId} ReSip India`,
       template: 'orderStatusUpdate',
       variables: {
         name: user.name,
@@ -392,7 +392,7 @@ class EmailService {
   async sendOrderCancelled(order, user) {
     return this.send({
       to: user.email,
-      subject: `Order Cancelled: ${order.orderId} — ReSip India`,
+      subject: `Order Cancelled: ${order.orderId} ReSip India`,
       template: 'orderCancelled',
       variables: {
         name: user.name,
@@ -404,7 +404,7 @@ class EmailService {
   async sendRefundCompleted(order, refundAmount, refundId, user) {
     return this.send({
       to: user.email,
-      subject: `Refund Processed: ${order.orderId} — ReSip India`,
+      subject: `Refund Processed: ${order.orderId} ReSip India`,
       template: 'refundCompleted',
       variables: {
         name: user.name,
@@ -683,7 +683,7 @@ class EmailService {
           ${item.setSize ? `<br><span style="color:#888;font-size:11px;">Set of ${item.setSize}</span>` : ''}
           ${item.fragrance ? `<br><span style="color:#888;font-size:11px;">Fragrance: ${item.fragrance}</span>` : ''}
         </td>
-        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#888;text-align:center;">${item.product || '—'}</td>
+        <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#888;text-align:center;">${item.product || ' '}</td>
         <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:center;">${item.quantity}</td>
         <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:right;">₹${item.price?.toLocaleString('en-IN')}</td>
         <td style="padding:10px 8px;border:1px solid #dee2e6;font-size:13px;color:#333;text-align:right;font-weight:bold;">₹${item.subtotal?.toLocaleString('en-IN')}</td>
@@ -719,7 +719,7 @@ class EmailService {
           <tr>
             <td style="background-color:${brandBlue};padding:25px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">🛒 New Order Received</h1>
-              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India — Admin Notification</p>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India Admin Notification</p>
             </td>
           </tr>
 
@@ -750,7 +750,7 @@ class EmailService {
                 </tr>
                 <tr>
                   <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Status</td>
-                  <td style="padding:8px 12px;font-size:13px;color:${isCod ? '#f57f17' : '#27ae60'};font-weight:bold;border-bottom:1px solid #dee2e6;">${isCod ? '💵 COD — Pay on Delivery' : '✅ ' + (order.paymentStatus?.toUpperCase() || 'PAID')}</td>
+                  <td style="padding:8px 12px;font-size:13px;color:${isCod ? '#f57f17' : '#27ae60'};font-weight:bold;border-bottom:1px solid #dee2e6;">${isCod ? '💵 COD Pay on Delivery' : '✅ ' + (order.paymentStatus?.toUpperCase() || 'PAID')}</td>
                 </tr>
                 <tr style="background-color:#f8f9fa;">
                   <td style="padding:8px 12px;font-size:13px;color:#888;border-bottom:1px solid #dee2e6;">Payment Method</td>
@@ -866,7 +866,7 @@ class EmailService {
   async sendContactInquiry({ name, email, company, orderType, message }) {
     const brandBlue = '#0047ab';
     const to = process.env.CONTACT_EMAIL || 'hello@resipindia.com';
-    const safe = (v) => (v ? String(v) : '—');
+    const safe = (v) => (v ? String(v) : ' ');
 
     const html = `
 <!DOCTYPE html>
@@ -880,7 +880,7 @@ class EmailService {
           <tr>
             <td style="background-color:${brandBlue};padding:25px;text-align:center;">
               <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">📩 New Contact Inquiry</h1>
-              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India — Website Contact Form</p>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">ReSip India Website Contact Form</p>
             </td>
           </tr>
           <tr>
@@ -921,7 +921,7 @@ class EmailService {
 
     const info = await this.deliver({
       to,
-      subject: `New Contact Inquiry from ${name || 'Website'} — ReSip India`,
+      subject: `New Contact Inquiry from ${name || 'Website'} ReSip India`,
       html,
       replyTo: email || undefined,
     });

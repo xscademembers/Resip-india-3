@@ -22,7 +22,7 @@ const register = asyncHandler(async (req, res) => {
   const verificationToken = user.generateVerificationToken();
   await user.save({ validateBeforeSave: false });
 
-  // Respond immediately — don't block account creation on email delivery.
+  // Respond immediately   don't block account creation on email delivery.
   // Emails are sent in the background so slow/unreachable SMTP can't hang the request.
   sendTokenResponse(user, 201, res);
 

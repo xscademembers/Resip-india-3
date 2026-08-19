@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 /**
- * Protect routes — requires valid JWT token.
+ * Protect routes   requires valid JWT token.
  */
 const protect = async (req, res, next) => {
   let token;
@@ -47,7 +47,7 @@ const protect = async (req, res, next) => {
 };
 
 /**
- * Admin-only middleware — must be used after protect.
+ * Admin-only middleware   must be used after protect.
  */
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
@@ -61,7 +61,7 @@ const admin = (req, res, next) => {
 };
 
 /**
- * Optional auth — attaches user if token exists, but doesn't block.
+ * Optional auth   attaches user if token exists, but doesn't block.
  * Useful for cart (guest vs logged in).
  */
 const optionalAuth = async (req, res, next) => {
@@ -81,7 +81,7 @@ const optionalAuth = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = await User.findById(decoded.id);
     } catch (error) {
-      // Token invalid — continue as guest
+      // Token invalid   continue as guest
       req.user = null;
     }
   }

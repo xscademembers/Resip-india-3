@@ -5,7 +5,7 @@ import { cartSessionStore, guestCartStore } from '../api/client';
 import type { ApiCart } from '../api/types';
 import { useAuth } from './AuthContext';
 
-/** Default pricing rules — overridden by admin Settings once they load. */
+/** Default pricing rules   overridden by admin Settings once they load. */
 export const DEFAULT_TAX_PERCENT = 18;
 export const DEFAULT_FREE_SHIPPING_THRESHOLD = 999;
 export const DEFAULT_SHIPPING_CHARGE = 50;

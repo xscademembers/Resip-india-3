@@ -66,7 +66,7 @@ export default function AdminInventory() {
             return (
               <tr key={p._id} className={isLow ? 'bg-red-50/50' : ''}>
                 <Td className="font-semibold text-charcoal">{p.name}</Td>
-                <Td className="text-charcoal/50">{p.sku || '—'}</Td>
+                <Td className="text-charcoal/50">{p.sku || ' '}</Td>
                 <Td>
                   <input
                     type="number"

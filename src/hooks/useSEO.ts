@@ -9,7 +9,7 @@ export interface SEOOptions {
   noindex?: boolean;
 }
 
-const DEFAULT_TITLE = 'ReSip India — Handcrafted Upcycled Glassware';
+const DEFAULT_TITLE = 'ReSip India Handcrafted Upcycled Glassware';
 const DEFAULT_DESCRIPTION =
   'ReSip India transforms discarded bottles into stunning handcrafted upcycled glassware and candles. Sustainable luxury, made in India.';
 

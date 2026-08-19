@@ -30,7 +30,7 @@ const shippingRoutes = require('./routes/shippingRoutes');
 const app = express();
 
 // Trust the first proxy (Render/hosting) so req.protocol reflects the real
-// client scheme (https) — needed to build correct payment return URLs.
+// client scheme (https)   needed to build correct payment return URLs.
 app.set('trust proxy', 1);
 
 // ─── Security Middleware ────────────────────────────
@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Cookie parser
 app.use(cookieParser());
 
-// Mongo sanitize — prevent NoSQL injection
+// Mongo sanitize   prevent NoSQL injection
 app.use(mongoSanitize());
 
 // Compression
@@ -184,7 +184,7 @@ app.get('/api/settings/public', async (req, res) => {
 // ─── Serve Frontend (single server for both dev & production) ───
 // In production we serve the pre-built `dist` folder as static files.
 // In development we mount Vite in middleware mode so the SAME server
-// serves the React app (with HMR) alongside the API — one process, one port.
+// serves the React app (with HMR) alongside the API   one process, one port.
 const fs = require('fs');
 const rootPath = path.join(__dirname, '..');
 const distPath = path.join(rootPath, 'dist');
@@ -240,7 +240,7 @@ const startServer = async () => {
   await connectDB();
 
   // Ensure pricing/payment settings exist so they show up (and are editable)
-  // in the admin panel. Only creates missing keys — never overwrites values
+  // in the admin panel. Only creates missing keys   never overwrites values
   // an admin has already customised.
   try {
     const defaults = [

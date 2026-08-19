@@ -66,7 +66,7 @@ export default function AdminCustomers() {
             <tr key={c._id} className="cursor-pointer hover:bg-brand-blue/5" onClick={() => openDetail(c._id)}>
               <Td className="font-semibold text-charcoal">{c.name}</Td>
               <Td className="text-charcoal/60">{c.email}</Td>
-              <Td className="text-charcoal/60">{c.phone || '—'}</Td>
+              <Td className="text-charcoal/60">{c.phone || ' '}</Td>
               <Td className="text-charcoal/60">{new Date(c.createdAt).toLocaleDateString('en-IN')}</Td>
             </tr>
           ))}

@@ -136,7 +136,7 @@ export default function AdminOrders() {
           {orders.map((o) => (
             <tr key={o._id} className="cursor-pointer hover:bg-brand-blue/5" onClick={() => openOrder(o)}>
               <Td className="font-semibold text-brand-blue">#{o.orderId}</Td>
-              <Td>{o.user?.name || '—'}</Td>
+              <Td>{o.user?.name || ' '}</Td>
               <Td className="text-charcoal/60">{new Date(o.createdAt).toLocaleDateString('en-IN')}</Td>
               <Td className="text-right font-semibold">{inr(o.totalAmount)}</Td>
               <Td>

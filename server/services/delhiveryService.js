@@ -1,9 +1,9 @@
 const axios = require('axios');
 
 /**
- * Delhivery Express — shipping / logistics integration.
+ * Delhivery Express   shipping / logistics integration.
  *
- * GST, HSN, and weight are configured in Delhivery One — not passed from here.
+ * GST, HSN, and weight are configured in Delhivery One   not passed from here.
  * Docs: https://delhivery-express-api-doc.readme.io/
  */
 const DELHIVERY_HOSTS = {
@@ -26,7 +26,7 @@ class DelhiveryService {
       console.warn('⚠️  Delhivery: DELHIVERY_API_TOKEN or DELHIVERY_PICKUP_LOCATION is missing');
     } else {
       console.log(
-        `✅ Delhivery: configured (${this.isProduction ? 'PRODUCTION' : 'STAGING'}) — ${this.pickupLocations.length} pickup location(s)`
+        `✅ Delhivery: configured (${this.isProduction ? 'PRODUCTION' : 'STAGING'})   ${this.pickupLocations.length} pickup location(s)`
       );
     }
   }
@@ -132,7 +132,7 @@ class DelhiveryService {
 
   /**
    * Create a forward shipment for an order and return the waybill (AWB).
-   * @param {import('../models/Order')} order — Mongoose order document
+   * @param {import('../models/Order')} order   Mongoose order document
    * @param {{ pickupLocation?: string }} [opts]
    */
   async createShipment(order, opts = {}) {

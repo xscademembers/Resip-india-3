@@ -160,19 +160,19 @@ export const RETURN_ADDRESS =
 /** Rotating promo line above the site header (all pages). */
 export const ANNOUNCEMENT_MESSAGES = [
   'Free delivery on orders above ₹999',
-  'Handcrafted upcycled glassware — made in India',
+  'Handcrafted upcycled glassware made in India',
   'Eco-friendly packaging on every order',
   'Customisation is available for all products',
 ] as const;
 
-/** Primary brand logo   header, footer, and favicon. */
+/** Primary brand logo header, footer, and favicon. */
 export const BRAND_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png';
 
 export const BRAND_LOGO_HEADER_SRC = BRAND_LOGO_SRC;
 export const BRAND_LOGO_FOOTER_SRC = BRAND_LOGO_SRC;
 
-/** Footer trust badges   upcycle and Make in India. */
+/** Footer trust badges upcycle and Make in India. */
 export const FOOTER_UPCYCLE_LOGO_SRC =
   'https://static.wixstatic.com/media/9356bd_5d6a139dc29c4143ad359a8615d47ac1~mv2.png';
 export const FOOTER_MAKE_IN_INDIA_LOGO_SRC =
@@ -189,7 +189,7 @@ export interface MediaPartner {
 /** Placeholder for collection cards not yet photographed. */
 export const CATEGORY_COMING_SOON_IMAGE = '/images/category-coming-soon.svg';
 
-/** Home page — "Our Media Partners" scrolling showcase. */
+/** Home page "Our Media Partners" scrolling showcase. */
 export const MEDIA_PARTNERS: MediaPartner[] = [
   {
     id: 'media-partner-1',
@@ -983,7 +983,7 @@ export const CATEGORIES: Category[] = [
   { id: 'corporate', name: 'Corporate Box', image: CATEGORY_COMING_SOON_IMAGE },
 ];
 
-/** Shop filter pills   always matches {@link CATEGORIES} order. */
+/** Shop filter pills always matches {@link CATEGORIES} order. */
 export const SHOP_CATEGORY_FILTERS = ['All', ...CATEGORIES.map((c) => c.name)] as const;
 
 /** Resolve `?category=` query value to a valid shop filter label. */
@@ -999,7 +999,7 @@ export function getShopCategoryPath(category: string): string {
   return `/shop?category=${encodeURIComponent(category)}`;
 }
 
-/** Gallery page   still photos from the ReSip workshop and events. */
+/** Gallery page still photos from the ReSip workshop and events. */
 export const GALLERY_IMAGES: string[] = [
   'https://static.wixstatic.com/media/9356bd_e30f9bad456049d28277b5806c843429~mv2.jpg',
   'https://static.wixstatic.com/media/9356bd_347b8ffa322e47a5b143ec09f73af2f5~mv2.jpg',
@@ -1018,5 +1018,5 @@ export const GALLERY_IMAGES: string[] = [
   'https://static.wixstatic.com/media/9356bd_b64db589f83941e2b140637c2b7ab28f~mv2.png',
 ];
 
-/** Gallery page   workshop and event videos. */
+/** Gallery page workshop and event videos. */
 export const GALLERY_VIDEOS: string[] = [];

@@ -1,7 +1,7 @@
 const { body, param, query, validationResult } = require('express-validator');
 
 /**
- * Process validation results — returns 400 with error messages if invalid.
+ * Process validation results   returns 400 with error messages if invalid.
  */
 const validate = (req, res, next) => {
   const errors = validationResult(req);

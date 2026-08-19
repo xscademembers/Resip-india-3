@@ -120,7 +120,7 @@ export default function Checkout() {
     if (!shippingAddress) return;
     setPlacing(true);
 
-    // Cash on Delivery: create the order and go straight to the order page —
+    // Cash on Delivery: create the order and go straight to the order page  
     // there is no online payment step.
     if (paymentMethod === 'cod') {
       try {
@@ -337,7 +337,7 @@ export default function Checkout() {
                   <span className="text-sm">
                     <strong>Pay Online</strong>
                     <br />
-                    <span className="text-charcoal/50">Credit/Debit Card, UPI, Netbanking — secured by Cashfree</span>
+                    <span className="text-charcoal/50">Credit/Debit Card, UPI, Netbanking secured by Cashfree</span>
                   </span>
                 </label>
 

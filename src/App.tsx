@@ -98,7 +98,7 @@ const MainLayout = () => {
       </main>
       <Footer />
 
-      {/* Sticky mobile CTA — homepage only so it doesn't block shop/collection views */}
+      {/* Sticky mobile CTA   homepage only so it doesn't block shop/collection views */}
       {showShopCta && (
         <div className="md:hidden fixed bottom-6 left-6 right-6 z-40">
           <Link

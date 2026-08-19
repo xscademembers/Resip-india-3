@@ -6,6 +6,8 @@ import { ordersApi } from '../../api/orders';
 import { useToast } from '../../context/ToastContext';
 import { OrderStatusBadge } from './OrderStatusBadge';
 import SEOHead from '../../components/SEOHead';
+import OptimizedImage from '../../OptimizedImage';
+import { IMG_WIDTHS } from '../../image-utils';
 import type { ApiOrder } from '../../api/types';
 import type { ApiErrorShape } from '../../api/client';
 
@@ -104,7 +106,12 @@ export default function OrderDetail() {
               {order.items.map((item, i) => (
                 <li key={i} className="flex gap-4 py-4">
                   {item.image && (
-                    <img src={item.image} alt={item.name} className="h-16 w-16 rounded-lg object-cover" loading="lazy" />
+                    <OptimizedImage
+                      src={item.image}
+                      displayWidth={IMG_WIDTHS.MINI}
+                      alt={item.name}
+                      className="h-16 w-16 rounded-lg object-cover"
+                    />
                   )}
                   <div className="flex flex-1 justify-between">
                     <div>
@@ -133,7 +140,7 @@ export default function OrderDetail() {
                       <p className="text-sm font-semibold text-charcoal">{h.status}</p>
                       <p className="text-xs text-charcoal/50">
                         {new Date(h.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                        {h.note ? ` — ${h.note}` : ''}
+                        {h.note ? `   ${h.note}` : ''}
                       </p>
                     </div>
                   </li>
