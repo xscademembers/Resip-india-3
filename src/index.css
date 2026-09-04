@@ -85,29 +85,41 @@
   .glass-reflection::after {
     animation: none;
   }
+}
 
-  .media-partners-marquee-track {
-    animation: none;
-    transform: none;
+/* Press-style partner logos: consistent visual weight, already B&W assets. */
+.partner-logo {
+  width: auto;
+  object-fit: contain;
+  opacity: 0.82;
+  transition: opacity 0.3s ease;
+}
+
+.partner-logo--wordmark {
+  height: 2.35rem;
+  max-width: 11.5rem;
+}
+
+.partner-logo--badge {
+  height: 3.75rem;
+  max-width: 4.25rem;
+}
+
+@media (min-width: 768px) {
+  .partner-logo--wordmark {
+    height: 2.75rem;
+    max-width: 13.5rem;
+  }
+
+  .partner-logo--badge {
+    height: 4.5rem;
+    max-width: 5rem;
   }
 }
 
-@keyframes media-partners-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.media-partners-marquee-track {
-  animation: media-partners-marquee 25s linear infinite;
-  will-change: transform;
-}
-
-.media-partners-marquee-track:hover {
-  animation-play-state: paused;
+.partner-logo:hover,
+.group:hover .partner-logo {
+  opacity: 1;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -137,4 +149,9 @@
   mask-repeat: no-repeat;
   -webkit-mask-position: left center;
   mask-position: left center;
+}
+
+.brand-logo--white.brand-logo--center {
+  -webkit-mask-position: center;
+  mask-position: center;
 }

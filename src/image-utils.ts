@@ -24,8 +24,8 @@ export const IMG_WIDTHS = {
   LOGO: 200,
   /** Footer logo. */
   LOGO_FOOTER: 240,
-  /** Media partner logo card. */
-  PARTNER: 220,
+  /** Media partner press logo. */
+  PARTNER: 320,
 } as const;
 
 type ImgWidth = (typeof IMG_WIDTHS)[keyof typeof IMG_WIDTHS];
@@ -36,7 +36,7 @@ function wixTransformHeight(width: ImgWidth | number): number {
   if (width === IMG_WIDTHS.LOGO || width === IMG_WIDTHS.LOGO_FOOTER) {
     return Math.round((width * 80) / 280);
   }
-  if (width === IMG_WIDTHS.PARTNER) return Math.round((width * 160) / 220);
+  if (width === IMG_WIDTHS.PARTNER) return Math.round((width * 80) / 320);
   if (width === IMG_WIDTHS.DETAIL) return Math.round((width * 5) / 4);
   if (width === IMG_WIDTHS.MINI) return width;
   return width;

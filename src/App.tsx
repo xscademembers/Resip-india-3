@@ -36,6 +36,7 @@ const Checkout = lazy(() => import('./pages/checkout/Checkout'));
 const PaymentSuccess = lazy(() => import('./pages/checkout/PaymentSuccess'));
 const PaymentFailed = lazy(() => import('./pages/checkout/PaymentFailed'));
 const PaymentPending = lazy(() => import('./pages/checkout/PaymentPending'));
+const OrderConfirmation = lazy(() => import('./pages/checkout/OrderConfirmation'));
 
 // User account pages
 const Profile = lazy(() => import('./pages/user/Profile'));
@@ -148,14 +149,8 @@ export default function App() {
 
                   {/* Cart + checkout */}
                   <Route path="/cart" element={<CartPage />} />
-                  <Route
-                    path="/checkout"
-                    element={
-                      <ProtectedRoute>
-                        <Checkout />
-                      </ProtectedRoute>
-                    }
-                  />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/order/confirmation" element={<OrderConfirmation />} />
                   <Route path="/payment/success" element={<PaymentSuccess />} />
                   <Route path="/payment/failed" element={<PaymentFailed />} />
                   <Route path="/payment/pending" element={<PaymentPending />} />

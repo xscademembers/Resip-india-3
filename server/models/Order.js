@@ -33,7 +33,54 @@ const orderSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      // Optional for guest checkout
+      sparse: true,
+    },
+    isGuest: {
+      type: Boolean,
+      default: false,
+    },
+    guestEmail: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
+    guestPhone: {
+      type: String,
+      trim: true,
+    },
+    guestName: {
+      type: String,
+      trim: true,
+    },
+    /** Opaque token so guests can view confirmation without logging in. */
+    accessToken: {
+      type: String,
+      index: true,
+    },
+    /** Cart session used when the order was placed (guest payment ownership). */
+    cartSessionId: {
+      type: String,
+      sparse: true,
+    },
+    carbonPointsUsed: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    carbonPointsDiscount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    carbonPointsEarned: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    carbonPointsAwarded: {
+      type: Boolean,
+      default: false,
     },
     items: [orderItemSchema],
     shippingAddress: {
@@ -137,13 +184,17 @@ orderSchema.index({ user: 1 });
 orderSchema.index({ orderStatus: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ paymentStatus: 1 });
+orderSchema.index({ guestEmail: 1 });
 
-// Auto-generate orderId before save
+// Auto-generate orderId + guest accessToken before save
 orderSchema.pre('save', function (next) {
   if (!this.orderId) {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = crypto.randomBytes(3).toString('hex').toUpperCase();
     this.orderId = `RSP-${timestamp}-${random}`;
+  }
+  if (!this.accessToken) {
+    this.accessToken = crypto.randomBytes(24).toString('hex');
   }
   next();
 });

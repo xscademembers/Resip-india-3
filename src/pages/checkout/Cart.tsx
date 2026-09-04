@@ -48,10 +48,6 @@ export default function CartPage() {
   };
 
   const goToCheckout = () => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/checkout' } });
-      return;
-    }
     navigate('/checkout');
   };
 

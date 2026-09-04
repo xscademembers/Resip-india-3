@@ -12,6 +12,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
 const emailService = require('../services/emailService');
 const delhiveryService = require('../services/delhiveryService');
+const carbonService = require('../services/carbonService');
 const { deleteImage, getPublicIdFromUrl } = require('../middleware/upload');
 
 // ═══════════════════════════════════════════════
@@ -263,12 +264,15 @@ const getAdminOrders = asyncHandler(async (req, res) => {
   if (search) {
     query.$or = [
       { orderId: { $regex: search, $options: 'i' } },
+      { guestEmail: { $regex: search, $options: 'i' } },
+      { guestName: { $regex: search, $options: 'i' } },
+      { guestPhone: { $regex: search, $options: 'i' } },
     ];
   }
 
   const [orders, total] = await Promise.all([
     Order.find(query)
-      .populate('user', 'name email')
+      .populate('user', 'name email carbonPoints')
       .sort('-createdAt')
       .skip(skip)
       .limit(limit),
@@ -283,7 +287,7 @@ const getAdminOrders = asyncHandler(async (req, res) => {
 });
 
 const getAdminOrderDetail = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id).populate('user', 'name email phone');
+  const order = await Order.findById(req.params.id).populate('user', 'name email phone carbonPoints');
   if (!order) throw new ApiError('Order not found', 404);
   res.status(200).json({ success: true, order });
 });
@@ -315,13 +319,26 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
 
   await order.save();
 
+  // Carbon Points: COD earn on Delivered; reverse on cancel/return/refund
+  if (status === 'Delivered' && order.paymentMethod === 'cod') {
+    await carbonService.awardEarnPoints(order);
+  }
+  if (['Cancelled', 'Returned', 'Refunded'].includes(status)) {
+    await carbonService.reversePointsForOrder(order, `Admin set status to ${status}`);
+  }
+  if (status === 'Refunded' && order.paymentStatus !== 'refunded') {
+    order.paymentStatus = 'refunded';
+    await order.save();
+  }
+
   // Send email notification
-  const user = await User.findById(order.user);
-  if (user) {
+  const user = order.user ? await User.findById(order.user) : null;
+  const contact = user || carbonService.guestContactFromOrder(order);
+  if (contact?.email) {
     if (status === 'Cancelled') {
-      await emailService.sendOrderCancelled(order, user);
+      await emailService.sendOrderCancelled(order, contact);
     } else {
-      await emailService.sendOrderStatusUpdate(order, user);
+      await emailService.sendOrderStatusUpdate(order, contact);
     }
   }
 

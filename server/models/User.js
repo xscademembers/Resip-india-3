@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    /** Loyalty wallet: ₹10 paid = 1 point; 1 point = ₹1 off. */
+    carbonPoints: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     emailVerificationToken: String,
     emailVerificationExpires: Date,
     resetPasswordToken: String,

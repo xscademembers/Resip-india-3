@@ -1,12 +1,15 @@
+const crypto = require('crypto');
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Inventory = require('../models/Inventory');
 const Coupon = require('../models/Coupon');
 const Settings = require('../models/Settings');
+const User = require('../models/User');
 const asyncHandler = require('../utils/asyncHandler');
 const { ApiError } = require('../middleware/errorHandler');
 const emailService = require('../services/emailService');
+const carbonService = require('../services/carbonService');
 
 // Default pricing rules (used when no admin Settings value is present).
 const DEFAULT_FREE_SHIPPING_THRESHOLD = 999;
@@ -30,14 +33,64 @@ const getPricingConfig = async () => {
   };
 };
 
-// @desc    Create order
+const getSessionId = (req) =>
+  req.cookies?.cartSession || req.headers['x-cart-session'] || null;
+
+/** Resolve cart for logged-in user or guest session. */
+const findCartForRequest = async (req) => {
+  if (req.user) {
+    return Cart.findOne({ user: req.user._id }).populate('items.product');
+  }
+  const sessionId = getSessionId(req);
+  if (!sessionId) return null;
+  return Cart.findOne({ sessionId }).populate('items.product');
+};
+
+const clearCartForRequest = async (req, cart) => {
+  if (req.user) {
+    await Cart.findOneAndDelete({ user: req.user._id });
+  } else if (cart?.sessionId) {
+    await Cart.findOneAndDelete({ sessionId: cart.sessionId });
+  } else {
+    const sessionId = getSessionId(req);
+    if (sessionId) await Cart.findOneAndDelete({ sessionId });
+  }
+};
+
+const contactFromOrder = (order, user) => {
+  if (user) return user;
+  return carbonService.guestContactFromOrder(order);
+};
+
+// @desc    Create order (guest or logged-in)
 // @route   POST /api/orders
 const createOrder = asyncHandler(async (req, res) => {
-  const { shippingAddress, billingAddress, couponCode, paymentMethod = 'cashfree' } = req.body;
+  const {
+    shippingAddress,
+    billingAddress,
+    couponCode,
+    paymentMethod = 'cashfree',
+    guestEmail,
+    carbonPointsToUse = 0,
+  } = req.body;
   const isCod = paymentMethod === 'cod';
+  const isGuest = !req.user;
 
-  // Get user's cart
-  const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
+  if (!shippingAddress || typeof shippingAddress !== 'object') {
+    throw new ApiError('Shipping address is required', 400);
+  }
+
+  // Guests must provide email (for confirmation + Cashfree).
+  const email = isGuest
+    ? String(guestEmail || shippingAddress.email || '').trim().toLowerCase()
+    : req.user.email;
+  if (isGuest) {
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      throw new ApiError('A valid email is required for guest checkout', 400);
+    }
+  }
+
+  const cart = await findCartForRequest(req);
   if (!cart || cart.items.length === 0) {
     throw new ApiError('Cart is empty', 400);
   }
@@ -65,13 +118,15 @@ const createOrder = asyncHandler(async (req, res) => {
     });
   }
 
-  // Calculate totals
   const subtotal = orderItems.reduce((sum, item) => sum + item.subtotal, 0);
 
-  // Apply coupon
+  // Coupons: logged-in only
   let couponDiscount = 0;
   let couponDoc = null;
   if (couponCode) {
+    if (!req.user) {
+      throw new ApiError('Please sign in to apply a coupon', 401);
+    }
     couponDoc = await Coupon.findOne({ code: couponCode.toUpperCase() });
     if (couponDoc) {
       const validation = couponDoc.isValid(req.user._id, subtotal);
@@ -84,17 +139,28 @@ const createOrder = asyncHandler(async (req, res) => {
   const { taxPercent, freeShippingThreshold, shippingCharge: shippingFee, codCharge: codFee } =
     await getPricingConfig();
 
-  const afterDiscount = subtotal - couponDiscount;
-  const taxAmount = Math.round((afterDiscount * taxPercent) / 100);
+  const afterCoupon = Math.max(0, subtotal - couponDiscount);
+  const taxAmount = Math.round((afterCoupon * taxPercent) / 100);
   const shippingCharge = subtotal >= freeShippingThreshold ? 0 : shippingFee;
-  // Extra handling fee charged only for Cash on Delivery orders.
   const codCharge = isCod ? codFee : 0;
-  const totalAmount = afterDiscount + taxAmount + shippingCharge + codCharge;
 
-  // COD orders are confirmed immediately (no online payment step); online
-  // orders stay Pending until the payment gateway confirms.
+  // Max redeemable points = remaining amount before points (cannot go negative).
+  const prePointsTotal = afterCoupon + taxAmount + shippingCharge + codCharge;
+  let carbonPointsUsed = 0;
+  let carbonPointsDiscount = 0;
+
+  // Create order first so redeem can reference order._id; adjust total after redeem.
+  const accessToken = crypto.randomBytes(24).toString('hex');
+  const sessionId = cart.sessionId || getSessionId(req) || undefined;
+
   const order = await Order.create({
-    user: req.user._id,
+    user: req.user?._id,
+    isGuest,
+    guestEmail: isGuest ? email : undefined,
+    guestPhone: isGuest ? shippingAddress.phone : undefined,
+    guestName: isGuest ? shippingAddress.fullName : undefined,
+    accessToken,
+    cartSessionId: sessionId,
     items: orderItems,
     shippingAddress,
     billingAddress: billingAddress || shippingAddress,
@@ -106,24 +172,45 @@ const createOrder = asyncHandler(async (req, res) => {
     taxAmount,
     shippingCharge,
     codCharge,
-    totalAmount,
+    carbonPointsUsed: 0,
+    carbonPointsDiscount: 0,
+    carbonPointsEarned: 0,
+    totalAmount: prePointsTotal,
     paymentMethod,
     orderStatus: isCod ? 'Confirmed' : 'Pending',
     paymentStatus: 'pending',
     statusHistory: [
-      { status: isCod ? 'Confirmed' : 'Pending', note: isCod ? 'Order placed (Cash on Delivery)' : 'Order created' },
+      {
+        status: isCod ? 'Confirmed' : 'Pending',
+        note: isCod ? 'Order placed (Cash on Delivery)' : 'Order created',
+      },
     ],
   });
 
-  // Update coupon usage
-  if (couponDoc) {
+  // Redeem carbon points (logged-in only) against pre-points total.
+  if (req.user && carbonPointsToUse > 0) {
+    const redeem = await carbonService.redeemPoints(
+      req.user._id,
+      carbonPointsToUse,
+      order._id,
+      prePointsTotal
+    );
+    carbonPointsUsed = redeem.pointsUsed;
+    carbonPointsDiscount = redeem.discountInr;
+  }
+
+  order.carbonPointsUsed = carbonPointsUsed;
+  order.carbonPointsDiscount = carbonPointsDiscount;
+  order.totalAmount = Math.max(0, prePointsTotal - carbonPointsDiscount);
+  await order.save();
+
+  if (couponDoc && req.user) {
     couponDoc.usedCount += 1;
     couponDoc.usedBy.push(req.user._id);
     await couponDoc.save();
   }
 
-  // For COD there is no payment gateway callback, so finalise the order now:
-  // reduce inventory, clear the cart, and send confirmation emails.
+  // COD: finalise now. Points earn waits until Delivered.
   if (isCod) {
     for (const item of order.items) {
       const inventory = await Inventory.findOne({ product: item.product });
@@ -134,21 +221,32 @@ const createOrder = asyncHandler(async (req, res) => {
       }
     }
 
-    await Cart.findOneAndDelete({ user: req.user._id });
+    await clearCartForRequest(req, cart);
 
-    const user = await require('../models/User').findById(req.user._id);
-    if (user) {
-      Promise.allSettled([
-        emailService.sendCustomerOrderConfirmation(order, { amount: 0, transactionId: 'COD', gatewayResponse: {} }, user),
-        emailService.sendAdminOrderNotification(order, { amount: 0, transactionId: 'COD', gatewayResponse: {} }, user),
-      ]).catch(() => {});
-    }
+    const user = req.user ? await User.findById(req.user._id) : null;
+    const contact = contactFromOrder(order, user);
+    Promise.allSettled([
+      emailService.sendCustomerOrderConfirmation(
+        order,
+        { amount: 0, transactionId: 'COD', gatewayResponse: {} },
+        contact
+      ),
+      emailService.sendAdminOrderNotification(
+        order,
+        { amount: 0, transactionId: 'COD', gatewayResponse: {} },
+        contact
+      ),
+    ]).catch(() => {});
   }
 
-  res.status(201).json({ success: true, order });
+  res.status(201).json({
+    success: true,
+    order,
+    accessToken: order.accessToken,
+  });
 });
 
-// @desc    Get single order
+// @desc    Get single order (owner or admin)
 // @route   GET /api/orders/:id
 const getOrder = asyncHandler(async (req, res) => {
   const order = await Order.findOne({
@@ -162,15 +260,39 @@ const getOrder = asyncHandler(async (req, res) => {
     throw new ApiError('Order not found', 404);
   }
 
-  // Only owner or admin can view
-  if (
-    order.user._id.toString() !== req.user._id.toString() &&
-    req.user.role !== 'admin'
-  ) {
+  const isOwner =
+    order.user &&
+    order.user._id.toString() === req.user._id.toString();
+  if (!isOwner && req.user.role !== 'admin') {
     throw new ApiError('Not authorized', 403);
   }
 
   res.status(200).json({ success: true, order });
+});
+
+// @desc    Guest/public order confirmation by orderId + accessToken
+// @route   GET /api/orders/confirm/:orderId
+const getOrderConfirmation = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+  const token = String(req.query.token || '').trim();
+  if (!token) {
+    throw new ApiError('Confirmation token is required', 400);
+  }
+
+  const order = await Order.findOne({ orderId, accessToken: token }).select(
+    '-__v'
+  );
+
+  if (!order) {
+    throw new ApiError('Order not found', 404);
+  }
+
+  // Strip sensitive fields from public response
+  const publicOrder = order.toObject();
+  // Keep accessToken out of nested copies if client stores it separately
+  delete publicOrder.cartSessionId;
+
+  res.status(200).json({ success: true, order: publicOrder });
 });
 
 // @desc    Cancel order
@@ -187,11 +309,11 @@ const cancelOrder = asyncHandler(async (req, res) => {
     throw new ApiError('Order not found', 404);
   }
 
-  if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+  const isOwner = order.user && order.user.toString() === req.user._id.toString();
+  if (!isOwner && req.user.role !== 'admin') {
     throw new ApiError('Not authorized', 403);
   }
 
-  // Only allow cancel for certain statuses
   const cancellable = ['Pending', 'Confirmed'];
   if (!cancellable.includes(order.orderStatus)) {
     throw new ApiError(`Cannot cancel order with status: ${order.orderStatus}`, 400);
@@ -206,23 +328,23 @@ const cancelOrder = asyncHandler(async (req, res) => {
   });
   await order.save();
 
-  // Restore inventory
+  await carbonService.reversePointsForOrder(order, 'Cancelled by user');
+
   for (const item of order.items) {
     const inventory = await Inventory.findOne({ product: item.product });
     if (inventory) {
       await inventory.restoreStock(item.quantity, order._id);
     } else {
-      // Update product stock directly
       await Product.findByIdAndUpdate(item.product, {
         $inc: { stock: item.quantity },
       });
     }
   }
 
-  // Send cancellation email
-  const user = await require('../models/User').findById(order.user);
-  if (user) {
-    await emailService.sendOrderCancelled(order, user);
+  const user = order.user ? await User.findById(order.user) : null;
+  const contact = contactFromOrder(order, user);
+  if (contact?.email) {
+    await emailService.sendOrderCancelled(order, contact);
   }
 
   res.status(200).json({ success: true, order });
@@ -231,5 +353,6 @@ const cancelOrder = asyncHandler(async (req, res) => {
 module.exports = {
   createOrder,
   getOrder,
+  getOrderConfirmation,
   cancelOrder,
 };

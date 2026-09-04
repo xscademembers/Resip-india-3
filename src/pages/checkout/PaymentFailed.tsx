@@ -21,10 +21,10 @@ export default function PaymentFailed() {
           Back to Cart
         </Link>
         <Link
-          to="/account/orders"
+          to="/shop"
           className="rounded-xl border border-brand-blue/20 px-6 py-3 text-sm font-bold text-brand-blue transition-colors hover:bg-brand-blue/5"
         >
-          My Orders
+          Continue Shopping
         </Link>
       </div>
     </PageContainer>

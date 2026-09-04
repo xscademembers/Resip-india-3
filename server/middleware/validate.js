@@ -147,6 +147,16 @@ const orderRules = [
     .trim()
     .matches(/^\d{6}$/)
     .withMessage('Valid pincode is required'),
+  body('guestEmail')
+    .optional({ nullable: true, checkFalsy: true })
+    .trim()
+    .isEmail()
+    .withMessage('Please provide a valid email')
+    .normalizeEmail(),
+  body('carbonPointsToUse')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Carbon points must be a non-negative integer'),
 ];
 
 module.exports = {

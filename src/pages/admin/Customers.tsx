@@ -58,6 +58,7 @@ export default function AdminCustomers() {
               <Th>Name</Th>
               <Th>Email</Th>
               <Th>Phone</Th>
+              <Th className="text-right">Carbon Pts</Th>
               <Th>Joined</Th>
             </tr>
           }
@@ -66,14 +67,15 @@ export default function AdminCustomers() {
             <tr key={c._id} className="cursor-pointer hover:bg-brand-blue/5" onClick={() => openDetail(c._id)}>
               <Td className="font-semibold text-charcoal">{c.name}</Td>
               <Td className="text-charcoal/60">{c.email}</Td>
-              <Td className="text-charcoal/60">{c.phone || ' '}</Td>
+              <Td className="text-charcoal/60">{c.phone || '—'}</Td>
+              <Td className="text-right font-semibold text-green-700">{c.carbonPoints ?? 0}</Td>
               <Td className="text-charcoal/60">{new Date(c.createdAt).toLocaleDateString('en-IN')}</Td>
             </tr>
           ))}
           {customers.length === 0 && (
             <tr>
               <Td>No customers.</Td>
-              <Td /><Td /><Td />
+              <Td /><Td /><Td /><Td />
             </tr>
           )}
         </Table>
@@ -85,6 +87,9 @@ export default function AdminCustomers() {
             <div className="mb-4 rounded-xl bg-brand-bg p-4 text-sm">
               <p>{detail.customer.email}</p>
               <p className="text-charcoal/60">{detail.customer.phone || 'No phone'}</p>
+              <p className="mt-2 font-semibold text-green-700">
+                Carbon Points: {detail.customer.carbonPoints ?? 0}
+              </p>
             </div>
             <h3 className="mb-2 text-sm font-bold text-brand-blue">Recent Orders ({detail.orders.length})</h3>
             <ul className="divide-y divide-brand-blue/10 text-sm">

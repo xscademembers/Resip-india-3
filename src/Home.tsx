@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import {
-  ArrowRight,
   Recycle,
   Droplets,
   Leaf,
@@ -185,52 +184,12 @@ const Home = () => {
   return (
     <div className="overflow-hidden">
       {/* Hero Section */}
-      <section className="relative flex h-screen items-center justify-center overflow-hidden" style={{ contentVisibility: 'visible' }}>
+      <section className="relative h-screen overflow-hidden" style={{ contentVisibility: 'visible' }}>
+        <h1 className="sr-only">ReSip India</h1>
         <HeroBackgroundSlideshow reduceMotion={!!reduceMotion} />
 
         {/* Glass Reflection Overlay */}
         <div className="glass-reflection pointer-events-none absolute inset-0 z-10 opacity-30" />
-
-        <div className="relative z-20 mx-auto max-w-4xl px-6 text-center">
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-          >
-            <span className="mb-6 inline-block font-display text-sm font-bold uppercase tracking-[0.4em] text-brand-gold">
-              Sustainable Luxury
-            </span>
-            <h1 className="mb-8 text-5xl leading-[0.9] tracking-tighter text-white md:text-8xl">
-              From Discarded Bottles to <span className="text-brand-gold italic">Designer</span> Glassware
-            </h1>
-            <p className="mx-auto mb-12 max-w-2xl text-lg font-light text-white/80 md:text-xl">
-              Handcrafted. Sustainable. Timeless. We reimagine waste into premium lifestyle pieces for the modern home.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
-              <Link to="/shop" className="group flex items-center gap-3 rounded-full bg-brand-blue px-10 py-5 text-lg font-bold text-white transition-all duration-500 hover:bg-brand-gold">
-                Shop Now <ArrowRight size={20} className="transition-transform group-hover:translate-x-2 motion-reduce:transform-none" />
-              </Link>
-              <Link to="/gallery" className="flex items-center gap-3 border-b border-white/20 pb-1 text-lg font-bold text-white transition-colors hover:text-brand-gold">
-                Gallery
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          animate={{
-            y: reduceMotion ? 0 : [0, 10, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: reduceMotion ? 0 : Infinity,
-          }}
-          className="absolute bottom-10 left-1/2 z-20 -translate-x-1/2 text-white/50"
-          aria-hidden
-        >
-          <div className="mx-auto h-16 w-[1px] bg-gradient-to-b from-white/50 to-transparent" />
-        </motion.div>
       </section>
 
       {/* Categories Section */}

@@ -59,6 +59,7 @@ export interface ApiUser {
   role: 'user' | 'admin';
   isEmailVerified?: boolean;
   avatar?: string;
+  carbonPoints?: number;
 }
 
 export interface ApiCartItem {
@@ -116,12 +117,21 @@ export interface ApiOrder {
   shippingCharge: number;
   codCharge?: number;
   couponDiscount?: number;
+  carbonPointsUsed?: number;
+  carbonPointsDiscount?: number;
+  carbonPointsEarned?: number;
   totalAmount: number;
   paymentMethod?: string;
   paymentStatus?: string;
   orderStatus: string;
   trackingNumber?: string;
   statusHistory?: Array<{ status: string; timestamp: string; note?: string }>;
+  isGuest?: boolean;
+  guestEmail?: string;
+  guestName?: string;
+  guestPhone?: string;
+  accessToken?: string;
+  user?: { name?: string; email?: string; phone?: string; carbonPoints?: number };
   createdAt: string;
 }
 

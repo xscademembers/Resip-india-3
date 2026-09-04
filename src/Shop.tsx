@@ -16,8 +16,13 @@ import { mapApiProduct } from './api/mapProduct';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState('');
+  const queryFromUrl = searchParams.get('q') ?? '';
+  const [searchQuery, setSearchQuery] = useState(queryFromUrl);
   const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    setSearchQuery(queryFromUrl);
+  }, [queryFromUrl]);
 
   // Load from the API, falling back to bundled constants if the backend is
   // unavailable so the storefront always renders.

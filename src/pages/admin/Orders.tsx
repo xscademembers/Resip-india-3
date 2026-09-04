@@ -136,7 +136,18 @@ export default function AdminOrders() {
           {orders.map((o) => (
             <tr key={o._id} className="cursor-pointer hover:bg-brand-blue/5" onClick={() => openOrder(o)}>
               <Td className="font-semibold text-brand-blue">#{o.orderId}</Td>
-              <Td>{o.user?.name || ' '}</Td>
+              <Td>
+                {o.isGuest || !o.user ? (
+                  <span>
+                    {o.guestName || o.shippingAddress?.fullName || 'Guest'}
+                    <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                      Guest
+                    </span>
+                  </span>
+                ) : (
+                  o.user?.name || ' '
+                )}
+              </Td>
               <Td className="text-charcoal/60">{new Date(o.createdAt).toLocaleDateString('en-IN')}</Td>
               <Td className="text-right font-semibold">{inr(o.totalAmount)}</Td>
               <Td>
@@ -157,9 +168,32 @@ export default function AdminOrders() {
         {selected && (
           <form onSubmit={saveStatus}>
             <div className="mb-4 rounded-xl bg-brand-bg p-4 text-sm">
-              <p className="font-semibold">{selected.user?.name}</p>
-              <p className="text-charcoal/60">{selected.user?.email}</p>
+              {selected.isGuest || !selected.user ? (
+                <>
+                  <p className="font-semibold">
+                    {selected.guestName || selected.shippingAddress?.fullName || 'Guest'}{' '}
+                    <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                      Guest
+                    </span>
+                  </p>
+                  <p className="text-charcoal/60">{selected.guestEmail || '—'}</p>
+                  <p className="text-charcoal/60">{selected.guestPhone || selected.shippingAddress?.phone || ''}</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold">{selected.user?.name}</p>
+                  <p className="text-charcoal/60">{selected.user?.email}</p>
+                  {typeof selected.user?.carbonPoints === 'number' && (
+                    <p className="text-green-700">Carbon Points: {selected.user.carbonPoints}</p>
+                  )}
+                </>
+              )}
               <p className="mt-2">Total: <strong>{inr(selected.totalAmount)}</strong></p>
+              {(selected.carbonPointsUsed > 0 || selected.carbonPointsEarned > 0) && (
+                <p className="text-xs text-charcoal/60">
+                  Points used: {selected.carbonPointsUsed || 0} · Earned: {selected.carbonPointsEarned || 0}
+                </p>
+              )}
             </div>
             <ul className="mb-4 divide-y divide-brand-blue/10 text-sm">
               {selected.items?.map((it: any, i: number) => (

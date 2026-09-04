@@ -10,7 +10,8 @@ const paymentSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      // Optional for guest checkout
+      sparse: true,
     },
     transactionId: {
       type: String,

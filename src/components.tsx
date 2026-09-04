@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { ShoppingBag, Menu, X, ChevronRight, ChevronLeft, ArrowRight, Instagram, Facebook, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles, User as UserIcon, LayoutDashboard } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, ChevronRight, ChevronLeft, ArrowRight, Instagram, Facebook, Mail, Phone, MapPin, Recycle, Award, Droplets, Sparkles, User as UserIcon, LayoutDashboard } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from './context/CartContext';
 import { useAuth } from './context/AuthContext';
@@ -13,6 +13,7 @@ import {
   formatInr,
   getProductGalleryImages,
   getProductPriceCaption,
+  getVisibleProducts,
   ANNOUNCEMENT_MESSAGES,
   INSTAGRAM_PROFILE_URL,
   CONTACT_WHATSAPP_URL,
@@ -169,6 +170,33 @@ export const AnnouncementBanner = () => {
   );
 };
 
+const HEADER_SEARCH_SUGGESTION_COUNT = 3;
+
+function productSearchHaystack(product: Product): string {
+  return [product.name, product.description, product.category, product.story, ...(product.features ?? [])]
+    .join(' ')
+    .toLowerCase();
+}
+
+function rankSearchMatch(product: Product, query: string): number {
+  const name = product.name.toLowerCase();
+  if (name.startsWith(query)) return 0;
+  if (name.includes(query)) return 1;
+  return 2;
+}
+
+function getHeaderSearchMatches(products: Product[], rawQuery: string): Product[] {
+  const query = rawQuery.trim().toLowerCase();
+  if (!query) return products;
+  return products
+    .filter((product) => productSearchHaystack(product).includes(query))
+    .sort((a, b) => rankSearchMatch(a, query) - rankSearchMatch(b, query) || a.name.localeCompare(b.name));
+}
+
+function headerProductPath(product: Product): string {
+  return `/product/${product.id}`;
+}
+
 /** Fixed header stack: announcement bar + navbar (every page). */
 export const SiteHeader = () => (
   <header className="fixed top-0 left-0 z-50 flex w-full flex-col">
@@ -183,7 +211,22 @@ export const SiteHeader = () => (
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState('');
+  const [suggestionIndex, setSuggestionIndex] = useState(-1);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const catalogProducts = useMemo(() => getVisibleProducts(), []);
+  const searchMatches = useMemo(
+    () => getHeaderSearchMatches(catalogProducts, headerSearch),
+    [catalogProducts, headerSearch]
+  );
+  const suggestions = searchMatches.slice(0, HEADER_SEARCH_SUGGESTION_COUNT);
+  const seeAllIndex = suggestions.length;
+  const trimmedQuery = headerSearch.trim();
+  const shopSearchPath = trimmedQuery ? `/shop?q=${encodeURIComponent(trimmedQuery)}` : '/shop';
   const { totalItems } = useCart();
   const { isAuthenticated, isAdmin } = useAuth();
   const isHome = location.pathname === '/';
@@ -195,7 +238,49 @@ export const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    searchInputRef.current?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsSearchOpen(false);
+    };
+    const onPointer = (event: PointerEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onPointer);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onPointer);
+    };
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    setSuggestionIndex(-1);
+  }, [headerSearch, isSearchOpen]);
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
   const navLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'About Us', path: '/about' },
+    { name: 'Shop', path: '/shop' },
+    { name: 'Contact', path: '/contact' },
+  ];
+
+  const mobileNavLinks = [
     { name: 'Home', path: '/' },
     { name: 'About Us', path: '/about' },
     { name: 'Shop', path: '/shop' },
@@ -203,16 +288,174 @@ export const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
+  const navLinkClass = cn(
+    'text-sm font-medium tracking-wide transition-colors duration-300 hover:text-brand-gold',
+    useTransparent ? 'text-white' : 'text-charcoal'
+  );
+
+  const submitHeaderSearch = (event?: React.FormEvent) => {
+    event?.preventDefault();
+    closeSearch();
+    navigate(shopSearchPath);
+  };
+
+  const goToSuggestion = (product: Product) => {
+    closeSearch();
+    navigate(headerProductPath(product));
+  };
+
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      setSuggestionIndex((index) => Math.min(index < 0 ? 0 : index + 1, seeAllIndex));
+      return;
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      setSuggestionIndex((index) => (index <= 0 ? -1 : index - 1));
+      return;
+    }
+    if (event.key === 'Enter' && suggestionIndex >= 0) {
+      event.preventDefault();
+      if (suggestionIndex === seeAllIndex) {
+        submitHeaderSearch();
+        return;
+      }
+      const product = suggestions[suggestionIndex];
+      if (product) goToSuggestion(product);
+    }
+  };
+
   return (
     <nav className={cn(
       "relative w-full transition-all duration-500 px-6 py-4",
       useTransparent ? "bg-transparent" : "bg-white/90 backdrop-blur-md shadow-sm py-3"
     )}>
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="relative z-10 flex min-w-0 items-center justify-start gap-1 sm:gap-4">
+          <div ref={searchWrapRef} className="relative">
+            <button
+              type="button"
+              aria-label={isSearchOpen ? 'Close search' : 'Search products'}
+              aria-expanded={isSearchOpen}
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setIsSearchOpen((open) => !open);
+              }}
+              className={cn(
+                'flex items-center gap-2 rounded-full p-2 text-sm font-medium tracking-wide transition-colors duration-300 hover:text-brand-gold',
+                useTransparent ? 'text-white hover:bg-white/10' : 'text-charcoal'
+              )}
+            >
+              <Search size={20} aria-hidden />
+              <span className="hidden lg:inline">Search</span>
+            </button>
+            {isSearchOpen && (
+              <div className="absolute left-0 top-full z-30 mt-3 w-[min(22rem,calc(100vw-3rem))] overflow-hidden rounded-2xl border border-brand-blue/10 bg-white shadow-xl">
+                <form onSubmit={submitHeaderSearch} className="p-2 pb-1">
+                  <label htmlFor="header-search" className="sr-only">
+                    Search products
+                  </label>
+                  <input
+                    id="header-search"
+                    ref={searchInputRef}
+                    type="search"
+                    value={headerSearch}
+                    onChange={(event) => setHeaderSearch(event.target.value)}
+                    onKeyDown={onSearchKeyDown}
+                    placeholder="Search products..."
+                    autoComplete="off"
+                    aria-autocomplete="list"
+                    aria-controls="header-search-suggestions"
+                    aria-expanded={isSearchOpen}
+                    aria-activedescendant={
+                      suggestionIndex < 0
+                        ? undefined
+                        : suggestionIndex === seeAllIndex
+                          ? 'header-search-see-all'
+                          : `header-search-suggestion-${suggestionIndex}`
+                    }
+                    className="w-full rounded-xl border border-brand-blue/10 bg-brand-bg px-4 py-2.5 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-brand-blue"
+                  />
+                </form>
+                <div id="header-search-suggestions" role="listbox" aria-label="Product suggestions">
+                  {suggestions.length > 0 ? (
+                    <ul className="m-0 list-none p-1">
+                      {suggestions.map((product, index) => {
+                        const active = index === suggestionIndex;
+                        return (
+                          <li key={product.id} role="presentation">
+                            <Link
+                              id={`header-search-suggestion-${index}`}
+                              role="option"
+                              aria-selected={active}
+                              to={headerProductPath(product)}
+                              onClick={closeSearch}
+                              className={cn(
+                                'flex items-center gap-3 rounded-xl px-2 py-2 transition-colors',
+                                active ? 'bg-brand-blue/10' : 'hover:bg-brand-blue/5'
+                              )}
+                            >
+                              <OptimizedImage
+                                src={product.image}
+                                displayWidth={IMG_WIDTHS.MINI}
+                                alt=""
+                                className="h-11 w-11 shrink-0 rounded-lg object-cover"
+                              />
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-bold text-charcoal">
+                                  {product.name}
+                                </span>
+                                <span className="mt-0.5 block truncate text-xs text-charcoal/50">
+                                  {product.category}
+                                  <span className="text-charcoal/30"> · </span>
+                                  {getProductPriceCaption(product)}
+                                </span>
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="px-4 py-3 text-sm text-charcoal/50">
+                      No matching products
+                    </p>
+                  )}
+                  <Link
+                    id="header-search-see-all"
+                    role="option"
+                    aria-selected={suggestionIndex === seeAllIndex}
+                    to={shopSearchPath}
+                    onClick={closeSearch}
+                    className={cn(
+                      'flex items-center justify-between border-t border-brand-blue/10 px-4 py-3 text-sm font-bold text-brand-blue transition-colors',
+                      suggestionIndex === seeAllIndex ? 'bg-brand-blue/10' : 'hover:bg-brand-blue/5 hover:text-brand-gold'
+                    )}
+                  >
+                    <span>
+                      See all
+                      {trimmedQuery && searchMatches.length > 0 ? (
+                        <span className="ml-1 font-medium text-charcoal/45">
+                          ({searchMatches.length})
+                        </span>
+                      ) : null}
+                    </span>
+                    <ChevronRight size={16} aria-hidden />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+          <Link to="/gallery" className={cn(navLinkClass, 'px-2 py-2')}>
+            Gallery
+          </Link>
+        </div>
+
         <Link
           to="/"
           className={cn(
-            'relative flex shrink-0 items-center rounded-sm motion-safe:transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)]',
+            'relative z-[1] flex shrink-0 items-center justify-center rounded-sm motion-safe:transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-gold)]',
             BRAND_LOGO_BOX
           )}
         >
@@ -221,33 +464,32 @@ export const Navbar = () => {
             displayWidth={IMG_WIDTHS.LOGO}
             priority
             className={cn(
-              'absolute inset-0 h-full w-full motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
+              'absolute inset-0 h-full w-full object-center motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
               useTransparent ? 'pointer-events-none opacity-0' : 'opacity-100'
             )}
           />
           <BrandLogo
             variant="white"
             className={cn(
-              'absolute inset-0 h-full w-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
+              'brand-logo--center absolute inset-0 h-full w-full drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)] motion-safe:transition-opacity motion-safe:duration-500 motion-reduce:transition-none',
               useTransparent ? 'opacity-100' : 'pointer-events-none opacity-0'
             )}
           />
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link 
-              key={link.name} 
-              to={link.path}
-              className={cn(
-                "text-sm font-medium tracking-wide hover:text-brand-gold transition-colors duration-300",
-                useTransparent ? "text-white" : "text-charcoal"
-              )}
-            >
-              {link.name}
-            </Link>
-          ))}
+        <div className="hidden items-center justify-end gap-3 md:flex lg:gap-6 xl:gap-8">
+          <div className="hidden items-center gap-6 lg:flex xl:gap-8">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                to={link.path}
+                className={navLinkClass}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
           {isAdmin && (
             <Link
               to="/admin"
@@ -288,7 +530,7 @@ export const Navbar = () => {
         </div>
 
         {/* Mobile: cart icon + menu toggle */}
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="flex items-center justify-end gap-1 md:hidden">
           <Link
             to="/cart"
             aria-label={`Cart with ${totalItems} items`}
@@ -306,7 +548,10 @@ export const Navbar = () => {
           </Link>
           <button
             className={cn('p-2', useTransparent ? 'text-white' : 'text-charcoal')}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onClick={() => {
+              setIsSearchOpen(false);
+              setIsMobileMenuOpen(!isMobileMenuOpen);
+            }}
             aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -323,7 +568,7 @@ export const Navbar = () => {
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 w-full bg-white shadow-xl p-6 flex flex-col gap-4 md:hidden"
           >
-            {navLinks.map((link) => (
+            {mobileNavLinks.map((link) => (
               <Link 
                 key={link.name} 
                 to={link.path}
@@ -532,61 +777,49 @@ export const Footer = () => {
   );
 };
 
-const MediaPartnerCard: React.FC<{ partner: MediaPartner }> = ({ partner }) => {
-  return (
-    <div className="group relative shrink-0 overflow-hidden rounded-xl bg-white shadow-md transition-all duration-400 hover:shadow-xl hover:-translate-y-1" style={{ width: 220, height: 160 }}>
-      <OptimizedImage
-        src={partner.image}
-        displayWidth={IMG_WIDTHS.PARTNER}
-        alt={partner.name}
-        className="h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-      />
-    </div>
+const MediaPartnerLogo: React.FC<{ partner: MediaPartner }> = ({ partner }) => {
+  const shape = partner.shape ?? 'wordmark';
+  const image = (
+    <OptimizedImage
+      src={partner.image}
+      displayWidth={shape === 'badge' ? 160 : IMG_WIDTHS.PARTNER}
+      quality={90}
+      alt={partner.name}
+      className={cn('partner-logo', `partner-logo--${shape}`)}
+      style={{ backgroundColor: 'transparent' }}
+    />
   );
-}
 
-/**
- * Infinite horizontal scrolling showcase â€” all four partner images visible,
- * continuously rotating one-by-one in a seamless loop.
- */
-export const MediaPartnersMarquee = () => {
-  const reduceMotion = useReducedMotion();
-  // Duplicate the set 3x for a seamless infinite scroll
-  const marqueeTrack = [...MEDIA_PARTNERS, ...MEDIA_PARTNERS, ...MEDIA_PARTNERS];
-
-  if (reduceMotion) {
+  if (partner.url) {
     return (
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-6">
-        {MEDIA_PARTNERS.map((partner) => (
-          <div key={partner.id}>
-            <MediaPartnerCard partner={partner} />
-          </div>
-        ))}
-      </div>
+      <a
+        href={partner.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2"
+        aria-label={partner.name}
+      >
+        {image}
+      </a>
     );
   }
 
+  return <div className="group inline-flex items-center justify-center">{image}</div>;
+};
+
+/** Centered press-style logo row — monochrome marks, consistent height. */
+export const MediaPartnersMarquee = () => {
   return (
-    <div
-      className="relative overflow-hidden py-2"
+    <ul
+      className="mx-auto m-0 flex max-w-5xl list-none flex-wrap items-center justify-center gap-x-10 gap-y-10 p-0 md:gap-x-16 md:gap-y-12"
       aria-label="Our media partners"
-      role="region"
     >
-      {/* Soft gradient fade on edges */}
-      <div
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-white to-transparent sm:w-24"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-white to-transparent sm:w-24"
-        aria-hidden
-      />
-      <div className="media-partners-marquee-track flex w-max items-center gap-8">
-        {marqueeTrack.map((partner, index) => (
-          <MediaPartnerCard key={`${partner.id}-${index}`} partner={partner} />
-        ))}
-      </div>
-    </div>
+      {MEDIA_PARTNERS.map((partner) => (
+        <li key={partner.id} className="flex items-center justify-center">
+          <MediaPartnerLogo partner={partner} />
+        </li>
+      ))}
+    </ul>
   );
 };
 

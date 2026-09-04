@@ -192,6 +192,23 @@ const getOrderHistory = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Carbon Points balance + recent ledger
+// @route   GET /api/users/carbon-points
+const getCarbonPoints = asyncHandler(async (req, res) => {
+  const CarbonLedger = require('../models/CarbonLedger');
+  const user = await User.findById(req.user._id).select('carbonPoints name email');
+  const ledger = await CarbonLedger.find({ user: req.user._id })
+    .sort('-createdAt')
+    .limit(30)
+    .populate('order', 'orderId totalAmount');
+
+  res.status(200).json({
+    success: true,
+    carbonPoints: user?.carbonPoints || 0,
+    ledger,
+  });
+});
+
 module.exports = {
   updateProfile,
   changePassword,
@@ -203,4 +220,5 @@ module.exports = {
   getWishlist,
   toggleWishlist,
   getOrderHistory,
+  getCarbonPoints,
 };

@@ -3,24 +3,45 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { PageContainer } from '../../components/ui';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { paymentsApi } from '../../api/orders';
+import { readOrderConfirm, storeOrderConfirm } from './OrderConfirmation';
 import SEOHead from '../../components/SEOHead';
 
 export default function PaymentSuccess() {
   const [params] = useSearchParams();
   const { refresh } = useCart();
-  const transactionId = params.get('transactionId') || params.get('txn') || '';
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+  const transactionId = params.get('transactionId') || params.get('txn') || params.get('order_id') || '';
+  const token = params.get('token') || readOrderConfirm()?.accessToken || '';
+  const [orderId, setOrderId] = useState<string | null>(readOrderConfirm()?.orderId || null);
+  const [accessToken, setAccessToken] = useState(token);
 
   useEffect(() => {
     refresh();
     if (transactionId) {
       paymentsApi
-        .status(transactionId)
-        .then((res) => setOrderId(res.order?.orderId || null))
+        .status(transactionId, token || undefined)
+        .then((res) => {
+          const oid = res.payment?.order?.orderId || null;
+          const at = res.payment?.order?.accessToken || token;
+          if (oid) setOrderId(oid);
+          if (at) {
+            setAccessToken(at);
+            if (oid) storeOrderConfirm(oid, at);
+          }
+        })
         .catch(() => undefined);
     }
-  }, [transactionId, refresh]);
+  }, [transactionId, token, refresh]);
+
+  const viewOrderTo = isAuthenticated
+    ? orderId
+      ? `/account/orders/${orderId}`
+      : '/account/orders'
+    : orderId && accessToken
+      ? `/order/confirmation?orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(accessToken)}`
+      : '/shop';
 
   return (
     <PageContainer className="max-w-2xl text-center">
@@ -32,7 +53,7 @@ export default function PaymentSuccess() {
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <Link
-          to={orderId ? `/account/orders/${orderId}` : '/account/orders'}
+          to={viewOrderTo}
           className="rounded-xl bg-brand-blue px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-brand-gold"
         >
           View Order

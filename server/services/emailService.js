@@ -426,7 +426,9 @@ class EmailService {
     const orderDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
-    const orderUrl = `${this.clientUrl}/account/orders/${order.orderId}`;
+    const orderUrl = order.isGuest && order.accessToken
+      ? `${this.clientUrl}/order/confirmation?orderId=${encodeURIComponent(order.orderId)}&token=${encodeURIComponent(order.accessToken)}`
+      : `${this.clientUrl}/account/orders/${order.orderId}`;
     const isCod = order.paymentMethod === 'cod';
     const paymentMethodLabel = isCod ? 'Cash on Delivery' : 'Online Payment';
     const paymentStatusHtml = isCod

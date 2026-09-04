@@ -31,4 +31,21 @@ export const userApi = {
 
   getOrders: () =>
     apiClient.get<{ success: boolean; orders: ApiOrder[] }>('/users/orders').then((r) => r.data.orders),
+
+  getCarbonPoints: () =>
+    apiClient
+      .get<{
+        success: boolean;
+        carbonPoints: number;
+        ledger: Array<{
+          _id: string;
+          type: string;
+          points: number;
+          amountInr?: number;
+          note?: string;
+          createdAt: string;
+          order?: { orderId: string; totalAmount: number };
+        }>;
+      }>('/users/carbon-points')
+      .then((r) => r.data),
 };

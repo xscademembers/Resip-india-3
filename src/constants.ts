@@ -184,36 +184,42 @@ export interface MediaPartner {
   logo: string;
   image: string;
   url?: string;
+  /** Square marks (e.g. MY FM) use a taller box so they match wordmark weight. */
+  shape?: 'wordmark' | 'badge';
 }
 
 /** Placeholder for collection cards not yet photographed. */
 export const CATEGORY_COMING_SOON_IMAGE = '/images/category-coming-soon.svg';
 
-/** Home page "Our Media Partners" scrolling showcase. */
+/** Home page "Our Partners" press-style logo row. */
 export const MEDIA_PARTNERS: MediaPartner[] = [
   {
-    id: 'media-partner-1',
-    name: 'Media Partner',
-    logo: CATEGORY_COMING_SOON_IMAGE,
-    image: 'https://static.wixstatic.com/media/9356bd_fbf501021476490d92d2929af633b251~mv2.jpeg',
+    id: 'deshonnati',
+    name: 'Deshonnati',
+    logo: '/images/partners/deshonnati.png',
+    image: '/images/partners/deshonnati.png',
+    shape: 'wordmark',
   },
   {
-    id: 'media-partner-2',
-    name: 'Media Partner',
-    logo: CATEGORY_COMING_SOON_IMAGE,
-    image: 'https://static.wixstatic.com/media/9356bd_b3c4e7ce4a1f4278b1129f2f4da8f17c~mv2.jpeg',
+    id: 'lokmat',
+    name: 'Lokmat',
+    logo: '/images/partners/lokmat.png',
+    image: '/images/partners/lokmat.png',
+    shape: 'wordmark',
   },
   {
-    id: 'media-partner-3',
-    name: 'Media Partner',
-    logo: CATEGORY_COMING_SOON_IMAGE,
-    image: 'https://static.wixstatic.com/media/9356bd_b6af70a4aec94b04aaeae5fb08c0166f~mv2.jpeg',
+    id: 'tarun-bharat',
+    name: 'Tarun Bharat',
+    logo: '/images/partners/tarun-bharat.png',
+    image: '/images/partners/tarun-bharat.png',
+    shape: 'wordmark',
   },
   {
-    id: 'media-partner-4',
-    name: 'Media Partner',
-    logo: CATEGORY_COMING_SOON_IMAGE,
-    image: 'https://static.wixstatic.com/media/9356bd_cd7cf9d6aaa94140bf3ea63f02a25361~mv2.jpeg',
+    id: 'my-fm',
+    name: 'MY FM',
+    logo: '/images/partners/my-fm.png',
+    image: '/images/partners/my-fm.png',
+    shape: 'badge',
   },
 ];
 

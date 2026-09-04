@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, Leaf } from 'lucide-react';
 import { PageContainer, TextField, Spinner, inr } from '../../components/ui';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { userApi } from '../../api/user';
 import { ordersApi, paymentsApi } from '../../api/orders';
 import { couponStore } from './couponStore';
+import { storeOrderConfirm } from './OrderConfirmation';
 import SEOHead from '../../components/SEOHead';
 import type { ApiAddress } from '../../api/types';
 import type { ApiErrorShape } from '../../api/client';
@@ -27,8 +29,14 @@ const emptyAddress = {
 
 type PayMethod = 'cashfree' | 'cod';
 
+function confirmationPath(orderId: string, accessToken?: string) {
+  if (!accessToken) return `/order/confirmation?orderId=${encodeURIComponent(orderId)}`;
+  return `/order/confirmation?orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(accessToken)}`;
+}
+
 export default function Checkout() {
   const { cart, subtotal, taxPercent, getTotals, refresh, codEnabled } = useCart();
+  const { isAuthenticated, user } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -36,27 +44,55 @@ export default function Checkout() {
   const [addresses, setAddresses] = useState<ApiAddress[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyAddress);
-  const [useNew, setUseNew] = useState(false);
+  const [email, setEmail] = useState(user?.email || '');
+  const [useNew, setUseNew] = useState(!isAuthenticated);
   const [loading, setLoading] = useState(true);
   const [placing, setPlacing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PayMethod>('cashfree');
+  const [carbonBalance, setCarbonBalance] = useState(0);
+  const [useCarbonPoints, setUseCarbonPoints] = useState(false);
+  const [pointsToUse, setPointsToUse] = useState(0);
 
   const coupon = couponStore.get();
   const totals = getTotals(coupon?.discount || 0, paymentMethod === 'cod');
-  const grandTotal = totals.total;
+  const maxRedeemable = Math.min(carbonBalance, Math.floor(totals.total));
+  const pointsDiscount =
+    isAuthenticated && useCarbonPoints ? Math.min(Math.max(0, pointsToUse), maxRedeemable) : 0;
+  const grandTotal = Math.max(0, totals.total - pointsDiscount);
 
   useEffect(() => {
+    if (user?.email) setEmail(user.email);
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUseNew(true);
+      setLoading(false);
+      return;
+    }
     userApi
       .getAddresses()
       .then((list) => {
         setAddresses(list);
         const def = list.find((a) => a.isDefault) || list[0];
-        if (def) setSelectedId(def._id);
-        else setUseNew(true);
+        if (def) {
+          setSelectedId(def._id);
+          setUseNew(false);
+        } else {
+          setUseNew(true);
+        }
       })
       .catch(() => setUseNew(true))
       .finally(() => setLoading(false));
-  }, []);
+
+    userApi
+      .getCarbonPoints()
+      .then((res) => {
+        setCarbonBalance(res.carbonPoints || 0);
+        setPointsToUse(res.carbonPoints || 0);
+      })
+      .catch(() => setCarbonBalance(0));
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!loading && (!cart.items || cart.items.length === 0)) {
@@ -68,7 +104,12 @@ export default function Checkout() {
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
   const resolveShippingAddress = async (): Promise<Record<string, any> | null> => {
-    if (useNew) {
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+      toast.error('Please enter a valid email address');
+      return null;
+    }
+
+    if (useNew || !isAuthenticated) {
       const required = ['fullName', 'phone', 'addressLine1', 'city', 'state', 'pincode'] as const;
       for (const field of required) {
         if (!form[field]?.trim()) {
@@ -76,6 +117,12 @@ export default function Checkout() {
           return null;
         }
       }
+
+      // Guests: use form as-is (do not save to address book).
+      if (!isAuthenticated) {
+        return { ...form };
+      }
+
       try {
         const saved = await userApi.addAddress({ ...form, isDefault: addresses.length === 0 });
         setAddresses((a) => [...a, saved]);
@@ -116,23 +163,35 @@ export default function Checkout() {
     });
   };
 
+  const afterOrderSuccess = (orderId: string, accessToken?: string) => {
+    if (accessToken) storeOrderConfirm(orderId, accessToken);
+    if (isAuthenticated) {
+      navigate(`/account/orders/${orderId}`);
+    } else {
+      navigate(confirmationPath(orderId, accessToken));
+    }
+  };
+
   const placeOrder = async () => {
     if (!shippingAddress) return;
     setPlacing(true);
 
-    // Cash on Delivery: create the order and go straight to the order page  
-    // there is no online payment step.
+    const payload = {
+      shippingAddress,
+      couponCode: isAuthenticated ? coupon?.code : undefined,
+      paymentMethod,
+      guestEmail: isAuthenticated ? undefined : email.trim().toLowerCase(),
+      carbonPointsToUse:
+        isAuthenticated && useCarbonPoints && pointsDiscount > 0 ? pointsDiscount : 0,
+    };
+
     if (paymentMethod === 'cod') {
       try {
-        const { order } = await ordersApi.create({
-          shippingAddress,
-          couponCode: coupon?.code,
-          paymentMethod: 'cod',
-        });
+        const { order, accessToken } = await ordersApi.create(payload);
         couponStore.clear();
         await refresh();
         toast.success('Order placed successfully! Pay on delivery.');
-        navigate(`/account/orders/${order.orderId}`);
+        afterOrderSuccess(order.orderId, accessToken || order.accessToken);
       } catch (err) {
         toast.error((err as ApiErrorShape).message);
       } finally {
@@ -142,41 +201,42 @@ export default function Checkout() {
     }
 
     try {
-      const { order } = await ordersApi.create({
-        shippingAddress,
-        couponCode: coupon?.code,
-        paymentMethod: 'cashfree',
-      });
+      const { order, accessToken } = await ordersApi.create(payload);
+      const token = accessToken || order.accessToken;
+      if (token) storeOrderConfirm(order.orderId, token);
+
       try {
         const pay = await paymentsApi.initiate(order._id);
         couponStore.clear();
 
-        // Dynamically load SDK before initializing
         const isLoaded = await loadCashfreeSdk();
-        
+
+        const pendingQs = new URLSearchParams({
+          order_id: pay.merchantOrderId,
+        });
+        if (token) pendingQs.set('token', token);
+
         if (isLoaded) {
           const cashfree = (window as any).Cashfree({
             mode: import.meta.env.PROD ? 'production' : 'sandbox',
           });
-          
+
           if (cashfree && pay.paymentSessionId) {
             cashfree.checkout({
               paymentSessionId: pay.paymentSessionId,
-              returnUrl: `${window.location.origin}/payment/pending?order_id=${pay.merchantOrderId}`,
+              returnUrl: `${window.location.origin}/payment/pending?${pendingQs.toString()}`,
             });
             return;
           }
         }
 
-        // Fallback: navigate to pending page for manual polling if SDK fails to load or init
-        navigate(`/payment/pending?order_id=${pay.merchantOrderId}`, {
-          state: { orderId: order.orderId },
+        navigate(`/payment/pending?${pendingQs.toString()}`, {
+          state: { orderId: order.orderId, accessToken: token },
         });
       } catch (payErr) {
-        // Order was created but payment gateway is unavailable.
         toast.error((payErr as ApiErrorShape).message || 'Payment could not be started');
         await refresh();
-        navigate(`/account/orders/${order.orderId}`);
+        afterOrderSuccess(order.orderId, token);
       }
     } catch (err) {
       toast.error((err as ApiErrorShape).message);
@@ -198,7 +258,27 @@ export default function Checkout() {
       <SEOHead title="Checkout" noindex />
       <h1 className="font-display text-3xl font-bold tracking-tight text-brand-blue md:text-4xl">Checkout</h1>
 
-      {/* Steps */}
+      {!isAuthenticated && (
+        <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-brand-gold/40 bg-brand-gold/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-3">
+            <Leaf className="mt-0.5 shrink-0 text-brand-gold" size={22} />
+            <div className="text-sm">
+              <p className="font-bold text-brand-blue">Sign in to earn Carbon Points</p>
+              <p className="mt-0.5 text-charcoal/70">
+                ₹10 spent = 1 point · 1 point = ₹1 off next time. Guests can still checkout without an account.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/login"
+            state={{ from: '/checkout' }}
+            className="shrink-0 rounded-xl bg-brand-blue px-4 py-2.5 text-center text-sm font-bold text-white transition-colors hover:bg-brand-gold"
+          >
+            Sign in for rewards
+          </Link>
+        </div>
+      )}
+
       <ol className="mt-6 flex items-center gap-4 text-sm font-semibold">
         {(['address', 'review'] as Step[]).map((s, i) => {
           const active = step === s;
@@ -225,9 +305,21 @@ export default function Checkout() {
         <div className="lg:col-span-2">
           {step === 'address' ? (
             <div className="rounded-2xl border border-brand-blue/10 bg-white p-6 shadow-sm">
-              <h2 className="font-display text-xl font-bold text-brand-blue">Delivery Address</h2>
+              <h2 className="font-display text-xl font-bold text-brand-blue">Delivery details</h2>
 
-              {addresses.length > 0 && (
+              <div className="mt-4 max-w-md">
+                <TextField
+                  id="email"
+                  label="Email *"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isAuthenticated}
+                />
+                <p className="mb-2 text-xs text-charcoal/50">Order confirmation will be sent here.</p>
+              </div>
+
+              {isAuthenticated && addresses.length > 0 && (
                 <div className="mt-4 space-y-3">
                   {addresses.map((a) => (
                     <label
@@ -261,15 +353,25 @@ export default function Checkout() {
                 </div>
               )}
 
-              {useNew && (
+              {(useNew || !isAuthenticated) && (
                 <div className="mt-6 grid grid-cols-1 gap-x-4 sm:grid-cols-2">
                   <TextField id="fullName" label="Full Name *" value={form.fullName} onChange={update('fullName')} />
                   <TextField id="phone" label="Phone *" value={form.phone} onChange={update('phone')} />
                   <div className="sm:col-span-2">
-                    <TextField id="addressLine1" label="Address Line 1 *" value={form.addressLine1} onChange={update('addressLine1')} />
+                    <TextField
+                      id="addressLine1"
+                      label="Address Line 1 *"
+                      value={form.addressLine1}
+                      onChange={update('addressLine1')}
+                    />
                   </div>
                   <div className="sm:col-span-2">
-                    <TextField id="addressLine2" label="Address Line 2" value={form.addressLine2} onChange={update('addressLine2')} />
+                    <TextField
+                      id="addressLine2"
+                      label="Address Line 2"
+                      value={form.addressLine2}
+                      onChange={update('addressLine2')}
+                    />
                   </div>
                   <TextField id="city" label="City *" value={form.city} onChange={update('city')} />
                   <TextField id="state" label="State *" value={form.state} onChange={update('state')} />
@@ -295,6 +397,8 @@ export default function Checkout() {
                   <p className="mt-1">
                     <strong>{shippingAddress.fullName}</strong> · {shippingAddress.phone}
                     <br />
+                    {email}
+                    <br />
                     {shippingAddress.addressLine1}
                     {shippingAddress.addressLine2 ? `, ${shippingAddress.addressLine2}` : ''}, {shippingAddress.city},{' '}
                     {shippingAddress.state} {shippingAddress.pincode}
@@ -319,7 +423,44 @@ export default function Checkout() {
                 ))}
               </ul>
 
-              {/* Payment method */}
+              {isAuthenticated && carbonBalance > 0 && (
+                <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
+                  <label className="flex cursor-pointer items-start gap-3">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={useCarbonPoints}
+                      onChange={(e) => {
+                        setUseCarbonPoints(e.target.checked);
+                        if (e.target.checked) setPointsToUse(maxRedeemable);
+                      }}
+                    />
+                    <span className="text-sm">
+                      <strong className="text-green-800">Use Carbon Points</strong>
+                      <br />
+                      <span className="text-green-700/80">
+                        Balance: {carbonBalance} pts (1 pt = ₹1). Max on this order: {maxRedeemable}.
+                      </span>
+                    </span>
+                  </label>
+                  {useCarbonPoints && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={0}
+                        max={maxRedeemable}
+                        value={pointsToUse}
+                        onChange={(e) =>
+                          setPointsToUse(Math.min(maxRedeemable, Math.max(0, parseInt(e.target.value, 10) || 0)))
+                        }
+                        className="w-28 rounded-lg border border-green-300 px-3 py-2 text-sm"
+                      />
+                      <span className="text-sm text-green-800">points (−{inr(pointsDiscount)})</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <h3 className="mt-6 font-display text-base font-bold text-brand-blue">Payment Method</h3>
               <div className="mt-3 space-y-3">
                 <label
@@ -386,7 +527,6 @@ export default function Checkout() {
           )}
         </div>
 
-        {/* Summary */}
         <aside className="lg:col-span-1">
           <div className="sticky top-32 rounded-2xl border border-brand-blue/10 bg-white p-6 shadow-sm">
             <h2 className="font-display text-xl font-bold text-brand-blue">Summary</h2>
@@ -399,6 +539,12 @@ export default function Checkout() {
                 <div className="flex justify-between text-green-600">
                   <dt>Coupon ({coupon?.code})</dt>
                   <dd className="font-semibold">−{inr(totals.discount)}</dd>
+                </div>
+              )}
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <dt>Carbon Points</dt>
+                  <dd className="font-semibold">−{inr(pointsDiscount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">

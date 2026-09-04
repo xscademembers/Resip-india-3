@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   updateProfile, changePassword,
   getAddresses, addAddress, updateAddress, deleteAddress, setDefaultAddress,
-  getWishlist, toggleWishlist, getOrderHistory,
+  getWishlist, toggleWishlist, getOrderHistory, getCarbonPoints,
 } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
 const { validate, addressRules } = require('../middleware/validate');
@@ -23,5 +23,6 @@ router.get('/wishlist', getWishlist);
 router.post('/wishlist/:productId', toggleWishlist);
 
 router.get('/orders', getOrderHistory);
+router.get('/carbon-points', getCarbonPoints);
 
 module.exports = router;
