@@ -22,46 +22,84 @@ import { ProductCard, MediaPartnersMarquee } from './components';
 import { getVisibleProducts, CATEGORIES, INSTAGRAM_PROFILE_URL, getShopCategoryPath } from './constants';
 import OptimizedImage from './OptimizedImage';
 import { optimizedSrc, IMG_WIDTHS } from './image-utils';
+import { settingsApi, bannersApi, type PublicBanner } from './api/settings';
 
-const HERO_SLIDES = [
-  'https://static.wixstatic.com/media/9356bd_c8da8f804c0040c6917734181d2df3df~mv2.jpeg',
-  'https://static.wixstatic.com/media/9356bd_a9b37b9f80984ce6ad7158b2ffc20bca~mv2.jpeg',
-  'https://static.wixstatic.com/media/9356bd_6d4b2e5ba5d24c67917bd840a5fc3f05~mv2.jpeg',
-] as const;
+const FALLBACK_HERO_SLIDES: PublicBanner[] = [
+  {
+    _id: 'fallback-1',
+    image: 'https://static.wixstatic.com/media/9356bd_c8da8f804c0040c6917734181d2df3df~mv2.jpeg',
+  },
+  {
+    _id: 'fallback-2',
+    image: 'https://static.wixstatic.com/media/9356bd_a9b37b9f80984ce6ad7158b2ffc20bca~mv2.jpeg',
+  },
+  {
+    _id: 'fallback-3',
+    image: 'https://static.wixstatic.com/media/9356bd_6d4b2e5ba5d24c67917bd840a5fc3f05~mv2.jpeg',
+  },
+];
 
 const HERO_SLIDE_INTERVAL_MS = 6000;
 
-function HeroBackgroundSlideshow({ reduceMotion }: { reduceMotion: boolean }) {
+const DEFAULT_IMPACT = {
+  bottlesValue: '6,000+',
+  bottlesLabel: 'Bottle Upcycled',
+  co2Value: '204kg',
+  co2Label: 'CO2 Reduce',
+  waterValue: '31,800 L',
+  waterLabel: 'Saved Water',
+  landfillValue: '2.5+ Tonnes',
+  landfillLabel: 'Landfilled Diverted',
+};
+
+function HeroBackgroundSlideshow({
+  reduceMotion,
+  slides,
+}: {
+  reduceMotion: boolean;
+  slides: PublicBanner[];
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const items = slides.length > 0 ? slides : FALLBACK_HERO_SLIDES;
 
   useEffect(() => {
-    if (reduceMotion || HERO_SLIDES.length <= 1) return;
+    if (reduceMotion || items.length <= 1) return;
     const id = window.setInterval(() => {
-      setActiveIndex((i) => (i + 1) % HERO_SLIDES.length);
+      setActiveIndex((i) => (i + 1) % items.length);
     }, HERO_SLIDE_INTERVAL_MS);
     return () => window.clearInterval(id);
-  }, [reduceMotion]);
+  }, [reduceMotion, items.length]);
 
-  const slideSrc = useMemo(
-    () => HERO_SLIDES.map((src) => optimizedSrc(src, IMG_WIDTHS.HERO, 75)),
-    []
-  );
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [items.length]);
 
   return (
     <div className="absolute inset-0 z-0" aria-hidden>
-      {slideSrc.map((src, i) => (
-        <motion.img
-          key={src}
-          src={src}
-          alt=""
-          animate={{ opacity: reduceMotion ? (i === 0 ? 1 : 0) : i === activeIndex ? 1 : 0 }}
-          transition={{ duration: reduceMotion ? 0 : 1.2, ease: 'easeInOut' }}
-          className="absolute inset-0 h-full w-full object-cover"
-          loading={i === 0 ? 'eager' : 'lazy'}
-          decoding={i === 0 ? 'sync' : 'async'}
-          fetchPriority={i === 0 ? 'high' : undefined}
-        />
-      ))}
+      {items.map((slide, i) => {
+        const desktopSrc = optimizedSrc(slide.image, IMG_WIDTHS.HERO, 75);
+        const mobileSrc = optimizedSrc(slide.mobileImage || slide.image, IMG_WIDTHS.HERO, 75);
+        return (
+          <motion.div
+            key={slide._id || slide.image}
+            animate={{ opacity: reduceMotion ? (i === 0 ? 1 : 0) : i === activeIndex ? 1 : 0 }}
+            transition={{ duration: reduceMotion ? 0 : 1.2, ease: 'easeInOut' }}
+            className="absolute inset-0"
+          >
+            <picture className="absolute inset-0 block h-full w-full">
+              <source media="(max-width: 767px)" srcSet={mobileSrc} />
+              <img
+                src={desktopSrc}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding={i === 0 ? 'sync' : 'async'}
+                fetchPriority={i === 0 ? 'high' : undefined}
+              />
+            </picture>
+          </motion.div>
+        );
+      })}
       <div className="absolute inset-0 bg-black/40" />
     </div>
   );
@@ -168,6 +206,33 @@ function UpcycleStepCard({
 
 const Home = () => {
   const reduceMotion = useReducedMotion();
+  const [heroSlides, setHeroSlides] = useState<PublicBanner[]>(FALLBACK_HERO_SLIDES);
+  const [impact, setImpact] = useState(DEFAULT_IMPACT);
+
+  useEffect(() => {
+    bannersApi
+      .list('hero')
+      .then((list) => {
+        if (list.length > 0) setHeroSlides(list);
+      })
+      .catch(() => undefined);
+
+    settingsApi
+      .public()
+      .then((s) => {
+        setImpact({
+          bottlesValue: String(s.impact_bottles_value ?? DEFAULT_IMPACT.bottlesValue),
+          bottlesLabel: String(s.impact_bottles_label ?? DEFAULT_IMPACT.bottlesLabel),
+          co2Value: String(s.impact_co2_value ?? DEFAULT_IMPACT.co2Value),
+          co2Label: String(s.impact_co2_label ?? DEFAULT_IMPACT.co2Label),
+          waterValue: String(s.impact_water_value ?? DEFAULT_IMPACT.waterValue),
+          waterLabel: String(s.impact_water_label ?? DEFAULT_IMPACT.waterLabel),
+          landfillValue: String(s.impact_landfill_value ?? DEFAULT_IMPACT.landfillValue),
+          landfillLabel: String(s.impact_landfill_label ?? DEFAULT_IMPACT.landfillLabel),
+        });
+      })
+      .catch(() => undefined);
+  }, []);
 
   /* First six catalog products visuals align with site; tiles link to @resip_india on Instagram. */
   const instagramSpotlight = useMemo(
@@ -186,7 +251,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-screen overflow-hidden" style={{ contentVisibility: 'visible' }}>
         <h1 className="sr-only">ReSip India</h1>
-        <HeroBackgroundSlideshow reduceMotion={!!reduceMotion} />
+        <HeroBackgroundSlideshow reduceMotion={!!reduceMotion} slides={heroSlides} />
 
         {/* Glass Reflection Overlay */}
         <div className="glass-reflection pointer-events-none absolute inset-0 z-10 opacity-30" />
@@ -294,23 +359,23 @@ const Home = () => {
             <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Recycle size={40} aria-hidden /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">6,000+</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Bottle Upcycled</p>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">{impact.bottlesValue}</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">{impact.bottlesLabel}</p>
               </div>
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Leaf size={40} aria-hidden /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">204kg</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">CO2 Reduce</p>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">{impact.co2Value}</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">{impact.co2Label}</p>
               </div>
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Droplets size={40} aria-hidden /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">31,800 L</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Saved Water</p>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">{impact.waterValue}</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">{impact.waterLabel}</p>
               </div>
               <div className="bg-white p-10 rounded-3xl border border-brand-blue/10 shadow-sm">
                 <div className="text-brand-gold mb-4"><Trash2 size={40} aria-hidden /></div>
-                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">2.5+ Tonnes</h3>
-                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">Landfilled Diverted</p>
+                <h3 className="text-5xl font-display font-bold text-brand-blue mb-2">{impact.landfillValue}</h3>
+                <p className="text-charcoal/50 uppercase tracking-widest text-xs font-bold">{impact.landfillLabel}</p>
               </div>
             </div>
           </div>

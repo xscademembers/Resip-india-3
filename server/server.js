@@ -169,7 +169,7 @@ app.get('/api/banners', async (req, res) => {
 const Settings = require('./models/Settings');
 app.get('/api/settings/public', async (req, res) => {
   try {
-    const publicGroups = ['general', 'footer', 'header', 'social', 'seo', 'tax', 'shipping', 'payment'];
+    const publicGroups = ['general', 'footer', 'header', 'social', 'seo', 'tax', 'shipping', 'payment', 'impact'];
     const settings = await Settings.find({ group: { $in: publicGroups } });
     const result = settings.reduce((acc, s) => {
       acc[s.key] = s.value;
@@ -249,6 +249,14 @@ const startServer = async () => {
       { key: 'shipping_charge', value: 50, group: 'shipping' },
       { key: 'cod_enabled', value: true, group: 'payment' },
       { key: 'cod_charge', value: 50, group: 'payment' },
+      { key: 'impact_bottles_value', value: '6,000+', group: 'impact' },
+      { key: 'impact_bottles_label', value: 'Bottle Upcycled', group: 'impact' },
+      { key: 'impact_co2_value', value: '204kg', group: 'impact' },
+      { key: 'impact_co2_label', value: 'CO2 Reduce', group: 'impact' },
+      { key: 'impact_water_value', value: '31,800 L', group: 'impact' },
+      { key: 'impact_water_label', value: 'Saved Water', group: 'impact' },
+      { key: 'impact_landfill_value', value: '2.5+ Tonnes', group: 'impact' },
+      { key: 'impact_landfill_label', value: 'Landfilled Diverted', group: 'impact' },
     ];
     for (const d of defaults) {
       const existing = await Settings.findOne({ key: d.key });

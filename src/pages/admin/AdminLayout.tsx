@@ -15,6 +15,7 @@ import {
   X,
   ExternalLink,
   LogOut,
+  Leaf,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import SEOHead from '../../components/SEOHead';
@@ -28,6 +29,7 @@ const navItems = [
   { to: '/admin/inventory', label: 'Inventory', icon: Boxes, end: false },
   { to: '/admin/reviews', label: 'Reviews', icon: Star, end: false },
   { to: '/admin/banners', label: 'Banners', icon: Image, end: false },
+  { to: '/admin/impact', label: 'Impact', icon: Leaf, end: false },
   { to: '/admin/announcements', label: 'Announcements', icon: Megaphone, end: false },
   { to: '/admin/settings', label: 'Settings', icon: SettingsIcon, end: false },
 ];

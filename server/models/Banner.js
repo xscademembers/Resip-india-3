@@ -16,6 +16,11 @@ const bannerSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Banner image is required'],
     },
+    /** Optional mobile-specific image; falls back to `image` when empty. */
+    mobileImage: {
+      type: String,
+      default: '',
+    },
     link: {
       type: String,
       default: '/shop',

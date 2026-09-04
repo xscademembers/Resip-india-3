@@ -68,13 +68,11 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError<{ message?: string; errors?: any[] }>) => {
-    // Auto-logout on auth failure so the UI doesn't get stuck with a stale token.
+    // Clear a stale JWT so guests can keep browsing. Do NOT hard-redirect to
+    // /login — that yanked visitors off the homepage whenever /auth/me failed.
+    // ProtectedRoute still sends users to login only when they open account pages.
     if (error.response?.status === 401 && tokenStore.get()) {
       tokenStore.clear();
-      // Redirect to login if unauthorized, unless already on login page
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
     }
     const normalised: ApiErrorShape = {
       message:
