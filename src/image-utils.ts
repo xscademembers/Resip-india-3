@@ -16,8 +16,10 @@ export const IMG_WIDTHS = {
   CARD: 480,
   /** Product detail carousel – main image. */
   DETAIL: 640,
-  /** Full-width hero / banner image. */
-  HERO: 1280,
+  /** Full-width hero / banner image (desktop). */
+  HERO: 1200,
+  /** Hero on phones. */
+  HERO_MOBILE: 720,
   /** "Related product" small thumbnail. */
   RELATED: 280,
   /** Navbar logo. */
@@ -32,7 +34,8 @@ type ImgWidth = (typeof IMG_WIDTHS)[keyof typeof IMG_WIDTHS];
 
 /** Wix `fill` / `fit` transforms require both width and height or the CDN returns 400. */
 function wixTransformHeight(width: ImgWidth | number): number {
-  if (width === IMG_WIDTHS.HERO) return Math.round((width * 9) / 16);
+  if (width === IMG_WIDTHS.HERO || width === 1200) return Math.round((width * 9) / 16);
+  if (width === IMG_WIDTHS.HERO_MOBILE || width === 720) return Math.round((width * 9) / 16);
   if (width === IMG_WIDTHS.LOGO || width === IMG_WIDTHS.LOGO_FOOTER) {
     return Math.round((width * 80) / 280);
   }

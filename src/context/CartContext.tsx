@@ -158,7 +158,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (cached?.items?.length) {
           setCart(cached);
         }
-        await refresh();
+        // Defer network cart sync so homepage LCP is not competing with /api/cart.
+        const run = () => {
+          void refresh();
+        };
+        if (typeof (window as any).requestIdleCallback === 'function') {
+          (window as any).requestIdleCallback(run, { timeout: 2000 });
+        } else {
+          setTimeout(run, 400);
+        }
       }
 
       wasAuthenticated.current = isAuthenticated;

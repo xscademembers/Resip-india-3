@@ -201,9 +201,28 @@ const useStaticFrontend =
 
 const setupFrontend = async () => {
   if (useStaticFrontend) {
-    app.use(express.static(distPath));
+    // Long-cache hashed Vite assets; keep HTML fresh for deploys.
+    app.use(
+      '/assets',
+      express.static(path.join(distPath, 'assets'), {
+        maxAge: '1y',
+        immutable: true,
+        etag: true,
+      })
+    );
+    app.use(
+      express.static(distPath, {
+        maxAge: '1h',
+        setHeaders(res, filePath) {
+          if (filePath.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
+          }
+        },
+      })
+    );
     // SPA fallback: any non-API route returns index.html so client routing works.
     app.get('*', (req, res) => {
+      res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(path.join(distPath, 'index.html'));
     });
     return;

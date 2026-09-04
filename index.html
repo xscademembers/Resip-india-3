@@ -11,49 +11,53 @@
     <!-- Preconnect to critical origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://static.wixstatic.com" />
-    <link rel="preconnect" href="https://images.unsplash.com" />
-    <!-- DNS-prefetch fallback for older browsers -->
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://static.wixstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://static.wixstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
 
-    <!-- Preload hero image for fast LCP (WebP auto-format) -->
+    <!-- Preload actual first hero slide (matches Home fallback / seeded banners) -->
     <link
       rel="preload"
       as="image"
       type="image/webp"
-      href="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=1280&q=75&auto=format&fit=crop&fm=webp"
+      href="https://static.wixstatic.com/media/9356bd_c8da8f804c0040c6917734181d2df3df~mv2.jpeg/v1/fit/w_720,h_405,al_c,q_68,usm_0.66_1.00_0.01/image.webp"
+      media="(max-width: 767px)"
       fetchpriority="high"
     />
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="https://static.wixstatic.com/media/9356bd_c8da8f804c0040c6917734181d2df3df~mv2.jpeg/v1/fit/w_1200,h_675,al_c,q_68,usm_0.66_1.00_0.01/image.webp"
+      media="(min-width: 768px)"
+      fetchpriority="high"
+    />
+
     <link
       rel="icon"
       type="image/png"
       href="https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png"
     />
-    <!-- Preload brand logo -->
     <link
       rel="preload"
       as="image"
       type="image/webp"
-      href="https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png/v1/fit/w_280,h_80,al_c,q_80,usm_0.66_1.00_0.01/image.webp"
+      href="https://static.wixstatic.com/media/9356bd_a4f67380f1ee44fc85bbaddce42a4556~mv2.png/v1/fit/w_200,h_57,al_c,q_75,usm_0.66_1.00_0.01/image.webp"
     />
 
-    <!-- Non-blocking font loading: preload then async switch -->
+    <!-- Fewer font weights = faster first paint -->
     <link
       rel="preload"
       as="style"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Outfit:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@600;700;800&display=swap"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Outfit:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@600;700;800&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     </noscript>
   </head>
   <body>

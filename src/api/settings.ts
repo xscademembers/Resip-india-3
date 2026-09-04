@@ -14,16 +14,44 @@ export interface PublicBanner {
   sortOrder?: number;
 }
 
+let publicSettingsPromise: Promise<PublicSettings> | null = null;
+let publicSettingsCache: PublicSettings | null = null;
+
 export const settingsApi = {
-  public: () =>
-    apiClient
-      .get<{ success: boolean; settings: PublicSettings }>('/settings/public')
-      .then((r) => r.data.settings || {}),
+  /** Shared cache so Home + Cart do not double-fetch on first load. */
+  public: () => {
+    if (publicSettingsCache) return Promise.resolve(publicSettingsCache);
+    if (!publicSettingsPromise) {
+      publicSettingsPromise = apiClient
+        .get<{ success: boolean; settings: PublicSettings }>('/settings/public')
+        .then((r) => {
+          publicSettingsCache = r.data.settings || {};
+          return publicSettingsCache;
+        })
+        .catch((err) => {
+          publicSettingsPromise = null;
+          throw err;
+        });
+    }
+    return publicSettingsPromise;
+  },
 };
 
+let bannersPromise: Promise<PublicBanner[]> | null = null;
+
 export const bannersApi = {
-  list: (position = 'hero') =>
-    apiClient
+  list: (position = 'hero') => {
+    if (position === 'hero' && bannersPromise) return bannersPromise;
+    const req = apiClient
       .get<{ success: boolean; banners: PublicBanner[] }>('/banners', { params: { position } })
-      .then((r) => r.data.banners || []),
+      .then((r) => r.data.banners || []);
+    if (position === 'hero') {
+      bannersPromise = req.catch((err) => {
+        bannersPromise = null;
+        throw err;
+      });
+      return bannersPromise;
+    }
+    return req;
+  },
 };
