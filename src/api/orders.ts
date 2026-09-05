@@ -46,7 +46,7 @@ export const couponsApi = {
 };
 
 export const paymentsApi = {
-  initiate: (orderId: string) =>
+  initiate: (orderId: string, accessToken?: string) =>
     apiClient
       .post<{
         success: boolean;
@@ -55,7 +55,12 @@ export const paymentsApi = {
         merchantOrderId: string;
         accessToken?: string;
         orderId?: string;
-      }>('/payments/initiate', { orderId })
+        cashfreeEnv?: 'production' | 'sandbox';
+      }>(
+        '/payments/initiate',
+        { orderId, accessToken },
+        accessToken ? { headers: { 'x-order-token': accessToken } } : undefined
+      )
       .then((r) => r.data),
 
   status: (transactionId: string, token?: string) =>

@@ -45,6 +45,75 @@ function canAccessPayment(payment, order, req) {
   return false;
 }
 
+function isAbsoluteUrl(url) {
+  return typeof url === 'string' && /^https?:\/\//i.test(url);
+}
+
+/** Build Cashfree cart_details so hosted checkout shows the purchased items. */
+function buildCashfreeCartDetails(order) {
+  const rawItems = Array.isArray(order.items) ? order.items : [];
+  if (rawItems.length === 0) return null;
+
+  const itemsSum = rawItems.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+    0
+  );
+  const total = Number(order.totalAmount) || 0;
+  let shippingCharge = parseFloat((total - itemsSum).toFixed(2));
+  let priceScale = 1;
+  if (shippingCharge < 0) {
+    priceScale = itemsSum > 0 ? total / itemsSum : 1;
+    shippingCharge = 0;
+  }
+
+  const cart_items = rawItems.map((item, idx) => {
+    const qty = Number(item.quantity) || 1;
+    const original = Number(item.price) || 0;
+    const discounted = parseFloat((original * priceScale).toFixed(2));
+    const productId = item.product ? String(item.product) : `item${idx + 1}`;
+    const row = {
+      item_id: productId.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50) || `item${idx + 1}`,
+      item_name: String(item.name || 'Item').slice(0, 100),
+      item_original_unit_price: parseFloat(original.toFixed(2)),
+      item_discounted_unit_price: discounted,
+      item_quantity: qty,
+      item_currency: 'INR',
+    };
+    if (isAbsoluteUrl(item.image)) row.item_image_url = item.image;
+    return row;
+  });
+
+  const computed =
+    cart_items.reduce((sum, item) => sum + item.item_discounted_unit_price * item.item_quantity, 0) +
+    shippingCharge;
+  const drift = parseFloat((total - computed).toFixed(2));
+  if (Number.isFinite(drift) && drift !== 0) {
+    shippingCharge = parseFloat((shippingCharge + drift).toFixed(2));
+    if (shippingCharge < 0) shippingCharge = 0;
+  }
+
+  const addr = order.shippingAddress || {};
+  const details = {
+    cart_name: String(order.orderId || 'ReSip India').slice(0, 100),
+    shipping_charge: shippingCharge,
+    cart_items,
+  };
+
+  if (addr.fullName && addr.addressLine1 && addr.city && addr.pincode) {
+    details.customer_shipping_address = {
+      name: String(addr.fullName).slice(0, 100),
+      address_1: String(addr.addressLine1).slice(0, 255),
+      address_2: String(addr.addressLine2 || '').slice(0, 255),
+      city: String(addr.city).slice(0, 100),
+      state: String(addr.state || '').slice(0, 100),
+      country: String(addr.country || 'India').slice(0, 100),
+      pincode: String(addr.pincode).slice(0, 10),
+    };
+  }
+
+  return details;
+}
+
 async function finalizeSuccessfulPayment(payment, order, bodyData) {
   payment.status = 'success';
   if (bodyData) payment.gatewayResponse = bodyData;
@@ -161,7 +230,7 @@ const initiatePayment = asyncHandler(async (req, res) => {
     user?.name || order.guestName || order.shippingAddress?.fullName || 'Customer';
   const customerId = user
     ? user._id.toString()
-    : `guest_${order.cartSessionId || order._id.toString()}`;
+    : `guest${order.cartSessionId || order._id.toString()}`;
 
   const payment = await Payment.create({
     order: order._id,
@@ -177,18 +246,26 @@ const initiatePayment = asyncHandler(async (req, res) => {
   order.cashfreeOrderId = cfMerchantOrderId;
   await order.save();
 
-  const result = await cashfreeService.createOrder({
-    orderId: cfMerchantOrderId,
-    amount: order.totalAmount,
-    customerDetails: {
-      id: customerId,
-      email: customerEmail,
-      phone: customerPhone,
-      name: customerName,
-    },
-    returnUrl,
-    notifyUrl,
-  });
+  let result;
+  try {
+    result = await cashfreeService.createOrder({
+      orderId: cfMerchantOrderId,
+      amount: order.totalAmount,
+      customerDetails: {
+        id: customerId,
+        email: customerEmail,
+        phone: customerPhone,
+        name: customerName,
+      },
+      returnUrl,
+      notifyUrl,
+      cartDetails: buildCashfreeCartDetails(order),
+    });
+  } catch (err) {
+    payment.status = 'failed';
+    await payment.save();
+    throw new ApiError(err.message || 'Payment initiation failed', 502);
+  }
 
   if (!result.success || !result.paymentSessionId) {
     payment.status = 'failed';
@@ -206,6 +283,7 @@ const initiatePayment = asyncHandler(async (req, res) => {
     merchantOrderId: cfMerchantOrderId,
     accessToken: order.accessToken,
     orderId: order.orderId,
+    cashfreeEnv: cashfreeService.isProduction ? 'production' : 'sandbox',
   });
 });
 

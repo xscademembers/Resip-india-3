@@ -52,6 +52,44 @@ class CashfreeService {
   }
 
   /**
+   * Cashfree customer_id must be alphanumeric, 3–50 chars.
+   */
+  _customerId(raw) {
+    const id = String(raw || 'guest').replace(/[^a-zA-Z0-9]/g, '');
+    const padded = id.length >= 3 ? id : `cus${id || 'guest'}`;
+    return padded.slice(0, 50);
+  }
+
+  /** Cashfree Indian phone field is 10 digits. */
+  _customerPhone(raw) {
+    const digits = String(raw || '').replace(/\D/g, '');
+    if (digits.length >= 12 && digits.startsWith('91')) return digits.slice(-10);
+    if (digits.length >= 11 && digits.startsWith('0')) return digits.slice(-10);
+    if (digits.length >= 10) return digits.slice(-10);
+    return '9999999999';
+  }
+
+  _customerName(raw) {
+    const name = String(raw || 'Customer').trim() || 'Customer';
+    return name.slice(0, 100);
+  }
+
+  async _postOrder(payload) {
+    const { data } = await axios.post(`${this.baseUrl}/orders`, payload, {
+      headers: this._headers(),
+      timeout: 15000,
+    });
+    return {
+      success: true,
+      cfOrderId: data.cf_order_id,
+      orderId: data.order_id,
+      paymentSessionId: data.payment_session_id,
+      orderStatus: data.order_status,
+      data,
+    };
+  }
+
+  /**
    * Create a Cashfree order and return the `payment_session_id` for the
    * frontend Checkout SDK plus the Cashfree `cf_order_id`.
    *
@@ -61,21 +99,22 @@ class CashfreeService {
    * @param {object} opts.customerDetails – { id, email, phone, name }
    * @param {string} opts.returnUrl    – Where Cashfree redirects the user after payment.
    * @param {string} [opts.notifyUrl]  – Webhook URL for server-to-server callbacks.
+   * @param {object} [opts.cartDetails] – Line items so hosted checkout is not empty.
    */
-  async createOrder({ orderId, amount, customerDetails, returnUrl, notifyUrl }) {
+  async createOrder({ orderId, amount, customerDetails, returnUrl, notifyUrl, cartDetails }) {
     if (!this.isConfigured()) {
       throw new Error('Cashfree is not configured (missing APP_ID / SECRET_KEY)');
     }
 
     const payload = {
       order_id: orderId,
-      order_amount: parseFloat(amount.toFixed(2)),
+      order_amount: parseFloat(Number(amount).toFixed(2)),
       order_currency: 'INR',
       customer_details: {
-        customer_id: customerDetails.id,
+        customer_id: this._customerId(customerDetails.id),
         customer_email: customerDetails.email || 'customer@resipindia.com',
-        customer_phone: customerDetails.phone || '9999999999',
-        customer_name: customerDetails.name || 'Customer',
+        customer_phone: this._customerPhone(customerDetails.phone),
+        customer_name: this._customerName(customerDetails.name),
       },
       order_meta: {
         return_url: returnUrl,
@@ -83,28 +122,43 @@ class CashfreeService {
       },
     };
 
-    try {
-      const { data } = await axios.post(`${this.baseUrl}/orders`, payload, {
-        headers: this._headers(),
-        timeout: 15000,
-      });
+    if (cartDetails && Array.isArray(cartDetails.cart_items) && cartDetails.cart_items.length > 0) {
+      payload.cart_details = cartDetails;
+    }
 
-      return {
-        success: true,
-        cfOrderId: data.cf_order_id,
-        orderId: data.order_id,
-        paymentSessionId: data.payment_session_id,
-        orderStatus: data.order_status,
-        data,
-      };
+    try {
+      return await this._postOrder(payload);
     } catch (error) {
       const errData = error.response?.data;
       const errStatus = error.response?.status;
+      // Hosted checkout needs cart_details, but a malformed cart should not
+      // block payment entirely — retry once without it.
+      if (payload.cart_details) {
+        console.warn(
+          `Cashfree cart_details rejected [${errStatus}]:`,
+          JSON.stringify(errData || error.message)
+        );
+        try {
+          const withoutCart = { ...payload };
+          delete withoutCart.cart_details;
+          return await this._postOrder(withoutCart);
+        } catch (retryErr) {
+          const retryData = retryErr.response?.data;
+          const retryStatus = retryErr.response?.status;
+          console.error(
+            `Cashfree create order error [${retryStatus}]:`,
+            JSON.stringify(retryData || retryErr.message)
+          );
+          const message =
+            retryData?.message || retryData?.error?.message || retryErr.message || 'Cashfree order creation failed';
+          throw new Error(`Cashfree error (${retryStatus}): ${message}`);
+        }
+      }
+
       console.error(
         `Cashfree create order error [${errStatus}]:`,
         JSON.stringify(errData || error.message)
       );
-      // Surface the actual Cashfree error message for debugging
       const message = errData?.message || errData?.error?.message || error.message || 'Cashfree order creation failed';
       throw new Error(`Cashfree error (${errStatus}): ${message}`);
     }

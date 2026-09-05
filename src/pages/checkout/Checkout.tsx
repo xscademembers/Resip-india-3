@@ -35,7 +35,7 @@ function confirmationPath(orderId: string, accessToken?: string) {
 }
 
 export default function Checkout() {
-  const { cart, subtotal, taxPercent, getTotals, refresh, codEnabled } = useCart();
+  const { cart, subtotal, taxPercent, getTotals, refresh, codEnabled, loading: cartLoading } = useCart();
   const { isAuthenticated, user } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
@@ -95,10 +95,12 @@ export default function Checkout() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!loading && (!cart.items || cart.items.length === 0)) {
+    if (placing) return;
+    if (loading || cartLoading) return;
+    if (!cart.items || cart.items.length === 0) {
       navigate('/cart', { replace: true });
     }
-  }, [loading, cart.items, navigate]);
+  }, [loading, cartLoading, cart.items, navigate, placing]);
 
   const update = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -206,7 +208,7 @@ export default function Checkout() {
       if (token) storeOrderConfirm(order.orderId, token);
 
       try {
-        const pay = await paymentsApi.initiate(order._id);
+        const pay = await paymentsApi.initiate(order._id, token);
         couponStore.clear();
 
         const isLoaded = await loadCashfreeSdk();
@@ -215,16 +217,30 @@ export default function Checkout() {
           order_id: pay.merchantOrderId,
         });
         if (token) pendingQs.set('token', token);
+        const pendingUrl = `${window.location.origin}/payment/pending?${pendingQs.toString()}`;
 
         if (isLoaded) {
           const cashfree = (window as any).Cashfree({
-            mode: import.meta.env.PROD ? 'production' : 'sandbox',
+            mode: pay.cashfreeEnv === 'production' ? 'production' : 'sandbox',
           });
 
           if (cashfree && pay.paymentSessionId) {
-            cashfree.checkout({
+            const result = await cashfree.checkout({
               paymentSessionId: pay.paymentSessionId,
-              returnUrl: `${window.location.origin}/payment/pending?${pendingQs.toString()}`,
+              redirectTarget: '_modal',
+              returnUrl: pendingUrl,
+            });
+
+            if (result?.error) {
+              toast.error(result.error.message || 'Payment was cancelled. You can try again.');
+              return;
+            }
+
+            // Popup finished or SDK is redirecting — confirm on the pending page.
+            if (result?.redirect) return;
+
+            navigate(`/payment/pending?${pendingQs.toString()}`, {
+              state: { orderId: order.orderId, accessToken: token },
             });
             return;
           }
@@ -235,8 +251,6 @@ export default function Checkout() {
         });
       } catch (payErr) {
         toast.error((payErr as ApiErrorShape).message || 'Payment could not be started');
-        await refresh();
-        afterOrderSuccess(order.orderId, token);
       }
     } catch (err) {
       toast.error((err as ApiErrorShape).message);
@@ -245,7 +259,7 @@ export default function Checkout() {
     }
   };
 
-  if (loading) {
+  if (loading || (cartLoading && (!cart.items || cart.items.length === 0))) {
     return (
       <PageContainer>
         <Spinner />
